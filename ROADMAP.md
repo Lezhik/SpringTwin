@@ -44,8 +44,7 @@ gantt
 | [x] B1.2 | Создать package структуру для всех модулей | High |
 | [x] B1.3 | Настроить Spring Modulith для модульного монолита | High |
 | B1.4 | Создать базовые domain модели для architecture модуля | High |
-| B1.5 | Настроить Lombok конфигурацию | Medium |
-| B1.6 | Создать базовые тестовые профили | Medium |
+| [x] B1.5 | Настроить Lombok конфигурацию | Medium |
 
 #### Frontend Tasks
 
@@ -89,7 +88,7 @@ gantt
 | B2.3 | Создать ReactiveNeo4jRepository для каждого узла | High |
 | B2.4 | Реализовать migration модуль для Neo4j | High |
 | B2.5 | Создать индексы и constraints в Neo4j | High |
-| B2.6 | Реализовать базовые Cypher запросы | Medium |
+| B2.6 | Создать базовые тестовые профили | Medium |
 
 #### Frontend Tasks
 

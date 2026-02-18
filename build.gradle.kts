@@ -32,6 +32,8 @@ dependencies {
 	implementation("org.springframework.modulith:spring-modulith-starter-core:2.0.2")
 	compileOnly("org.projectlombok:lombok")
 	annotationProcessor("org.projectlombok:lombok")
+	testCompileOnly("org.projectlombok:lombok")
+	testAnnotationProcessor("org.projectlombok:lombok")
 	testImplementation("org.springframework.boot:spring-boot-starter-actuator-test")
 	testImplementation("org.springframework.boot:spring-boot-starter-data-neo4j-test")
 	testImplementation("org.springframework.boot:spring-boot-starter-webflux-test")
