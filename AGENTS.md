@@ -35,7 +35,7 @@ Spring Twin — MCP-агент для анализа Spring Boot проекто�
 
 ## Технологический стек
 
-- Backend: Java 21+ / Spring Boot 3.x / WebFlux, язык Java (не Kotlin)
+- Backend: Java 21+ / Spring Boot 4.x / WebFlux, язык Java (не Kotlin)
 - Архитектура: Модульный монолит (Spring Modulith)
 - Database: Neo4j
 - Frontend: npm 11+, node 24+, Vue.js (компилируется в обычный JavaScript, для хостинга всех статических ресурсов используется Spring Boot)

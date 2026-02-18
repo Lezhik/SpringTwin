@@ -378,7 +378,7 @@ graph LR
 
 ## Технический стек (напоминание)
 
-- **Backend:** Java 21+, Spring Boot 3.x, WebFlux, Neo4j
+- **Backend:** Java 21+, Spring Boot 4.x, WebFlux, Neo4j
 - **Frontend:** Vue.js, TypeScript, Vuex
 - **Сборка:** Gradle 8.5+, Kotlin DSL
 - **Тесты:** JUnit, Vitest, Cypress, Testcontainers

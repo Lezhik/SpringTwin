@@ -7,7 +7,7 @@
 ## Технологический стек
 
 - **Язык**: Java 21+ (не Kotlin)
-- **Фреймворк**: Spring Boot 3.x
+- **Фреймворк**: Spring Boot 4.x
 - **Архитектура**: WebFlux (реактивный стек)
 - **База данных**: Neo4j (embedded in-memory для MVP)
 - **Модульность**: Spring Modulith

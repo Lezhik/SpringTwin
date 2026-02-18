@@ -27,7 +27,7 @@ Spring Twin — MCP-агент для анализа Spring Boot проекто�
 
 ## Технический стек
 
-**Backend:** Java, Spring Boot, WebFlux, Neo4j (in-memory)  
+**Backend:** Java, Spring Boot 4.x, WebFlux, Neo4j (in-memory)
 **Frontend:** TypeScript, Vue.js  
 **Сборка:** Gradle/Kotlin DSL  
 **Тестирование:** JUnit (backend), Vitest (frontend), Cypress (e2e)

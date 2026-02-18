@@ -153,7 +153,7 @@ Spring Twin предоставляет MCP tools для:
 
 ## Backend
 - Java
-- Spring Boot
+- Spring Boot 4.x
 - WebFlux
 - Neo4j (хранение графа зависимостей)
 
