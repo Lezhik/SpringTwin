@@ -119,6 +119,11 @@ public interface ProjectRepository extends ReactiveNeo4jRepository<Project, Stri
 
 ---
 
+
+### Идентификаторы
+
+Идентификаторы в БД и в соответствующих им DTO классах ВСЕГДА типа String и генерируются с помощью UUID.
+
 ## DTO и Mapper
 
 ### Правила DTO

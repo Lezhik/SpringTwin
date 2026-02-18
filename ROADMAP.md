@@ -43,7 +43,7 @@ gantt
 | [x] B1.1 | Настроить Gradle multi-module структуру | High |
 | [x] B1.2 | Создать package структуру для всех модулей | High |
 | [x] B1.3 | Настроить Spring Modulith для модульного монолита | High |
-| B1.4 | Создать базовые domain модели для architecture модуля | High |
+| [x] B1.4 | Создать базовые domain модели для architecture модуля | High |
 | [x] B1.5 | Настроить Lombok конфигурацию | Medium |
 
 #### Frontend Tasks
