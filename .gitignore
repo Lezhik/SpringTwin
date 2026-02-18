@@ -36,3 +36,5 @@ out/
 ### VS Code ###
 .vscode/
 /.kilocode
+/src/main/vue/node_modules
+/src/main/vue/package-lock.json

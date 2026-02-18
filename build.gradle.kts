@@ -4,6 +4,28 @@ plugins {
 	id("io.spring.dependency-management") version "1.1.7"
 }
 
+// Frontend build configuration
+val frontendSourceDir = file("src/main/vue")
+
+tasks.register<Exec>("npmInstall") {
+	group = "frontend"
+	description = "Install npm dependencies"
+	workingDir(frontendSourceDir)
+	commandLine("cmd", "/c", "npm install")
+}
+
+tasks.register<Exec>("npmBuild") {
+	group = "frontend"
+	description = "Build Vue.js frontend"
+	workingDir(frontendSourceDir)
+	commandLine("cmd", "/c", "npm run build")
+	dependsOn("npmInstall")
+}
+
+tasks.processResources {
+	dependsOn("npmBuild")
+}
+
 group = "twin"
 version = "0.0.1-SNAPSHOT"
 description = "SpringTwin MCP agent"

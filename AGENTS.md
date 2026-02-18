@@ -215,8 +215,8 @@ src/
 ### Особенности организации
 
 - Код TypeScript должен храниться в стандартной для Spring Boot структуре: src/main/vue и src/test/vue
-- Скомпилированные JS файлы (из TypeScript) должны помещаться в resources/public/js в папке build/
-- Статические ресурсы из Vue.js (<module>/asset/) помещаются в resources/public/<module>/asset в папке build/
+- Скомпилированные JS файлы (из TypeScript) должны помещаться в /build/resources/main/public/js 
+- Статические ресурсы из Vue.js (<module>/asset/) помещаются в /build/resources/main/public/<module>/asset
 - Модули в backend и frontend должны соответствовать друг другу по названиям и ответственности
 
 ---

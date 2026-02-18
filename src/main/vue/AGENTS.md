@@ -518,8 +518,8 @@ describe('ProjectListView', () => {
 
 ### Выходные файлы
 
-- Скомпилированные JS: `resources/public/js/`
-- Статические ресурсы: `resources/public/<module>/asset/`
+- Скомпилированные JS: `/build/resources/main/public/js/`
+- Статические ресурсы: `/build/resources/main/public/<module>/asset/`
 
 ### Gradle интеграция
 
