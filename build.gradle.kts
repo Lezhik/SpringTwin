@@ -24,31 +24,22 @@ repositories {
 	mavenCentral()
 }
 
-extra["springModulithVersion"] = "2.0.2"
-
 dependencies {
 	implementation("org.springframework.boot:spring-boot-starter-actuator")
 	implementation("org.springframework.boot:spring-boot-starter-data-neo4j")
 	implementation("org.springframework.boot:spring-boot-starter-webflux")
-	implementation("org.springframework.modulith:spring-modulith-starter-core")
+	implementation("org.springframework.boot:spring-boot-starter")
+	implementation("org.springframework.modulith:spring-modulith-starter-core:2.0.2")
 	compileOnly("org.projectlombok:lombok")
-	runtimeOnly("org.springframework.modulith:spring-modulith-actuator")
-	runtimeOnly("org.springframework.modulith:spring-modulith-observability")
 	annotationProcessor("org.projectlombok:lombok")
 	testImplementation("org.springframework.boot:spring-boot-starter-actuator-test")
 	testImplementation("org.springframework.boot:spring-boot-starter-data-neo4j-test")
 	testImplementation("org.springframework.boot:spring-boot-starter-webflux-test")
 	testImplementation("org.springframework.boot:spring-boot-testcontainers")
-	testImplementation("org.springframework.modulith:spring-modulith-starter-test")
+	testImplementation("org.springframework.modulith:spring-modulith-starter-test:2.0.2")
 	testImplementation("org.testcontainers:testcontainers-junit-jupiter")
 	testImplementation("org.testcontainers:testcontainers-neo4j")
 	testRuntimeOnly("org.junit.platform:junit-platform-launcher")
-}
-
-dependencyManagement {
-	imports {
-		mavenBom("org.springframework.modulith:spring-modulith-bom:${property("springModulithVersion")}")
-	}
 }
 
 tasks.withType<Test> {
