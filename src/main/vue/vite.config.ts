@@ -15,13 +15,13 @@ export default defineConfig({
   // Resolve aliases for imports
   resolve: {
     alias: {
-      '@': resolve(__dirname, 'src'),
-      '@app': resolve(__dirname, 'src/app'),
-      '@project': resolve(__dirname, 'src/project'),
-      '@architecture': resolve(__dirname, 'src/architecture'),
-      '@analysis': resolve(__dirname, 'src/analysis'),
-      '@report': resolve(__dirname, 'src/report'),
-      '@mcp': resolve(__dirname, 'src/mcp'),
+      '@': resolve(__dirname, '.'),
+      '@app': resolve(__dirname, 'app'),
+      '@project': resolve(__dirname, 'project'),
+      '@architecture': resolve(__dirname, 'architecture'),
+      '@analysis': resolve(__dirname, 'analysis'),
+      '@report': resolve(__dirname, 'report'),
+      '@mcp': resolve(__dirname, 'mcp'),
     },
   },
   

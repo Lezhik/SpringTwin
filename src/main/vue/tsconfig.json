@@ -23,15 +23,16 @@
     /* Path Mapping */
     "baseUrl": ".",
     "paths": {
-      "@/*": ["src/*"],
-      "@app/*": ["src/app/*"],
-      "@project/*": ["src/project/*"],
-      "@architecture/*": ["src/architecture/*"],
-      "@analysis/*": ["src/analysis/*"],
-      "@report/*": ["src/report/*"],
-      "@mcp/*": ["src/mcp/*"]
+      "@/*": ["./*"],
+      "@app/*": ["app/*"],
+      "@project/*": ["project/*"],
+      "@architecture/*": ["architecture/*"],
+      "@analysis/*": ["analysis/*"],
+      "@report/*": ["report/*"],
+      "@mcp/*": ["mcp/*"]
     }
   },
-  "include": ["src/**/*.ts", "src/**/*.d.ts", "src/**/*.tsx", "src/**/*.vue"],
+  "include": ["**/*.ts", "**/*.d.ts", "**/*.tsx", "**/*.vue"],
+  "exclude": ["vite.config.ts", "vitest.config.ts", "tsconfig.node.json"],
   "references": [{ "path": "./tsconfig.node.json" }]
 }

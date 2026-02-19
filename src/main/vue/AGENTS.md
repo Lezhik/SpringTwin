@@ -9,7 +9,8 @@
 - **Язык**: TypeScript
 - **Фреймворк**: Vue.js 3.x
 - **Состояние**: Vuex
-- **Сборка**: Gradle (Kotlin DSL)
+- **Сборка в рамках проекта**: Gradle (Kotlin DSL)
+- **Сборка отдельно UI**: npm
 - **Тестирование**: Vitest (unit), Cypress (e2e)
 
 ---
@@ -40,6 +41,21 @@ src/main/vue/<module>/
 └── api/                    # API клиенты
     └── <Entity>Api.ts
 ```
+
+Корневые файлы приложения:
+```
+src/main/vue/
+├── App.vue                 # Корневой компонент
+├── main.ts                 # Точка входа
+├── vite-env.d.ts           # Типы Vite
+├── vite.config.ts          # Конфигурация Vite
+├── vitest.config.ts        # Конфигурация Vitest
+├── tsconfig.json           # Конфигурация TypeScript
+├── package.json            # Зависимости npm
+└── index.html              # HTML шаблон
+```
+
+Важно: Модули находятся напрямую в src/main/vue/<module>/ без промежуточной папки src/!
 
 ### Описание слоев
 
@@ -482,11 +498,13 @@ const handleRefresh = async () => {
 
 ### Vitest для unit тестов
 
+Тесты находятся в `src/test/vue/<module>/` и запускаются из директории `src/main/vue`.
+
 ```typescript
-// __tests__/ProjectListView.spec.ts
+// src/test/vue/project/view/ProjectListView.spec.ts
 import { describe, it, expect, vi } from 'vitest';
 import { mount } from '@vue/test-utils';
-import ProjectListView from '../view/ProjectListView.vue';
+import ProjectListView from '@/project/view/ProjectListView.vue';
 
 describe('ProjectListView', () => {
   it('renders project list', async () => {
@@ -512,6 +530,17 @@ describe('ProjectListView', () => {
 });
 ```
 
+### Запуск тестов
+
+```bash
+# Из директории src/main/vue
+cd src\main\vue
+npm run test
+
+# С покрытием
+npm run test:coverage
+```
+
 ---
 
 ## Сборка
@@ -521,9 +550,18 @@ describe('ProjectListView', () => {
 - Скомпилированные JS: `/build/resources/main/public/js/`
 - Статические ресурсы: `/build/resources/main/public/<module>/asset/`
 
+### Сборка UI отдельно от проекта
+
+Отдельно от проекта UI собирается с помощью npm:
+
+```bash
+cd src\main\vue
+npm run build
+```
+
 ### Gradle интеграция
 
-Сборка frontend выполняется через Gradle:
+Сборка frontend выполняется через Gradle (gradle выступает оберткой для вызова npm):
 
 ```bash
 gradlew.bat build

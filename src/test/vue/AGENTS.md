@@ -68,6 +68,8 @@ src/test/vue/
     └── service/
 ```
 
+Важно: не должно быть папки src/test/vue/src ! Код должен быть организован строго по модулям!
+
 ### Именование тестов
 
 ```
@@ -152,26 +154,47 @@ export class ProjectTestProfile {
 
 ### Конфигурация Vitest
 
+Конфигурация Vitest находится в `src/main/vue/vitest.config.ts`. Тесты запускаются из директории `src/main/vue`.
+
 ```typescript
-// vitest.config.ts
+// src/main/vue/vitest.config.ts
 import { defineConfig } from 'vitest/config';
 import vue from '@vitejs/plugin-vue';
-import path from 'path';
 
+/**
+ * Vitest configuration for SpringTwin Vue.js frontend.
+ * Run from src/main/vue directory: cd src/main/vue && npm run test
+ */
 export default defineConfig({
   plugins: [vue()],
+  
+  // Set root to current directory (src/main/vue)
+  root: './',
+  
   test: {
     environment: 'jsdom',
     globals: true,
-    include: ['src/test/vue/**/*.spec.ts'],
+    
+    // Include test files pattern (relative to src/main/vue)
+    include: ['../../../src/test/vue/**/*.spec.ts'],
+    
     coverage: {
       provider: 'v8',
-      reporter: ['text', 'json', 'html'],
+      reporter: ['text', 'json', 'html', 'lcov', 'cobertura'],
+      reportsDirectory: '../../../build/reports/vue',
     },
   },
+  
+  // Resolve aliases (modules are directly in src/main/vue/<module>)
   resolve: {
     alias: {
-      '@': path.resolve(__dirname, './src/main/vue'),
+      '@': '.',
+      '@app': './app',
+      '@project': './project',
+      '@architecture': './architecture',
+      '@analysis': './analysis',
+      '@report': './report',
+      '@mcp': './mcp',
     },
   },
 });
@@ -318,18 +341,19 @@ describe('ProjectService', () => {
 
 ## E2E тесты (Cypress)
 
-### Конфигурация Cypress
+**Примечание:** На текущем этапе MVP Cypress не настроен. Интеграция E2E тестов планируется в будущих фазах.
+
+Планируемая конфигурация Cypress (после настройки):
 
 ```typescript
-// cypress.config.ts
+// cypress.config.ts (планируется)
 import { defineConfig } from 'cypress';
-import { devServer } from '@cypress/vite-dev-server';
 
 export default defineConfig({
   e2e: {
     baseUrl: 'http://localhost:8080',
-    specPattern: 'src/test/vue/**/*.cy.ts',
-    supportFile: 'src/test/vue/support/index.ts',
+    specPattern: '../../../src/test/vue/**/*.cy.ts',
+    supportFile: '../../../src/test/vue/support/index.ts',
     setupNodeEvents(on, config) {
       // Интеграция с Spring Boot через testcontainers
     },
@@ -487,20 +511,32 @@ cy.wait('@getProjects');
 
 - Все Vue компоненты должны покрываться unit тестами
 - Все Vuex actions должны покрываться unit тестами
-- Все критические пользовательские сценарии должны покрываться E2E тестами
+- Все критические пользовательские сценарии должны покрываться E2E тестами (после настройки Cypress)
 
 ### Запуск тестов
 
+Тесты запускаются из директории `src/main/vue`:
+
 ```bash
-# Unit тесты
-gradlew.bat :frontendTest
+# Unit тесты (из директории src/main/vue)
+cd src\main\vue
+npm run test
 
-# E2E тесты
-gradlew.bat :e2eTest
+# Unit тесты с покрытием
+npm run test:coverage
 
-# Все тесты с покрытием
+# Unit тесты с UI
+npm run test:ui
+```
+
+Для запуска всех тестов проекта (backend + frontend):
+
+```bash
+# Из корня проекта
 gradlew.bat test
 ```
+
+Примечание: Gradle автоматически вызывает `npm run test` при сборке frontend.
 
 ---
 
@@ -585,8 +621,16 @@ it('handles concurrent project updates correctly', () => {
 
 Всегда запускайте выполнение тестов после выполнения задачи:
 
+Для проекта целиком:
+
 ```bash
-gradlew.bat clean build
+gradlew.bat test
+```
+
+Отдельно для UI:
+```bash
+cd src\main\vue
+npm run test
 ```
 
 Задача не считается выполненной, пока все тесты не пройдут успешно.
