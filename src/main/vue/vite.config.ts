@@ -44,6 +44,17 @@ export default defineConfig({
         chunkFileNames: 'js/[name].[hash].js',
         assetFileNames: (assetInfo) => {
           const name = assetInfo.name || '';
+          
+          // Check if asset belongs to a specific module (app, project, architecture, analysis, report, mcp)
+          const moduleMatch = name.match(/^(app|project|architecture|analysis|report|mcp)\/asset\//);
+          if (moduleMatch) {
+            const moduleName = moduleMatch[1];
+            // Extract filename without module prefix
+            const fileName = name.replace(`${moduleName}/asset/`, '');
+            return `${moduleName}/asset/${fileName.replace(/\//g, '_')}.[hash][extname]`;
+          }
+          
+          // Default handling for root assets
           if (/\.css$/.test(name)) {
             return 'css/[name].[hash][extname]';
           }

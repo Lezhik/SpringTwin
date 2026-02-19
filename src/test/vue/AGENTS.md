@@ -163,7 +163,7 @@ import vue from '@vitejs/plugin-vue';
 
 /**
  * Vitest configuration for SpringTwin Vue.js frontend.
- * Run from src/main/vue directory: cd src/main/vue && npm run test
+ * Run from src/main/vue directory: cd src/main/vue && set CI=true && npm run test
  */
 export default defineConfig({
   plugins: [vue()],
@@ -520,13 +520,13 @@ cy.wait('@getProjects');
 ```bash
 # Unit тесты (из директории src/main/vue)
 cd src\main\vue
-npm run test
+set CI=true && npm run test
 
 # Unit тесты с покрытием
 npm run test:coverage
 
 # Unit тесты с UI
-npm run test:ui
+set CI=true && npm run test:ui
 ```
 
 Для запуска всех тестов проекта (backend + frontend):
@@ -536,7 +536,7 @@ npm run test:ui
 gradlew.bat test
 ```
 
-Примечание: Gradle автоматически вызывает `npm run test` при сборке frontend.
+Примечание: Gradle автоматически вызывает `set CI=true && npm run test` при сборке frontend.
 
 ---
 
@@ -630,7 +630,7 @@ gradlew.bat test
 Отдельно для UI:
 ```bash
 cd src\main\vue
-npm run test
+set CI=true && npm run test
 ```
 
 Задача не считается выполненной, пока все тесты не пройдут успешно.

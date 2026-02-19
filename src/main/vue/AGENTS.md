@@ -535,10 +535,10 @@ describe('ProjectListView', () => {
 ```bash
 # Из директории src/main/vue
 cd src\main\vue
-npm run test
+set CI=true && npm run test
 
 # С покрытием
-npm run test:coverage
+set CI=true && npm run test:coverage
 ```
 
 ---
