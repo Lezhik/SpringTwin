@@ -369,7 +369,7 @@ function formatDate(date: string): string {
 
 ---
 
-## Vuex Store
+## Pinia Store
 
 ### state.ts
 

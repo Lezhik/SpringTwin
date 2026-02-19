@@ -8,7 +8,7 @@
 
 - **Язык**: TypeScript
 - **Фреймворк**: Vue.js 3.x
-- **Состояние**: Vuex
+- **Состояние**: Pinia
 - **Сборка в рамках проекта**: Gradle (Kotlin DSL)
 - **Сборка отдельно UI**: npm
 - **Тестирование**: Vitest (unit), Cypress (e2e)
@@ -28,7 +28,7 @@ src/main/vue/<module>/
 ├── view/                   # Vue компоненты и шаблоны
 │   ├── <Entity>View.vue
 │   └── <Entity>Form.vue
-├── store/                  # Vuex store модуль
+├── store/                  # Pinia store модуль
 │   ├── index.ts
 │   ├── state.ts
 │   ├── mutations.ts
@@ -63,7 +63,7 @@ src/main/vue/
 |------|-------|-----------------|
 | **asset** | .asset | Статические файлы: CSS, шрифты, изображения |
 | **view** | .view | Vue компоненты, шаблоны отображения |
-| **store** | .store | Vuex модуль состояния |
+| **store** | .store | Pinia модуль состояния |
 | **router** | .router | Конфигурация маршрутов модуля |
 | **service** | .service | Бизнес-логика UI, трансформация данных |
 | **api** | .api | HTTP клиенты для backend API |
@@ -112,38 +112,14 @@ const fetch = async (id: string) => { ... };
 
 ---
 
-## Vuex Store
+## Pinia Store
 
 ### Структура модуля
 
 ```typescript
-// store/index.ts
-import { Module } from 'vuex';
-import { ProjectState } from './state';
-import mutations from './mutations';
-import actions from './actions';
-import getters from './getters';
+// store/project.store.ts
+import { defineStore } from 'pinia';
 
-const projectModule: Module<ProjectState, RootState> = {
-  namespaced: true,
-  state: (): ProjectState => ({
-    projects: [],
-    currentProject: null,
-    isLoading: false,
-    error: null,
-  }),
-  mutations,
-  actions,
-  getters,
-};
-
-export default projectModule;
-```
-
-### State
-
-```typescript
-// store/state.ts
 export interface ProjectState {
   projects: Project[];
   currentProject: Project | null;
@@ -151,102 +127,62 @@ export interface ProjectState {
   error: string | null;
 }
 
-export const state: ProjectState = {
-  projects: [],
-  currentProject: null,
-  isLoading: false,
-  error: null,
-};
-```
-
-### Actions (асинхронные)
-
-```typescript
-// store/actions.ts
-import { ActionTree } from 'vuex';
-import { ProjectState } from './state';
-import { RootState } from '@/app/store';
-import projectApi from '../api/projectApi';
-
-const actions: ActionTree<ProjectState, RootState> = {
-  async fetchProjects({ commit }) {
-    commit('setLoading', true);
-    try {
-      const projects = await projectApi.getAll();
-      commit('setProjects', projects);
-    } catch (error) {
-      commit('setError', error.message);
-    } finally {
-      commit('setLoading', false);
-    }
+export const useProjectStore = defineStore('project', {
+  state: (): ProjectState => ({
+    projects: [],
+    currentProject: null,
+    isLoading: false,
+    error: null,
+  }),
+  
+  actions: {
+    async fetchProjects() {
+      this.isLoading = true;
+      try {
+        const projects = await projectApi.getAll();
+        this.projects = projects;
+      } catch (error) {
+        this.error = error.message;
+      } finally {
+        this.isLoading = false;
+      }
+    },
+    
+    async fetchProjectById(id: string) {
+      this.isLoading = true;
+      try {
+        const project = await projectApi.getById(id);
+        this.currentProject = project;
+      } catch (error) {
+        this.error = error.message;
+      } finally {
+        this.isLoading = false;
+      }
+    },
+    
+    setLoading(isLoading: boolean) {
+      this.isLoading = isLoading;
+    },
+    
+    setError(error: string | null) {
+      this.error = error;
+    },
   },
   
-  async fetchProjectById({ commit }, id: string) {
-    commit('setLoading', true);
-    try {
-      const project = await projectApi.getById(id);
-      commit('setCurrentProject', project);
-    } catch (error) {
-      commit('setError', error.message);
-    } finally {
-      commit('setLoading', false);
-    }
+  getters: {
+    projectCount: (state) => state.projects.length,
+    
+    projectById: (state) => (id: string) => {
+      return state.projects.find(p => p.id === id);
+    },
+    
+    isLoading: (state) => state.isLoading,
+    
+    hasError: (state) => state.error !== null,
   },
-};
+});
 
-export default actions;
-```
-
-### Mutations (синхронные)
-
-```typescript
-// store/mutations.ts
-import { MutationTree } from 'vuex';
-import { ProjectState } from './state';
-import { Project } from '../domain/Project';
-
-const mutations: MutationTree<ProjectState> = {
-  setProjects(state, projects: Project[]) {
-    state.projects = projects;
-  },
-  
-  setCurrentProject(state, project: Project) {
-    state.currentProject = project;
-  },
-  
-  setLoading(state, isLoading: boolean) {
-    state.isLoading = isLoading;
-  },
-  
-  setError(state, error: string | null) {
-    state.error = error;
-  },
-};
-
-export default mutations;
-```
-
-### Getters
-
-```typescript
-// store/getters.ts
-import { GetterTree } from 'vuex';
-import { ProjectState } from './state';
-import { RootState } from '@/app/store';
-
-const getters: GetterTree<ProjectState, RootState> = {
-  projectCount: (state) => state.projects.length,
-  
-  projectById: (state) => (id: string) => {
-    return state.projects.find(p => p.id === id);
-  },
-  
-  isLoading: (state) => state.isLoading,
-  
-  hasError: (state) => state.error !== null,
-};
-
-export default getters;
+export default useProjectStore;
 ```
 
 ---
@@ -298,7 +234,7 @@ export default {
 ```vue
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue';
-import { useStore } from 'vuex';
+import { useProjectStore } from '@/project/store/project.store';
 import { useRouter } from 'vue-router';
 
 // Props
@@ -313,16 +249,16 @@ const emit = defineEmits<{
 }>();
 
 // Store
-const store = useStore();
+const projectStore = useProjectStore();
 const router = useRouter();
 
 // Reactive state
-const isLoading = computed(() => store.state.project.isLoading);
-const project = computed(() => store.state.project.currentProject);
+const isLoading = computed(() => projectStore.isLoading);
+const project = computed(() => projectStore.currentProject);
 
 // Methods
 const loadProject = async () => {
-  await store.dispatch('project/fetchProjectById', props.projectId);
+  await projectStore.fetchProjectById(props.projectId);
   if (project.value) {
     emit('projectLoaded', project.value);
   }
@@ -430,42 +366,52 @@ export default router;
 
 ---
 
-## Пространства имен Vuex
+## Пространства имен Pinia
 
-### Глобальное пространство (app)
+### Создание Pinia
 
 ```typescript
-// app/store/index.ts
-import { createStore } from 'vuex';
-import appModule from './module';
+// store.ts (корневое файл)
+import { createPinia } from 'pinia';
 
-const store = createStore({
-  modules: {
-    app: appModule,  // Глобальное пространство с префиксом app
-    project: projectModule,
-    architecture: architectureModule,
-    // ... другие модули
-  },
-});
+const pinia = createPinia();
+
+export default pinia;
+```
+
+### Подключение в приложении
+
+```typescript
+// main.ts
+import { createApp } from 'vue';
+import App from './App.vue';
+import pinia from './store';
+
+const app = createApp(App);
+app.use(pinia);
+app.mount('#app');
 ```
 
 ### Доступ к состоянию
 
 ```typescript
 // В компоненте
-const store = useStore();
+import { useAppStore } from '@/app/store/app.store';
+import { useProjectStore } from '@/project/store/project.store';
 
 // Глобальное состояние
-const appLoading = computed(() => store.state.app.isLoading);
+const appStore = useAppStore();
+const appLoading = computed(() => appStore.isLoading);
 
 // Состояние модуля
-const projects = computed(() => store.state.project.projects);
+const projectStore = useProjectStore();
+const projects = computed(() => projectStore.projects);
 
-// Dispatch action
-await store.dispatch('project/fetchProjects');
+// Вызов action
+await projectStore.fetchProjects();
 
-// Commit mutation
-store.commit('project/setLoading', true);
+// Изменение состояния
+appStore.setLoading(true);
 ```
 
 ---
@@ -475,20 +421,21 @@ store.commit('project/setLoading', true);
 Все взаимодействия с backend асинхронны:
 
 ```typescript
-// В actions
-async fetchProjects({ commit }) {
-  commit('setLoading', true);
+// В store actions
+async fetchProjects() {
+  this.isLoading = true;
   try {
     const projects = await projectApi.getAll();
-    commit('setProjects', projects);
+    this.projects = projects;
   } finally {
-    commit('setLoading', false);
+    this.isLoading = false;
   }
 }
 
 // В компонентах
+const projectStore = useProjectStore();
 const handleRefresh = async () => {
-  await store.dispatch('project/fetchProjects');
+  await projectStore.fetchProjects();
 };
 ```
 
@@ -504,26 +451,27 @@ const handleRefresh = async () => {
 // src/test/vue/project/view/ProjectListView.spec.ts
 import { describe, it, expect, vi } from 'vitest';
 import { mount } from '@vue/test-utils';
+import { createTestingPinia } from '@pinia/testing';
 import ProjectListView from '@/project/view/ProjectListView.vue';
+import { useProjectStore } from '@/project/store/project.store';
 
 describe('ProjectListView', () => {
   it('renders project list', async () => {
     const wrapper = mount(ProjectListView, {
       global: {
-        mocks: {
-          $store: {
-            state: {
-              project: {
-                projects: [
-                  { id: '1', name: 'Test Project' },
-                ],
-                isLoading: false,
-              },
-            },
-          },
-        },
+        plugins: [
+          createTestingPinia({
+            createSpy: vi.fn,
+          }),
+        ],
       },
     });
+    
+    const projectStore = useProjectStore();
+    projectStore.projects = [
+      { id: '1', name: 'Test Project' },
+    ];
+    projectStore.isLoading = false;
     
     expect(wrapper.find('[name="project-list"]').exists()).toBe(true);
   });
@@ -591,4 +539,4 @@ graph TD
 1. Все модули используют общие компоненты из `app`
 2. API клиент находится в `app/api` и используется всеми модулями
 3. Модули не имеют прямых зависимостей друг от друга
-4. Состояние каждого модуля изолировано в Vuex
+4. Состояние каждого модуля изолировано в Pinia

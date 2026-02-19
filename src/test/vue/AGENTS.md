@@ -269,7 +269,7 @@ describe('ProjectListView', () => {
 });
 ```
 
-### Тестирование Vuex store
+### Тестирование Pinia store
 
 ```typescript
 // project/store/actions.spec.ts
@@ -510,7 +510,7 @@ cy.wait('@getProjects');
 ### Требования
 
 - Все Vue компоненты должны покрываться unit тестами
-- Все Vuex actions должны покрываться unit тестами
+- Все Pinia actions должны покрываться unit тестами
 - Все критические пользовательские сценарии должны покрываться E2E тестами (после настройки Cypress)
 
 ### Запуск тестов

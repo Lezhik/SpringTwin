@@ -513,7 +513,7 @@ async function copyConfig() {
 
 ---
 
-## Vuex Store
+## Pinia Store
 
 ### state.ts
 

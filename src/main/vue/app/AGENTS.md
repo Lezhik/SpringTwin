@@ -321,7 +321,7 @@ function removeNotification(id: string) {
 
 ---
 
-## Vuex Store
+## Pinia Store
 
 ### state.ts
 

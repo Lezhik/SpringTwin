@@ -33,6 +33,11 @@
     }
   },
   "include": ["**/*.ts", "**/*.d.ts", "**/*.tsx", "**/*.vue"],
-  "exclude": ["vite.config.ts", "vitest.config.ts", "tsconfig.node.json"],
+  "exclude": [
+    "node_modules",
+    "vite.config.ts",
+    "vitest.config.ts",
+    "tsconfig.node.json"
+  ],
   "references": [{ "path": "./tsconfig.node.json" }]
 }

@@ -287,7 +287,7 @@ function updateExclude(index: number, event: Event) {
 
 ---
 
-## Vuex Store
+## Pinia Store
 
 ### state.ts
 

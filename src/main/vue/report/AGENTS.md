@@ -467,7 +467,7 @@ async function getExportContent(): Promise<string> {
 
 ---
 
-## Vuex Store
+## Pinia Store
 
 ### state.ts
 

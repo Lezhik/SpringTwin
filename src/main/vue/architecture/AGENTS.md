@@ -380,7 +380,7 @@ function clearFilter() {
 
 ---
 
-## Vuex Store
+## Pinia Store
 
 ### state.ts
 
