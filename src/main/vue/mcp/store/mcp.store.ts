@@ -33,8 +33,6 @@ export const useMcpStore = defineStore('mcp', {
   },
   
   getters: {
-    isConnected: (state) => state.isConnected,
-    activeTools: (state) => state.activeTools
   }
 });
 

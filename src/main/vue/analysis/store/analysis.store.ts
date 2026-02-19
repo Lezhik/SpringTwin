@@ -33,8 +33,6 @@ export const useAnalysisStore = defineStore('analysis', {
   },
   
   getters: {
-    isAnalyzing: (state) => state.isAnalyzing,
-    analysisProgress: (state) => state.analysisProgress
   }
 });
 

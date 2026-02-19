@@ -53,7 +53,7 @@ gantt
 | [x] F1.1 | Настроить Vue.js проект в src/main/vue | High |
 | [x] F1.2 | Настроить Vitest для unit тестов | High |
 | [x] F1.3 | Создать базовую структуру модулей Vue | High |
-| F1.4 | Настроить Vuex store с модульной структурой | Medium |
+| [x] F1.4 | Настроить Pinia store с модульной структурой | Medium |
 | F1.5 | Создать базовый layout и навигацию | Medium |
 | F1.6 | Настроить сборку Vue через Gradle | Medium |
 
@@ -378,7 +378,7 @@ graph LR
 ## Технический стек (напоминание)
 
 - **Backend:** Java 21+, Spring Boot 4.x, WebFlux, Neo4j
-- **Frontend:** Vue.js, TypeScript, Vuex
+- **Frontend:** Vue.js, TypeScript, Pinia
 - **Сборка:** Gradle 8.5+, Kotlin DSL
 - **Тесты:** JUnit, Vitest, Cypress, Testcontainers
 

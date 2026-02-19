@@ -1,21 +1,45 @@
 import { defineStore } from 'pinia';
 
+export interface Project {
+  id: string;
+  name: string;
+  path: string;
+  createdAt: number;
+}
+
 export interface ProjectState {
-  projectName: string;
+  projects: Project[];
+  currentProject: Project | null;
   includePackages: string[];
   excludePackages: string[];
 }
 
 export const useProjectStore = defineStore('project', {
   state: (): ProjectState => ({
-    projectName: '',
+    projects: [],
+    currentProject: null,
     includePackages: [],
     excludePackages: []
   }),
   
   actions: {
-    updateProjectName(name: string) {
-      this.projectName = name;
+    addProject(project: Omit<Project, 'createdAt'>) {
+      const newProject: Project = {
+        ...project,
+        createdAt: Date.now()
+      };
+      this.projects.push(newProject);
+    },
+    
+    removeProject(id: string) {
+      this.projects = this.projects.filter(p => p.id !== id);
+      if (this.currentProject?.id === id) {
+        this.currentProject = null;
+      }
+    },
+    
+    setCurrentProject(project: Project | null) {
+      this.currentProject = project;
     },
     
     updateIncludePackages(packages: string[]) {
@@ -28,9 +52,6 @@ export const useProjectStore = defineStore('project', {
   },
   
   getters: {
-    projectName: (state) => state.projectName,
-    includePackages: (state) => state.includePackages,
-    excludePackages: (state) => state.excludePackages
   }
 });
 

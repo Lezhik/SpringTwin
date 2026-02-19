@@ -22,8 +22,6 @@ export const useReportStore = defineStore('report', {
   },
   
   getters: {
-    selectedReportType: (state) => state.selectedReportType,
-    reportContent: (state) => state.reportContent
   }
 });
 

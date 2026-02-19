@@ -111,6 +111,7 @@ export default defineConfig({
       'vue': resolve(__dirname, 'node_modules/vue'),
       'vue-router': resolve(__dirname, 'node_modules/vue-router'),
       'vuex': resolve(__dirname, 'node_modules/vuex'),
+      'pinia': resolve(__dirname, 'node_modules/pinia'),
     },
   },
 });
