@@ -1,6 +1,7 @@
 import { createApp } from 'vue';
 import App from './App.vue';
 import pinia from './store';
+import router from './app/router';
 
 /**
  * Vue application entry point.
@@ -10,6 +11,9 @@ const app = createApp(App);
 
 // Use Pinia store
 app.use(pinia);
+
+// Use Vue Router
+app.use(router);
 
 // Global error handler
 app.config.errorHandler = (err, instance, info) => {

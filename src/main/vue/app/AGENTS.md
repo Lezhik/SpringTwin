@@ -31,23 +31,22 @@ src/main/vue/app/
 │       ├── AppHeader.vue              # Шапка приложения
 │       ├── AppSidebar.vue             # Боковая панель
 │       ├── AppFooter.vue              # Подвал
+│       ├── NavItem.vue                # Элемент навигации
 │       ├── AppBreadcrumb.vue          # Хлебные крошки
 │       ├── LoadingIndicator.vue       # Индикатор загрузки
 │       ├── ErrorBoundary.vue          # Граница ошибок
 │       └── NotificationToast.vue      # Уведомления
 ├── store/
-│   ├── index.ts                       # Корневой store
-│   ├── state.ts                       # Глобальное состояние
-│   ├── mutations.ts
-│   ├── actions.ts
-│   └── getters.ts
+│   ├── app.store.ts                   # Pinia store приложения
+│   └── index.ts                       # Экспорт store
 ├── router/
 │   ├── index.ts                       # Корневой роутер
 │   └── guards.ts                      # Навигационные guards
 ├── service/
-│   └── NotificationService.ts         # Сервис уведомлений
+│   └── app.service.ts                 # Сервис приложения
 └── api/
-    ├── client.ts                      # Axios клиент
+    ├── index.ts                       # API клиент
+    ├── navigation.ts                  # Навигационные данные
     └── interceptors.ts                # Перехватчики
 ```
 
@@ -60,72 +59,26 @@ src/main/vue/app/
 ```vue
 <template>
   <div class="app-layout" name="app-layout">
-    <AppHeader 
-      :title="appTitle"
-      :user="currentUser"
-      @toggle-sidebar="toggleSidebar"
-    />
+    <AppHeader />
     
     <div class="app-layout__body">
-      <AppSidebar 
-        :collapsed="sidebarCollapsed"
-        :menu-items="menuItems"
-      />
+      <AppSidebar />
       
-      <main class="app-layout__content" name="main-content">
-        <AppBreadcrumb :items="breadcrumbs" />
-        
-        <ErrorBoundary>
-          <router-view v-slot="{ Component }">
-            <transition name="fade" mode="out-in">
-              <component :is="Component" />
-            </transition>
-          </router-view>
-        </ErrorBoundary>
+      <main class="app-layout__content" name="main-content" role="main">
+        <div class="app-layout__content-container">
+          <router-view />
+        </div>
       </main>
     </div>
     
-    <AppFooter :version="appVersion" />
-    
-    <NotificationToast />
-    <LoadingIndicator v-if="isLoading" />
+    <AppFooter />
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from 'vue';
-import { useStore } from 'vuex';
-import { useRoute } from 'vue-router';
-import AppHeader from './components/AppHeader.vue';
-import AppSidebar from './components/AppSidebar.vue';
-import AppFooter from './components/AppFooter.vue';
-import AppBreadcrumb from './components/AppBreadcrumb.vue';
-import ErrorBoundary from './components/ErrorBoundary.vue';
-import NotificationToast from './components/NotificationToast.vue';
-import LoadingIndicator from './components/LoadingIndicator.vue';
-
-const store = useStore();
-const route = useRoute();
-
-const sidebarCollapsed = ref(false);
-
-const appTitle = computed(() => store.state.app.title);
-const appVersion = computed(() => store.state.app.version);
-const currentUser = computed(() => store.state.app.user);
-const isLoading = computed(() => store.getters['app/isLoading']);
-const breadcrumbs = computed(() => route.meta.breadcrumbs || []);
-
-const menuItems = [
-  { path: '/', label: 'Home', icon: 'home' },
-  { path: '/projects', label: 'Projects', icon: 'folder' },
-  { path: '/architecture', label: 'Architecture', icon: 'graph' },
-  { path: '/report', label: 'Reports', icon: 'report' },
-  { path: '/mcp/tools', label: 'MCP Tools', icon: 'api' },
-];
-
-function toggleSidebar() {
-  sidebarCollapsed.value = !sidebarCollapsed.value;
-}
+import AppHeader from './AppHeader.vue';
+import AppSidebar from './AppSidebar.vue';
+import AppFooter from './AppFooter.vue';
 </script>
 ```
 
@@ -133,55 +86,114 @@ function toggleSidebar() {
 
 ```vue
 <template>
-  <header class="app-header" name="app-header">
-    <div class="app-header__left">
-      <button 
-        name="btn-toggle-sidebar"
-        @click="$emit('toggle-sidebar')"
-      >
-        <span class="icon">☰</span>
-      </button>
-      
-      <h1 class="app-header__title" name="app-title">
-        {{ title }}
-      </h1>
-    </div>
-    
-    <div class="app-header__right">
-      <div class="search-box">
-        <input 
-          type="search"
-          name="global-search"
-          placeholder="Search..."
-          @keyup.enter="search"
-        />
+  <header class="app-header" name="app-header" role="banner">
+    <div class="app-header__container">
+      <div class="app-header__logo">
+        <router-link to="/" class="app-header__logo-link" name="logo-link">
+          <span class="app-header__logo-icon" name="logo-icon">🏗️</span>
+          <span class="app-header__logo-text" name="logo-text">Spring Twin</span>
+        </router-link>
       </div>
-      
-      <div class="user-menu" v-if="user">
-        <span name="user-name">{{ user.name }}</span>
-        <button name="btn-logout" @click="logout">Logout</button>
+
+      <nav class="app-header__nav" role="navigation" aria-label="Primary navigation">
+        <ul class="app-header__nav-list" name="nav-list">
+          <li class="app-header__nav-item" name="nav-item">
+            <router-link 
+              to="/" 
+              class="app-header__nav-link"
+              :class="{ 'app-header__nav-link--active': isActive('/') }"
+              name="nav-link-home"
+            >
+              Главная
+            </router-link>
+          </li>
+          <li class="app-header__nav-item" name="nav-item">
+            <router-link 
+              to="/project" 
+              class="app-header__nav-link"
+              :class="{ 'app-header__nav-link--active': isActive('/project') }"
+              name="nav-link-project"
+            >
+              Проект
+            </router-link>
+          </li>
+          <li class="app-header__nav-item" name="nav-item">
+            <router-link 
+              to="/architecture" 
+              class="app-header__nav-link"
+              :class="{ 'app-header__nav-link--active': isActive('/architecture') }"
+              name="nav-link-architecture"
+            >
+              Архитектура
+            </router-link>
+          </li>
+          <li class="app-header__nav-item" name="nav-item">
+            <router-link 
+              to="/analysis" 
+              class="app-header__nav-link"
+              :class="{ 'app-header__nav-link--active': isActive('/analysis') }"
+              name="nav-link-analysis"
+            >
+              Анализ
+            </router-link>
+          </li>
+          <li class="app-header__nav-item" name="nav-item">
+            <router-link 
+              to="/report" 
+              class="app-header__nav-link"
+              :class="{ 'app-header__nav-link--active': isActive('/report') }"
+              name="nav-link-report"
+            >
+              Отчеты
+            </router-link>
+          </li>
+          <li class="app-header__nav-item" name="nav-item">
+            <router-link 
+              to="/mcp" 
+              class="app-header__nav-link"
+              :class="{ 'app-header__nav-link--active': isActive('/mcp') }"
+              name="nav-link-mcp"
+            >
+              MCP
+            </router-link>
+          </li>
+        </ul>
+      </nav>
+
+      <div class="app-header__actions" name="header-actions">
+        <button class="app-header__action-btn" name="action-btn" @click="toggleSidebar">
+          <span class="app-header__action-icon" name="action-icon">☰</span>
+          <span class="app-header__action-text" name="action-text">Меню</span>
+        </button>
       </div>
     </div>
   </header>
 </template>
 
 <script setup lang="ts">
-interface Props {
-  title: string;
-  user: { name: string } | null;
-}
+import { useRoute } from 'vue-router';
 
-defineProps<Props>();
-defineEmits(['toggle-sidebar']);
+const route = useRoute();
 
-function search(event: Event) {
-  const query = (event.target as HTMLInputElement).value;
-  // Global search implementation
-}
+/**
+ * Checks if the current route matches the given path.
+ */
+const isActive = (path: string) => {
+  if (path === '/') {
+    return route.path === '/';
+  }
+  return route.path.startsWith(path);
+};
 
-function logout() {
-  // Logout implementation
-}
+/**
+ * Toggles sidebar visibility (for mobile).
+ */
+const toggleSidebar = () => {
+  const sidebar = document.querySelector('.app-sidebar');
+  if (sidebar) {
+    sidebar.classList.toggle('app-sidebar--open');
+  }
+};
 </script>
 ```
 
@@ -189,55 +201,61 @@ function logout() {
 
 ```vue
 <template>
-  <aside 
-    class="app-sidebar" 
-    :class="{ 'app-sidebar--collapsed': collapsed }"
-    name="app-sidebar"
-  >
-    <nav class="sidebar-nav">
-      <ul class="menu-list">
-        <li 
-          v-for="item in menuItems" 
-          :key="item.path"
-          class="menu-item"
-        >
-          <router-link 
-            :to="item.path"
-            :name="`menu-${item.label.toLowerCase()}`"
-            :class="{ 'router-link-active': isActive(item.path) }"
-          >
-            <span :class="['icon', `icon--${item.icon}`]"></span>
-            <span v-if="!collapsed" class="label">{{ item.label }}</span>
-          </router-link>
-        </li>
-      </ul>
-    </nav>
+  <aside class="app-sidebar" name="app-sidebar" role="complementary" aria-label="Sidebar navigation">
+    <div class="app-sidebar__content">
+      <nav class="app-sidebar__nav" role="navigation" aria-label="Module navigation">
+        <ul class="app-sidebar__nav-list" name="sidebar-nav-list">
+          <NavItem 
+            v-for="item in navigationItems" 
+            :key="item.id" 
+            :item="item"
+          />
+        </ul>
+      </nav>
+
+      <div class="app-sidebar__info" name="sidebar-info">
+        <div class="app-sidebar__info-section">
+          <h3 class="app-sidebar__info-title" name="info-title">О приложении</h3>
+          <p class="app-sidebar__info-text" name="info-text">
+            Spring Twin — MCP-агент для анализа Spring Boot проектов.
+          </p>
+        </div>
+        <div class="app-sidebar__info-section">
+          <h3 class="app-sidebar__info-title" name="info-title">Версия</h3>
+          <p class="app-sidebar__info-text" name="info-text">1.0.0</p>
+        </div>
+      </div>
+    </div>
+
+    <button 
+      class="app-sidebar__close" 
+      name="sidebar-close"
+      @click="closeSidebar"
+      aria-label="Закрыть меню"
+    >
+      <span class="app-sidebar__close-icon" name="close-icon">×</span>
+    </button>
   </aside>
 </template>
 
 <script setup lang="ts">
-import { useRoute } from 'vue-router';
+import NavItem from './NavItem.vue';
+import { defaultNavigationItems } from '../api/navigation';
 
-interface MenuItem {
-  path: string;
-  label: string;
-  icon: string;
-}
+/**
+ * Default navigation items for the sidebar.
+ */
+const navigationItems = defaultNavigationItems;
 
-interface Props {
-  collapsed: boolean;
-  menuItems: MenuItem[];
-}
-
-defineProps<Props>();
-const route = useRoute();
-
-function isActive(path: string): boolean {
-  if (path === '/') {
-    return route.path === '/';
+/**
+ * Closes the sidebar (for mobile).
+ */
+const closeSidebar = () => {
+  const sidebar = document.querySelector('.app-sidebar');
+  if (sidebar) {
+    sidebar.classList.remove('app-sidebar--open');
   }
-  return route.path.startsWith(path);
-}
+};
 </script>
 ```
 
@@ -307,14 +325,14 @@ function resetError() {
 
 <script setup lang="ts">
 import { computed } from 'vue';
-import { useStore } from 'vuex';
+import { useAppStore } from '../store/app.store';
 
-const store = useStore();
+const store = useAppStore();
 
-const notifications = computed(() => store.state.app.notifications);
+const notifications = computed(() => store.notifications);
 
 function removeNotification(id: string) {
-  store.commit('app/removeNotification', id);
+  store.removeNotification(id);
 }
 </script>
 ```
@@ -323,252 +341,142 @@ function removeNotification(id: string) {
 
 ## Pinia Store
 
-### state.ts
+### app.store.ts
 
 ```typescript
-/**
- * Глобальное состояние приложения.
- */
-export interface AppState {
-  title: string;
-  version: string;
-  user: User | null;
-  notifications: Notification[];
-  loading: number;
-  error: AppError | null;
-  sidebarCollapsed: boolean;
-}
-
-export const state: AppState = {
-  title: 'Spring Twin',
-  version: '1.0.0',
-  user: null,
-  notifications: [],
-  loading: 0,
-  error: null,
-  sidebarCollapsed: false,
-};
-
-export interface User {
-  id: string;
-  name: string;
-  email: string;
-}
+import { defineStore } from 'pinia';
 
 export interface Notification {
   id: string;
   type: 'success' | 'error' | 'warning' | 'info';
   message: string;
-  timeout?: number;
+  timestamp: number;
 }
 
-export interface AppError {
-  code: string;
-  message: string;
-  details?: any;
+export interface AppState {
+  isLoading: boolean;
+  currentRoute: string;
+  notifications: Notification[];
+  theme: 'light' | 'dark';
+  error: string | null;
 }
-```
 
-### mutations.ts
-
-```typescript
-import { MutationTree } from 'vuex';
-import { AppState, Notification, AppError } from './state';
-
-export const mutations: MutationTree<AppState> = {
+export const useAppStore = defineStore('app', {
+  state: (): AppState => ({
+    isLoading: false,
+    currentRoute: '',
+    notifications: [],
+    theme: 'light',
+    error: null
+  }),
   
-  setTitle(state, title: string) {
-    state.title = title;
-  },
-  
-  setUser(state, user: User | null) {
-    state.user = user;
-  },
-  
-  addNotification(state, notification: Notification) {
-    state.notifications.push(notification);
-  },
-  
-  removeNotification(state, id: string) {
-    state.notifications = state.notifications.filter(n => n.id !== id);
-  },
-  
-  clearNotifications(state) {
-    state.notifications = [];
-  },
-  
-  setLoading(state, isLoading: boolean) {
-    if (isLoading) {
-      state.loading++;
-    } else {
-      state.loading = Math.max(0, state.loading - 1);
+  actions: {
+    showLoading(isLoading: boolean) {
+      this.isLoading = isLoading;
+    },
+    
+    showError(error: string | null) {
+      this.error = error;
+    },
+    
+    setCurrentRoute(route: string) {
+      this.currentRoute = route;
+    },
+    
+    addNotification(notification: Omit<Notification, 'id' | 'timestamp'>) {
+      const newNotification: Notification = {
+        ...notification,
+        id: Date.now().toString(),
+        timestamp: Date.now()
+      };
+      this.notifications.push(newNotification);
+    },
+    
+    removeNotification(id: string) {
+      this.notifications = this.notifications.filter(n => n.id !== id);
+    },
+    
+    toggleTheme() {
+      this.theme = this.theme === 'light' ? 'dark' : 'light';
     }
   },
   
-  setError(state, error: AppError | null) {
-    state.error = error;
-  },
-  
-  toggleSidebar(state) {
-    state.sidebarCollapsed = !state.sidebarCollapsed;
-  },
-};
-```
+  getters: {
+    isLoading: (state) => state.isLoading,
+    hasError: (state) => state.error !== null,
+    notificationCount: (state) => state.notifications.length
+  }
+});
 
-### actions.ts
-
-```typescript
-import { ActionTree } from 'vuex';
-import { AppState } from './state';
-import { RootState } from './index';
-
-export const actions: ActionTree<AppState, RootState> = {
-  
-  notify({ commit }, { type, message, timeout = 5000 }: { type: string; message: string; timeout?: number }) {
-    const id = Date.now().toString();
-    
-    commit('addNotification', { id, type, message, timeout });
-    
-    if (timeout > 0) {
-      setTimeout(() => {
-        commit('removeNotification', id);
-      }, timeout);
-    }
-  },
-  
-  async initialize({ dispatch }) {
-    // Initialize application
-    await dispatch('fetchAppInfo');
-  },
-  
-  async fetchAppInfo({ commit }) {
-    // Fetch app info from API
-  },
-};
-```
-
-### getters.ts
-
-```typescript
-import { GetterTree } from 'vuex';
-import { AppState } from './state';
-import { RootState } from './index';
-
-export const getters: GetterTree<AppState, RootState> = {
-  
-  isLoading: (state) => state.loading > 0,
-  
-  hasError: (state) => state.error !== null,
-  
-  isAuthenticated: (state) => state.user !== null,
-  
-  notificationCount: (state) => state.notifications.length,
-};
+export default useAppStore;
 ```
 
 ---
 
 ## API Client
 
-### client.ts
+### index.ts
 
 ```typescript
-import axios, { AxiosInstance, AxiosRequestConfig } from 'axios';
-import { setupInterceptors } from './interceptors';
-
-/**
- * API клиент для взаимодействия с backend.
- */
-const createApiClient = (): AxiosInstance => {
-  const client = axios.create({
-    baseURL: '/api/v1',
-    timeout: 30000,
-    headers: {
-      'Content-Type': 'application/json',
-    },
-  });
-  
-  setupInterceptors(client);
-  
-  return client;
-};
-
-export const apiClient = createApiClient();
+// Dummy export to make TypeScript recognize the module
+export const dummy_app_api = 0;
 ```
 
-### interceptors.ts
+### navigation.ts
 
 ```typescript
-import { AxiosInstance, AxiosError } from 'axios';
-import { store } from '@/app/store';
-
-/**
- * Настраивает перехватчики для API клиента.
- */
-export function setupInterceptors(client: AxiosInstance): void {
-  
-  // Request interceptor
-  client.interceptors.request.use(
-    (config) => {
-      store.commit('app/setLoading', true);
-      
-      // Add auth token if available
-      const token = localStorage.getItem('auth_token');
-      if (token) {
-        config.headers.Authorization = `Bearer ${token}`;
-      }
-      
-      return config;
-    },
-    (error) => {
-      store.commit('app/setLoading', false);
-      return Promise.reject(error);
-    }
-  );
-  
-  // Response interceptor
-  client.interceptors.response.use(
-    (response) => {
-      store.commit('app/setLoading', false);
-      return response;
-    },
-    (error: AxiosError) => {
-      store.commit('app/setLoading', false);
-      
-      if (error.response) {
-        const status = error.response.status;
-        
-        if (status === 401) {
-          // Unauthorized - redirect to login
-          store.dispatch('app/notify', {
-            type: 'error',
-            message: 'Session expired. Please login again.'
-          });
-        } else if (status === 403) {
-          // Forbidden
-          store.dispatch('app/notify', {
-            type: 'error',
-            message: 'You do not have permission to perform this action.'
-          });
-        } else if (status === 500) {
-          // Server error
-          store.dispatch('app/notify', {
-            type: 'error',
-            message: 'Server error. Please try again later.'
-          });
-        }
-      } else if (error.request) {
-        // Network error
-        store.dispatch('app/notify', {
-          type: 'error',
-          message: 'Network error. Please check your connection.'
-        });
-      }
-      
-      return Promise.reject(error);
-    }
-  );
+export interface NavigationItem {
+  id: string;
+  label: string;
+  path: string;
+  icon?: string;
+  description?: string;
 }
+
+export const defaultNavigationItems: NavigationItem[] = [
+  {
+    id: 'home',
+    label: 'Главная',
+    path: '/',
+    icon: '🏠',
+    description: 'Главная страница приложения'
+  },
+  {
+    id: 'project',
+    label: 'Проект',
+    path: '/project',
+    icon: '📁',
+    description: 'Конфигурация проекта и управление анализами'
+  },
+  {
+    id: 'architecture',
+    label: 'Архитектура',
+    path: '/architecture',
+    icon: '🏗️',
+    description: 'Архитектурный график и модели данных'
+  },
+  {
+    id: 'analysis',
+    label: 'Анализ',
+    path: '/analysis',
+    icon: '🔍',
+    description: 'Процессы анализа и индексации проекта'
+  },
+  {
+    id: 'report',
+    label: 'Отчеты',
+    path: '/report',
+    icon: '📊',
+    description: 'Генерация и просмотр отчетов'
+  },
+  {
+    id: 'mcp',
+    label: 'MCP',
+    path: '/mcp',
+    icon: '🔌',
+    description: 'MCP-интеграция с внешними инструментами'
+  }
+];
 ```
 
 ---
@@ -578,50 +486,94 @@ export function setupInterceptors(client: AxiosInstance): void {
 ### index.ts
 
 ```typescript
-import { createRouter, createWebHistory, RouteRecordRaw } from 'vue-router';
-import { setupGuards } from './guards';
+import { createRouter, createWebHistory } from 'vue-router';
 
-// Import module routes
-import { projectRoutes } from '@/project/router';
-import { architectureRoutes } from '@/architecture/router';
-import { analysisRoutes } from '@/analysis/router';
-import { reportRoutes } from '@/report/router';
-import { mcpRoutes } from '@/mcp/router';
-
-// Base routes
-const baseRoutes: RouteRecordRaw[] = [
+/**
+ * Vue Router configuration for Spring Twin application.
+ * 
+ * Routes are configured with lazy loading for better performance.
+ */
+const routes = [
   {
     path: '/',
     name: 'home',
     component: () => import('../view/HomeView.vue'),
-    meta: { title: 'Home' },
+    meta: {
+      title: 'Главная',
+      description: 'Spring Twin - MCP-агент для анализа Spring Boot проектов'
+    }
+  },
+  {
+    path: '/project',
+    name: 'project',
+    component: () => import('../../project/view/ProjectView.vue'),
+    meta: {
+      title: 'Проект',
+      description: 'Конфигурация проекта и управление анализами'
+    }
+  },
+  {
+    path: '/architecture',
+    name: 'architecture',
+    component: () => import('../../architecture/view/ArchitectureView.vue'),
+    meta: {
+      title: 'Архитектура',
+      description: 'Архитектурный график и модели данных'
+    }
+  },
+  {
+    path: '/analysis',
+    name: 'analysis',
+    component: () => import('../../analysis/view/AnalysisView.vue'),
+    meta: {
+      title: 'Анализ',
+      description: 'Процессы анализа и индексации проекта'
+    }
+  },
+  {
+    path: '/report',
+    name: 'report',
+    component: () => import('../../report/view/ReportView.vue'),
+    meta: {
+      title: 'Отчеты',
+      description: 'Генерация и просмотр отчетов'
+    }
+  },
+  {
+    path: '/mcp',
+    name: 'mcp',
+    component: () => import('../../mcp/view/McpView.vue'),
+    meta: {
+      title: 'MCP',
+      description: 'MCP-интеграция с внешними инструментами'
+    }
   },
   {
     path: '/:pathMatch(.*)*',
     name: 'not-found',
     component: () => import('../view/NotFoundView.vue'),
-    meta: { title: 'Not Found' },
-  },
+    meta: {
+      title: 'Страница не найдена',
+      description: 'Запрошенная страница не существует'
+    }
+  }
 ];
 
-// Combine all routes
-const routes: RouteRecordRaw[] = [
-  ...baseRoutes,
-  ...projectRoutes,
-  ...architectureRoutes,
-  ...analysisRoutes,
-  ...reportRoutes,
-  ...mcpRoutes,
-];
-
-// Create router
-export const router = createRouter({
+const router = createRouter({
   history: createWebHistory(),
-  routes,
+  routes
 });
 
-// Setup navigation guards
-setupGuards(router);
+/**
+ * Sets document title based on route meta.
+ */
+router.afterEach((to) => {
+  if (to.meta.title) {
+    document.title = `${to.meta.title} | Spring Twin`;
+  } else {
+    document.title = 'Spring Twin';
+  }
+});
 
 export default router;
 ```
@@ -630,7 +582,7 @@ export default router;
 
 ```typescript
 import { Router, NavigationGuardNext } from 'vue-router';
-import { store } from '../store';
+import { useAppStore } from '../store/app.store';
 
 /**
  * Настраивает навигационные guards.
@@ -643,7 +595,8 @@ export function setupGuards(router: Router): void {
     document.title = title ? `${title} | Spring Twin` : 'Spring Twin';
     
     // Check authentication if required
-    if (to.meta.requiresAuth && !store.getters['app/isAuthenticated']) {
+    const store = useAppStore();
+    if (to.meta.requiresAuth && !store.isAuthenticated) {
       next({ name: 'login', query: { redirect: to.fullPath } });
       return;
     }
@@ -660,42 +613,49 @@ export function setupGuards(router: Router): void {
 
 ---
 
-## Root Store
+## Сервисы
 
-### index.ts
+### app.service.ts
 
 ```typescript
-import { createStore, Module } from 'vuex';
-import { app, AppState } from './index';
+/**
+ * Application service utility functions.
+ * Provides helper functions for the app module.
+ */
 
-// Import module stores
-import project from '@/project/store';
-import architecture from '@/architecture/store';
-import analysis from '@/analysis/store';
-import report from '@/report/store';
-import mcp from '@/mcp/store';
-
-export interface RootState {
-  app: AppState;
-  project: ProjectState;
-  architecture: ArchitectureState;
-  analysis: AnalysisState;
-  report: ReportState;
-  mcp: McpState;
+/**
+ * Formats the application title with version.
+ * @param appName - The name of the application
+ * @param version - The version string
+ * @returns Formatted title with version
+ */
+export function formatAppTitle(appName: string, version: string): string {
+  return `${appName} v${version}`;
 }
 
-export const store = createStore<RootState>({
-  modules: {
-    app,
-    project,
-    architecture,
-    analysis,
-    report,
-    mcp,
-  },
-});
+/**
+ * Determines if the application is in production mode.
+ * @returns True if in production mode
+ */
+export function isProductionMode(): boolean {
+  return import.meta.env.PROD === true;
+}
 
-export default store;
+/**
+ * Determines if the application is in development mode.
+ * @returns True if in development mode
+ */
+export function isDevelopmentMode(): boolean {
+  return import.meta.env.DEV === true;
+}
+
+/**
+ * Determines if the application is running in test mode.
+ * @returns True if in test mode
+ */
+export function isTestMode(): boolean {
+  return import.meta.env.MODE === 'test';
+}
 ```
 
 ---
@@ -725,24 +685,35 @@ graph TD
 ### Unit тесты
 
 ```typescript
-// app/store/actions.spec.ts
-import { actions } from './actions';
+// app/store/app.store.spec.ts
+import { useAppStore } from './app.store';
 
-describe('App Store Actions', () => {
+describe('App Store', () => {
   
-  it('notify adds notification and removes after timeout', async () => {
-    const commit = vi.fn();
+  it('should add notification', () => {
+    const store = useAppStore();
     
-    await actions.notify({ commit }, {
-      type: 'success',
-      message: 'Test notification',
-      timeout: 100
-    });
-    
-    expect(commit).toHaveBeenCalledWith('addNotification', expect.objectContaining({
+    store.addNotification({
       type: 'success',
       message: 'Test notification'
-    }));
+    });
+    
+    expect(store.notifications.length).toBeGreaterThan(0);
+  });
+  
+  it('should remove notification', () => {
+    const store = useAppStore();
+    const initialCount = store.notifications.length;
+    
+    store.addNotification({
+      type: 'success',
+      message: 'Test notification'
+    });
+    
+    const notificationId = store.notifications[store.notifications.length - 1].id;
+    store.removeNotification(notificationId);
+    
+    expect(store.notifications.length).toBe(initialCount);
   });
 });
 ```
