@@ -6,7 +6,9 @@ plugins {
 
 // Frontend build configuration
 val frontendSourceDir = file("src/main/vue")
+val frontendOutputDir = file("build/resources/main/public")
 
+// NPM Install task
 tasks.register<Exec>("npmInstall") {
 	group = "frontend"
 	description = "Install npm dependencies"
@@ -14,6 +16,7 @@ tasks.register<Exec>("npmInstall") {
 	commandLine("cmd", "/c", "npm install")
 }
 
+// NPM Build task
 tasks.register<Exec>("npmBuild") {
 	group = "frontend"
 	description = "Build Vue.js frontend"
@@ -22,8 +25,47 @@ tasks.register<Exec>("npmBuild") {
 	dependsOn("npmInstall")
 }
 
-tasks.processResources {
+// NPM Test task
+tasks.register<Exec>("npmTest") {
+	group = "frontend"
+	description = "Run Vue.js tests (Vitest)"
+	workingDir(frontendSourceDir)
+	commandLine("cmd", "/c", "set CI=true && npm run test")
+}
+
+// Vue Build aggregate task (install + build)
+tasks.register("vueBuild") {
+	group = "frontend"
+	description = "Full Vue.js build (install dependencies + build)"
+	dependsOn("npmInstall")
 	dependsOn("npmBuild")
+}
+
+// Vue Clean task
+tasks.register<Delete>("vueClean") {
+	group = "frontend"
+	description = "Clean Vue.js build output"
+	delete(frontendOutputDir)
+}
+
+// Process resources depends on vueBuild
+tasks.processResources {
+	dependsOn("vueBuild")
+}
+
+// Build task depends on vueBuild
+tasks.named("build") {
+	dependsOn("vueBuild")
+}
+
+// Test task depends on npmTest
+tasks.named("test") {
+	dependsOn("npmTest")
+}
+
+// Clean task depends on vueClean
+tasks.named("clean") {
+	dependsOn("vueClean")
 }
 
 group = "twin"
