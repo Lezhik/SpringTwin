@@ -1,6 +1,8 @@
 # AGENTS.md: Тестирование модуля Analysis (Frontend)
 
-Правила и структура тестирования для модуля analysis UI. Содержит тестовые профили для Vitest unit тестов и Cypress E2E тестов.
+Правила и структура тестирования для модуля analysis UI. Содержит тестовые профили для Vitest unit тестов.
+
+**Примечание:** E2E тесты выполняются на backend с использованием Playwright. См. [`src/test/java/AGENTS.md`](../../../../test/java/AGENTS.md) для деталей.
 
 ---
 
@@ -8,17 +10,14 @@
 
 ```
 src/test/vue/analysis/
-├── unit/
-│   ├── AnalysisDashboard.spec.ts
+├── view/
+│   ├── AnalysisView.spec.ts
 │   ├── AnalysisProgress.spec.ts
-│   ├── AnalysisResult.spec.ts
-│   └── store/
-│       └── analysisStore.spec.ts
-├── e2e/
-│   ├── analysis-execution.cy.ts
-│   └── analysis-results.cy.ts
-└── profile/
-    └── AnalysisTestProfile.ts
+│   └── AnalysisResult.spec.ts
+├── store/
+│   └── analysis.store.spec.ts
+└── service/
+    └── analysis.service.spec.ts
 ```
 
 ---
@@ -184,23 +183,23 @@ export class AnalysisTestProfile {
 
 ## Unit тесты (Vitest)
 
-### AnalysisDashboard.spec.ts
+### AnalysisView.spec.ts
 
 ```typescript
 /**
- * Unit тесты для компонента AnalysisDashboard.
+ * Unit тесты для компонента AnalysisView.
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { mount } from '@vue/test-utils';
 import { createTestingPinia } from '@pinia/testing';
-import AnalysisDashboard from '@/analysis/view/AnalysisDashboard.vue';
+import AnalysisView from '@/analysis/view/AnalysisView.vue';
 import { AnalysisTestProfile } from './profile/AnalysisTestProfile';
 
-describe('AnalysisDashboard', () => {
+describe('AnalysisView', () => {
   let wrapper: any;
   
   beforeEach(() => {
-    wrapper = mount(AnalysisDashboard, {
+    wrapper = mount(AnalysisView, {
       global: {
         plugins: [
           createTestingPinia({
@@ -225,7 +224,7 @@ describe('AnalysisDashboard', () => {
   });
   
   it('should display analysis history', () => {
-    const historyWrapper = mount(AnalysisDashboard, {
+    const historyWrapper = mount(AnalysisView, {
       global: {
         plugins: [
           createTestingPinia({
@@ -251,7 +250,7 @@ describe('AnalysisDashboard', () => {
   });
   
   it('should show running analysis indicator', () => {
-    const runningWrapper = mount(AnalysisDashboard, {
+    const runningWrapper = mount(AnalysisView, {
       global: {
         plugins: [
           createTestingPinia({
@@ -326,18 +325,6 @@ describe('AnalysisProgress', () => {
     await cancelButton.trigger('click');
     
     expect(wrapper.emitted('cancel')).toBeTruthy();
-  });
-  
-  it('should update progress dynamically', async () => {
-    const progressBar = wrapper.find('[data-test="progress-bar"]');
-    const initialWidth = progressBar.element.style.width;
-    
-    // Simulate progress update
-    await wrapper.vm.$store.dispatch('analysis/updateProgress', {
-      percent: 75
-    });
-    
-    expect(progressBar.element.style.width).not.toBe(initialWidth);
   });
 });
 ```
@@ -424,11 +411,11 @@ describe('AnalysisResult', () => {
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { setActivePinia, createPinia } from 'pinia';
-import { useAnalysisStore } from '@/analysis/store/analysisStore';
-import { analysisApi } from '@/analysis/api/analysisApi';
+import { useAnalysisStore } from '@/analysis/store/analysis.store';
+import { analysisApi } from '@/analysis/api';
 import { AnalysisTestProfile } from './profile/AnalysisTestProfile';
 
-vi.mock('@/analysis/api/analysisApi');
+vi.mock('@/analysis/api');
 
 describe('analysisStore', () => {
   let store: ReturnType<typeof useAnalysisStore>;
@@ -515,116 +502,6 @@ describe('analysisStore', () => {
 
 ---
 
-## E2E тесты (Cypress)
-
-### analysis-execution.cy.ts
-
-```typescript
-/**
- * E2E тесты для запуска анализа.
- */
-describe('Analysis Execution', () => {
-  beforeEach(() => {
-    cy.resetDatabase();
-    cy.seedProjects();
-    cy.visit('/analysis');
-  });
-  
-  it('should start analysis', () => {
-    cy.get('[data-test="project-selector"]').select('Test Project');
-    cy.get('[data-test="start-analysis-btn"]').click();
-    
-    cy.get('[data-test="analysis-progress"]').should('be.visible');
-    cy.get('[data-test="progress-bar"]').should('exist');
-  });
-  
-  it('should show progress during analysis', () => {
-    cy.get('[data-test="project-selector"]').select('Test Project');
-    cy.get('[data-test="start-analysis-btn"]').click();
-    
-    // Wait for progress updates
-    cy.get('[data-test="progress-percent"]').should('not.contain', '0');
-    cy.get('[data-test="current-stage"]').should('exist');
-  });
-  
-  it('should complete analysis successfully', () => {
-    cy.get('[data-test="project-selector"]').select('Test Project');
-    cy.get('[data-test="start-analysis-btn"]').click();
-    
-    // Wait for completion
-    cy.get('[data-test="analysis-result"]', { timeout: 60000 }).should('be.visible');
-    cy.get('[data-test="classes-count"]').should('exist');
-  });
-  
-  it('should cancel running analysis', () => {
-    cy.get('[data-test="project-selector"]').select('Test Project');
-    cy.get('[data-test="start-analysis-btn"]').click();
-    
-    // Wait for progress
-    cy.get('[data-test="progress-bar"]').should('exist');
-    
-    // Cancel
-    cy.get('[data-test="cancel-btn"]').click();
-    cy.get('[data-test="confirm-cancel-btn"]').click();
-    
-    cy.get('[data-test="analysis-progress"]').should('not.exist');
-  });
-  
-  it('should handle analysis error', () => {
-    // Seed project with invalid path
-    cy.seedInvalidProject();
-    
-    cy.get('[data-test="project-selector"]').select('Invalid Project');
-    cy.get('[data-test="start-analysis-btn"]').click();
-    
-    cy.get('[data-test="error-message"]').should('be.visible');
-  });
-});
-
-describe('Analysis Results', () => {
-  beforeEach(() => {
-    cy.resetDatabase();
-    cy.seedCompletedAnalysis();
-    cy.visit('/analysis');
-  });
-  
-  it('should display analysis statistics', () => {
-    cy.get('[data-test="stats-section"]').should('be.visible');
-    cy.get('[data-test="classes-count"]').should('not.contain', '0');
-    cy.get('[data-test="methods-count"]').should('not.contain', '0');
-  });
-  
-  it('should show label breakdown', () => {
-    cy.get('[data-test="label-breakdown"]').should('be.visible');
-    cy.get('[data-test="label-item"]').should('have.length.at.least', 1);
-  });
-  
-  it('should navigate to graph view', () => {
-    cy.get('[data-test="view-graph-btn"]').click();
-    
-    cy.url().should('include', '/architecture/graph');
-  });
-  
-  it('should navigate to report generation', () => {
-    cy.get('[data-test="generate-report-btn"]').click();
-    
-    cy.url().should('include', '/report');
-  });
-  
-  it('should show analysis history', () => {
-    cy.get('[data-test="history-item"]').should('have.length.at.least', 1);
-  });
-  
-  it('should view previous analysis result', () => {
-    cy.get('[data-test="history-item"]').first().click();
-    
-    cy.get('[data-test="analysis-result"]').should('be.visible');
-  });
-});
-```
-
----
-
 ## Тестовые сценарии
 
 ### Сценарий: Запуск анализа
@@ -682,7 +559,18 @@ sequenceDiagram
 |----------|----------|
 | Unit тесты | Все компоненты покрыты |
 | Store тесты | Все actions покрыты |
-| E2E тесты | Запуск и отмена проверены |
 | Прогресс | Отображение прогресса работает |
 | Результаты | Статистика отображается корректно |
 | История | История анализа доступна |
+
+---
+
+## Запуск тестов
+
+```bash
+# Из директории src/main/vue
+cd src\main\vue
+set CI=true && npm run test
+
+# Запуск тестов конкретного модуля
+set CI=true && npm run test -- analysis

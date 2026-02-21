@@ -101,10 +101,7 @@ dependencies {
 	testImplementation("org.springframework.boot:spring-boot-starter-actuator-test")
 	testImplementation("org.springframework.boot:spring-boot-starter-data-neo4j-test")
 	testImplementation("org.springframework.boot:spring-boot-starter-webflux-test")
-	testImplementation("org.springframework.boot:spring-boot-testcontainers")
 	testImplementation("org.springframework.modulith:spring-modulith-starter-test:2.0.2")
-	testImplementation("org.testcontainers:testcontainers-junit-jupiter")
-	testImplementation("org.testcontainers:testcontainers-neo4j")
 	testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 

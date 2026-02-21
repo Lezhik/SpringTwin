@@ -53,21 +53,21 @@ src/main/java/twin/spring/report/
 
 ```mermaid
 graph TD
-    Endpoint[Endpoint] --> Method[Метод контроллера]
-    Method --> Controller[Класс контроллера]
-    Method --> Calls[Вызываемые методы]
+    EndpointNode[EndpointNode] --> MethodNode[Метод контроллера]
+    MethodNode --> ClassNode[Класс контроллера]
+    MethodNode --> Calls[Вызываемые методы]
     Calls --> Services[Сервисы]
     Services --> Repositories[Репозитории]
-    Controller --> Dependencies[Зависимости контроллера]
+    ClassNode --> Dependencies[Зависимости контроллера]
 ```
 
 ### Explain Class
 
 ```mermaid
 graph TD
-    Class[Класс] --> Methods[Методы класса]
-    Class --> Dependencies[Зависимости DI]
-    Class --> Dependents[Зависящие классы]
+    ClassNode[ClassNode] --> Methods[Методы класса]
+    ClassNode --> Dependencies[Зависимости DI]
+    ClassNode --> Dependents[Зависящие классы]
     Methods --> Calls[Вызовы методов]
     Dependencies --> InjectedServices[Инжектированные сервисы]
 ```
@@ -76,11 +76,11 @@ graph TD
 
 ```mermaid
 graph TD
-    Method[Метод] --> ParentClass[Родительский класс]
-    Method --> Calls[Вызываемые методы]
-    Method --> CalledBy[Вызывающие методы]
-    Method --> FieldAccess[Доступ к полям]
-    Method --> Instantiations[Создание объектов]
+    MethodNode[MethodNode] --> ParentClass[Родительский класс]
+    MethodNode --> Calls[Вызываемые методы]
+    MethodNode --> CalledBy[Вызывающие методы]
+    MethodNode --> FieldAccess[Доступ к полям]
+    MethodNode --> Instantiations[Создание объектов]
 ```
 
 ---
@@ -242,9 +242,9 @@ public class MethodReport extends ExplainReport {
 @RequiredArgsConstructor
 public class EndpointExplainService {
     
-    private final EndpointRepository endpointRepository;
-    private final ClassRepository classRepository;
-    private final MethodRepository methodRepository;
+    private final EndpointNodeRepository endpointNodeRepository;
+    private final ClassNodeRepository classNodeRepository;
+    private final MethodNodeRepository methodNodeRepository;
     private final ReportRepository reportRepository;
     
     /**
@@ -253,7 +253,7 @@ public class EndpointExplainService {
     public Mono<EndpointReport> generateReport(String endpointId) {
         log.info("Generating endpoint report for: {}", endpointId);
         
-        return endpointRepository.findById(endpointId)
+        return endpointNodeRepository.findById(endpointId)
             .switchIfEmpty(Mono.error(new EndpointNotFoundException(endpointId)))
             .flatMap(endpoint -> {
                 EndpointReport report = EndpointReport.builder()
@@ -279,7 +279,7 @@ public class EndpointExplainService {
     /**
      * Строит цепочку вызовов метода.
      */
-    private Mono<List<CallChainItem>> buildCallChain(Method method) {
+    private Mono<List<CallChainItem>> buildCallChain(MethodNode method) {
         return reportRepository.findCallChain(method.getId())
             .collectList()
             .map(calls -> calls.stream()
@@ -300,8 +300,8 @@ public class EndpointExplainService {
 @RequiredArgsConstructor
 public class ClassExplainService {
     
-    private final ClassRepository classRepository;
-    private final MethodRepository methodRepository;
+    private final ClassNodeRepository classNodeRepository;
+    private final MethodNodeRepository methodNodeRepository;
     private final ReportRepository reportRepository;
     
     /**
@@ -349,7 +349,7 @@ public class ClassExplainService {
 @RequiredArgsConstructor
 public class MethodExplainService {
     
-    private final MethodRepository methodRepository;
+    private final MethodNodeRepository methodNodeRepository;
     private final ReportRepository reportRepository;
     
     /**
@@ -517,7 +517,7 @@ public class ReportRepository {
      * Находит цепочку вызовов метода.
      */
     @Query("""
-        MATCH path = (m:Method {id: $methodId})-[:CALLS*1..5]->(called:Method)
+        MATCH path = (m:MethodNode {id: $methodId})-[:CALLS*1..5]->(called:MethodNode)
         RETURN called, length(path) as depth
         ORDER BY depth
         """)
@@ -527,19 +527,19 @@ public class ReportRepository {
      * Находит все зависимости класса.
      */
     @Query("""
-        MATCH (c:Class {id: $classId})-[:DEPENDS_ON]->(dep:Class)
+        MATCH (c:ClassNode {id: $classId})-[:DEPENDS_ON]->(dep:ClassNode)
         RETURN dep
         """)
-    public Flux<Class> findDependencies(String classId);
+    public Flux<ClassNode> findDependencies(String classId);
     
     /**
      * Находит все классы, зависящие от данного.
      */
     @Query("""
-        MATCH (c:Class)-[:DEPENDS_ON]->(target:Class {id: $classId})
+        MATCH (c:ClassNode)-[:DEPENDS_ON]->(target:ClassNode {id: $classId})
         RETURN c
         """)
-    public Flux<Class> findDependents(String classId);
+    public Flux<ClassNode> findDependents(String classId);
 }
 ```
 

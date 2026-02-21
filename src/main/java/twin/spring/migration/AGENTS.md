@@ -21,9 +21,9 @@ src/main/java/twin/spring/migration/
 ├── MigrationRunner.java                 # Запуск миграций
 ├── MigrationVersion.java                # Версия миграции
 ├── v0001/                               # Версия 1: базовые сущности
-│   ├── ClassMigration.java              # Миграция для Class узлов
-│   ├── MethodMigration.java             # Миграция для Method узлов
-│   └── EndpointMigration.java           # Миграция для Endpoint узлов
+│   ├── ClassNodeMigration.java          # Миграция для ClassNode узлов
+│   ├── MethodNodeMigration.java         # Миграция для MethodNode узлов
+│   └── EndpointNodeMigration.java       # Миграция для EndpointNode узлов
 ├── v0002/                               # Версия 2: связи
 │   ├── DependsOnMigration.java          # Миграция для DEPENDS_ON
 │   ├── CallsMigration.java              # Миграция для CALLS
@@ -123,15 +123,15 @@ public interface Migration {
 
 ## v0001: Базовые узлы
 
-### ClassMigration
+### ClassNodeMigration
 
 ```java
 /**
- * Миграция для создания ограничений для узлов Class.
+ * Миграция для создания ограничений для узлов ClassNode.
  */
 @Component
 @Slf4j
-public class ClassMigration implements Migration {
+public class ClassNodeMigration implements Migration {
     
     @Override
     public String getVersion() {
@@ -140,28 +140,28 @@ public class ClassMigration implements Migration {
     
     @Override
     public String getDescription() {
-        return "Create constraints and indexes for Class nodes";
+        return "Create constraints and indexes for ClassNode nodes";
     }
     
     @Override
     public Mono<Void> execute(ReactiveNeo4jClient client) {
-        log.info("Creating Class constraints...");
+        log.info("Creating ClassNode constraints...");
         
         return Flux.concat(
             // Уникальность по fullName
-            createConstraint(client, 
+            createConstraint(client,
                 "CREATE CONSTRAINT class_fullname_unique IF NOT EXISTS " +
-                "FOR (c:Class) REQUIRE c.fullName IS UNIQUE"),
+                "FOR (c:ClassNode) REQUIRE c.fullName IS UNIQUE"),
             
             // Индекс по name
             createIndex(client,
                 "CREATE INDEX class_name_index IF NOT EXISTS " +
-                "FOR (c:Class) ON (c.name)"),
+                "FOR (c:ClassNode) ON (c.name)"),
             
             // Индекс по packageName
             createIndex(client,
                 "CREATE INDEX class_package_index IF NOT EXISTS " +
-                "FOR (c:Class) ON (c.packageName)")
+                "FOR (c:ClassNode) ON (c.packageName)")
         ).then();
     }
     
@@ -175,14 +175,14 @@ public class ClassMigration implements Migration {
 }
 ```
 
-### MethodMigration
+### MethodNodeMigration
 
 ```java
 /**
- * Миграция для создания ограничений для узлов Method.
+ * Миграция для создания ограничений для узлов MethodNode.
  */
 @Component
-public class MethodMigration implements Migration {
+public class MethodNodeMigration implements Migration {
     
     @Override
     public String getVersion() {
@@ -191,7 +191,7 @@ public class MethodMigration implements Migration {
     
     @Override
     public String getDescription() {
-        return "Create constraints and indexes for Method nodes";
+        return "Create constraints and indexes for MethodNode nodes";
     }
     
     @Override
@@ -200,25 +200,25 @@ public class MethodMigration implements Migration {
             // Индекс по name
             createIndex(client,
                 "CREATE INDEX method_name_index IF NOT EXISTS " +
-                "FOR (m:Method) ON (m.name)"),
+                "FOR (m:MethodNode) ON (m.name)"),
             
             // Индекс по signature
             createIndex(client,
                 "CREATE INDEX method_signature_index IF NOT EXISTS " +
-                "FOR (m:Method) ON (m.signature)")
+                "FOR (m:MethodNode) ON (m.signature)")
         ).then();
     }
 }
 ```
 
-### EndpointMigration
+### EndpointNodeMigration
 
 ```java
 /**
- * Миграция для создания ограничений для узлов Endpoint.
+ * Миграция для создания ограничений для узлов EndpointNode.
  */
 @Component
-public class EndpointMigration implements Migration {
+public class EndpointNodeMigration implements Migration {
     
     @Override
     public String getVersion() {
@@ -227,7 +227,7 @@ public class EndpointMigration implements Migration {
     
     @Override
     public String getDescription() {
-        return "Create constraints and indexes for Endpoint nodes";
+        return "Create constraints and indexes for EndpointNode nodes";
     }
     
     @Override
@@ -236,12 +236,12 @@ public class EndpointMigration implements Migration {
             // Уникальность по path + httpMethod
             createConstraint(client,
                 "CREATE CONSTRAINT endpoint_unique IF NOT EXISTS " +
-                "FOR (e:Endpoint) REQUIRE (e.path, e.httpMethod) IS UNIQUE"),
+                "FOR (e:EndpointNode) REQUIRE (e.path, e.httpMethod) IS UNIQUE"),
             
             // Индекс по httpMethod
             createIndex(client,
                 "CREATE INDEX endpoint_method_index IF NOT EXISTS " +
-                "FOR (e:Endpoint) ON (e.httpMethod)")
+                "FOR (e:EndpointNode) ON (e.httpMethod)")
         ).then();
     }
 }
@@ -311,12 +311,12 @@ public class IndexMigration implements Migration {
             // Полнотекстовый индекс для поиска классов
             createFulltextIndex(client,
                 "CREATE FULLTEXT INDEX class_fulltext_index IF NOT EXISTS " +
-                "FOR (c:Class) ON EACH [c.name, c.fullName, c.packageName]"),
+                "FOR (c:ClassNode) ON EACH [c.name, c.fullName, c.packageName]"),
             
             // Полнотекстовый индекс для поиска методов
             createFulltextIndex(client,
                 "CREATE FULLTEXT INDEX method_fulltext_index IF NOT EXISTS " +
-                "FOR (m:Method) ON EACH [m.name, m.signature]")
+                "FOR (m:MethodNode) ON EACH [m.name, m.signature]")
         ).then();
     }
 }
@@ -344,20 +344,20 @@ public class MigrationAutoConfiguration {
     
     @Bean
     @Order(1)
-    public ClassMigration classMigration() {
-        return new ClassMigration();
+    public ClassNodeMigration classNodeMigration() {
+        return new ClassNodeMigration();
     }
     
     @Bean
     @Order(2)
-    public MethodMigration methodMigration() {
-        return new MethodMigration();
+    public MethodNodeMigration methodNodeMigration() {
+        return new MethodNodeMigration();
     }
     
     @Bean
     @Order(3)
-    public EndpointMigration endpointMigration() {
-        return new EndpointMigration();
+    public EndpointNodeMigration endpointNodeMigration() {
+        return new EndpointNodeMigration();
     }
     
     @Bean
@@ -414,12 +414,12 @@ graph TD
 ### Интеграционные тесты
 
 ```java
+/**
+ * Интеграционный тест миграций Neo4j.
+ * Использует Neo4j embedded (in-memory) для тестирования.
+ */
 @SpringBootTest
-@Testcontainers
 class MigrationIntegrationTest {
-    
-    @Container
-    static Neo4jContainer<?> neo4jContainer = new Neo4jContainer<>("neo4j:5.15");
     
     @Autowired
     private ReactiveNeo4jClient neo4jClient;

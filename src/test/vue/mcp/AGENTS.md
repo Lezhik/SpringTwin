@@ -1,6 +1,8 @@
 # AGENTS.md: Тестирование модуля MCP (Frontend)
 
-Правила и структура тестирования для модуля mcp UI. Содержит тестовые профили для Vitest unit тестов и Cypress E2E тестов.
+Правила и структура тестирования для модуля mcp UI. Содержит тестовые профили для Vitest unit тестов.
+
+**Примечание:** E2E тесты выполняются на backend с использованием Playwright. См. [`src/test/java/AGENTS.md`](../../../../test/java/AGENTS.md) для деталей.
 
 ---
 
@@ -8,17 +10,14 @@
 
 ```
 src/test/vue/mcp/
-├── unit/
-│   ├── McpToolList.spec.ts
+├── view/
+│   ├── McpView.spec.ts
 │   ├── McpToolCard.spec.ts
-│   ├── McpExecutor.spec.ts
-│   └── store/
-│       └── mcpStore.spec.ts
-├── e2e/
-│   ├── mcp-tools.cy.ts
-│   └── mcp-execution.cy.ts
-└── profile/
-    └── McpTestProfile.ts
+│   └── McpExecutor.spec.ts
+├── store/
+│   └── mcp.store.spec.ts
+└── service/
+    └── mcp.service.spec.ts
 ```
 
 ---
@@ -249,23 +248,23 @@ export class McpTestProfile {
 
 ## Unit тесты (Vitest)
 
-### McpToolList.spec.ts
+### McpView.spec.ts
 
 ```typescript
 /**
- * Unit тесты для компонента McpToolList.
+ * Unit тесты для компонента McpView.
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { mount } from '@vue/test-utils';
 import { createTestingPinia } from '@pinia/testing';
-import McpToolList from '@/mcp/view/McpToolList.vue';
+import McpView from '@/mcp/view/McpView.vue';
 import { McpTestProfile } from './profile/McpTestProfile';
 
-describe('McpToolList', () => {
+describe('McpView', () => {
   let wrapper: any;
   
   beforeEach(() => {
-    wrapper = mount(McpToolList, {
+    wrapper = mount(McpView, {
       global: {
         plugins: [
           createTestingPinia({
@@ -301,7 +300,7 @@ describe('McpToolList', () => {
   });
   
   it('should show empty state when no tools', () => {
-    const emptyWrapper = mount(McpToolList, {
+    const emptyWrapper = mount(McpView, {
       global: {
         plugins: [
           createTestingPinia({
@@ -510,11 +509,11 @@ describe('McpExecutor', () => {
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { setActivePinia, createPinia } from 'pinia';
-import { useMcpStore } from '@/mcp/store/mcpStore';
-import { mcpApi } from '@/mcp/api/mcpApi';
+import { useMcpStore } from '@/mcp/store/mcp.store';
+import { mcpApi } from '@/mcp/api';
 import { McpTestProfile } from './profile/McpTestProfile';
 
-vi.mock('@/mcp/api/mcpApi');
+vi.mock('@/mcp/api');
 
 describe('mcpStore', () => {
   let store: ReturnType<typeof useMcpStore>;
@@ -626,128 +625,6 @@ describe('mcpStore', () => {
 
 ---
 
-## E2E тесты (Cypress)
-
-### mcp-tools.cy.ts
-
-```typescript
-/**
- * E2E тесты для просмотра MCP tools.
- */
-describe('MCP Tools', () => {
-  beforeEach(() => {
-    cy.resetDatabase();
-    cy.visit('/mcp');
-  });
-  
-  it('should display available tools', () => {
-    cy.get('[data-test="tool-card"]').should('have.length.at.least', 1);
-  });
-  
-  it('should show tool details', () => {
-    cy.get('[data-test="tool-card"]').first().click();
-    
-    cy.get('[data-test="tool-name"]').should('be.visible');
-    cy.get('[data-test="tool-description"]').should('be.visible');
-  });
-  
-  it('should display tool parameters', () => {
-    cy.get('[data-test="tool-card"]').first().click();
-    
-    cy.get('[data-test="parameter-form"]').should('be.visible');
-    cy.get('[data-test="required-param"]').should('exist');
-  });
-  
-  it('should search tools', () => {
-    cy.get('[data-test="tool-search"]').type('endpoint');
-    
-    cy.get('[data-test="tool-card"]').should('have.length', 1);
-    cy.get('[data-test="tool-card"]').should('contain', 'get_endpoint_context');
-  });
-  
-  it('should show integration info', () => {
-    cy.get('[data-test="integration-info"]').should('be.visible');
-    cy.get('[data-test="integration-info"]').should('contain', 'Cursor AI');
-    cy.get('[data-test="integration-info"]').should('contain', 'Kilo Code');
-  });
-});
-
-describe('MCP Execution', () => {
-  beforeEach(() => {
-    cy.resetDatabase();
-    cy.seedArchitectureData();
-    cy.visit('/mcp');
-  });
-  
-  it('should execute class context tool', () => {
-    cy.get('[data-test="tool-card"]').first().click();
-    cy.get('input[name="fullName"]').type('com.example.service.UserService');
-    cy.get('[data-test="execute-btn"]').click();
-    
-    cy.get('[data-test="mcp-response"]').should('be.visible');
-    cy.get('[data-test="context-type"]').should('contain', 'CLASS');
-  });
-  
-  it('should show validation error', () => {
-    cy.get('[data-test="tool-card"]').first().click();
-    cy.get('[data-test="execute-btn"]').click();
-    
-    cy.get('[data-test="validation-error"]').should('be.visible');
-  });
-  
-  it('should handle execution error', () => {
-    cy.get('[data-test="tool-card"]').first().click();
-    cy.get('input[name="fullName"]').type('com.nonexistent.Class');
-    cy.get('[data-test="execute-btn"]').click();
-    
-    cy.get('[data-test="error-message"]').should('be.visible');
-  });
-  
-  it('should copy response to clipboard', () => {
-    cy.get('[data-test="tool-card"]').first().click();
-    cy.get('input[name="fullName"]').type('com.example.service.UserService');
-    cy.get('[data-test="execute-btn"]').click();
-    
-    cy.get('[data-test="copy-response-btn"]').click();
-    cy.get('[data-test="notification"]').should('contain', 'Copied');
-  });
-  
-  it('should execute endpoint context tool', () => {
-    cy.get('[data-test="tool-card"]').contains('endpoint').click();
-    cy.get('input[name="path"]').type('/api/users');
-    cy.get('[data-test="execute-btn"]').click();
-    
-    cy.get('[data-test="mcp-response"]').should('be.visible');
-    cy.get('[data-test="context-type"]').should('contain', 'ENDPOINT');
-  });
-  
-  it('should show execution history', () => {
-    // Execute a tool first
-    cy.get('[data-test="tool-card"]').first().click();
-    cy.get('input[name="fullName"]').type('com.example.service.UserService');
-    cy.get('[data-test="execute-btn"]').click();
-    
-    // Check history
-    cy.get('[data-test="history-item"]').should('have.length.at.least', 1);
-  });
-  
-  it('should re-execute from history', () => {
-    // Execute a tool first
-    cy.get('[data-test="tool-card"]').first().click();
-    cy.get('input[name="fullName"]').type('com.example.service.UserService');
-    cy.get('[data-test="execute-btn"]').click();
-    
-    // Clear and re-execute from history
-    cy.get('[data-test="clear-btn"]').click();
-    cy.get('[data-test="history-item"]').first().click();
-    
-    cy.get('input[name="fullName"]').should('have.value', 'com.example.service.UserService');
-  });
-});
-```
-
----
-
 ## Тестовые сценарии
 
 ### Сценарий: Просмотр MCP tools
@@ -755,16 +632,16 @@ describe('MCP Execution', () => {
 ```mermaid
 sequenceDiagram
     participant User
-    participant McpToolList
+    participant McpView
     participant Store
     participant API
     
-    User->>McpToolList: View tools
-    McpToolList->>Store: fetchTools()
+    User->>McpView: View tools
+    McpView->>Store: fetchTools()
     Store->>API: GET /api/v1/mcp/tools
     API-->>Store: tools
-    Store-->>McpToolList: tools
-    McpToolList-->>User: Show tool cards
+    Store-->>McpView: tools
+    McpView-->>User: Show tool cards
 ```
 
 ### Сценарий: Выполнение MCP tool
@@ -794,7 +671,18 @@ sequenceDiagram
 |----------|----------|
 | Unit тесты | Все компоненты покрыты |
 | Store тесты | Все actions покрыты |
-| E2E тесты | Просмотр и выполнение проверены |
 | Валидация | Параметры проверяются |
 | История | История выполнения работает |
 | Copy | Копирование результата работает |
+
+---
+
+## Запуск тестов
+
+```bash
+# Из директории src/main/vue
+cd src\main\vue
+set CI=true && npm run test
+
+# Запуск тестов конкретного модуля
+set CI=true && npm run test -- mcp

@@ -11,7 +11,9 @@
 - **Состояние**: Pinia
 - **Сборка в рамках проекта**: Gradle (Kotlin DSL)
 - **Сборка отдельно UI**: npm
-- **Тестирование**: Vitest (unit), Cypress (e2e)
+- **Тестирование**: Vitest (unit)
+
+**Примечание:** E2E тесты выполняются на backend с использованием Playwright. См. [`src/test/java/AGENTS.md`](../../../test/java/AGENTS.md) для деталей.
 
 ---
 

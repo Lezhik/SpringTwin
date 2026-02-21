@@ -1,6 +1,8 @@
 # AGENTS.md: Тестирование модуля Architecture (Frontend)
 
-Правила и структура тестирования для модуля architecture UI. Содержит тестовые профили для Vitest unit тестов и Cypress E2E тестов.
+Правила и структура тестирования для модуля architecture UI. Содержит тестовые профили для Vitest unit тестов.
+
+**Примечание:** E2E тесты выполняются на backend с использованием Playwright. См. [`src/test/java/AGENTS.md`](../../../../test/java/AGENTS.md) для деталей.
 
 ---
 
@@ -8,19 +10,15 @@
 
 ```
 src/test/vue/architecture/
-├── unit/
+├── view/
+│   ├── ArchitectureView.spec.ts
 │   ├── ClassList.spec.ts
-│   ├── ClassCard.spec.ts
 │   ├── ClassDetail.spec.ts
-│   ├── GraphViewer.spec.ts
-│   └── store/
-│       └── architectureStore.spec.ts
-├── e2e/
-│   ├── class-browsing.cy.ts
-│   ├── graph-visualization.cy.ts
-│   └── class-filtering.cy.ts
-└── profile/
-    └── ArchitectureTestProfile.ts
+│   └── GraphViewer.spec.ts
+├── store/
+│   └── architecture.store.spec.ts
+└── service/
+    └── architecture.service.spec.ts
 ```
 
 ---
@@ -423,11 +421,11 @@ describe('GraphViewer', () => {
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { setActivePinia, createPinia } from 'pinia';
-import { useArchitectureStore } from '@/architecture/store/architectureStore';
-import { architectureApi } from '@/architecture/api/architectureApi';
+import { useArchitectureStore } from '@/architecture/store/architecture.store';
+import { architectureApi } from '@/architecture/api';
 import { ArchitectureTestProfile } from './profile/ArchitectureTestProfile';
 
-vi.mock('@/architecture/api/architectureApi');
+vi.mock('@/architecture/api');
 
 describe('architectureStore', () => {
   let store: ReturnType<typeof useArchitectureStore>;
@@ -529,139 +527,6 @@ describe('architectureStore', () => {
 
 ---
 
-## E2E тесты (Cypress)
-
-### class-browsing.cy.ts
-
-```typescript
-/**
- * E2E тесты для просмотра классов.
- */
-describe('Class Browsing', () => {
-  beforeEach(() => {
-    cy.resetDatabase();
-    cy.seedArchitectureData();
-    cy.visit('/architecture');
-  });
-  
-  it('should display class list', () => {
-    cy.get('[data-test="class-card"]').should('have.length.at.least', 1);
-  });
-  
-  it('should show class details on click', () => {
-    cy.get('[data-test="class-card"]').first().click();
-    
-    cy.get('[data-test="class-detail"]').should('be.visible');
-    cy.get('[data-test="class-name"]').should('exist');
-  });
-  
-  it('should display class methods', () => {
-    cy.get('[data-test="class-card"]').first().click();
-    
-    cy.get('[data-test="method-item"]').should('have.length.at.least', 1);
-  });
-  
-  it('should navigate to dependency', () => {
-    cy.get('[data-test="class-card"]').first().click();
-    
-    cy.get('[data-test="dependency-link"]').first().click();
-    
-    cy.get('[data-test="class-detail"]').should('be.visible');
-  });
-  
-  it('should close detail panel', () => {
-    cy.get('[data-test="class-card"]').first().click();
-    cy.get('[data-test="close-btn"]').click();
-    
-    cy.get('[data-test="class-detail"]').should('not.exist');
-  });
-});
-
-describe('Class Filtering', () => {
-  beforeEach(() => {
-    cy.resetDatabase();
-    cy.seedArchitectureData();
-    cy.visit('/architecture');
-  });
-  
-  it('should filter by single label', () => {
-    cy.get('[data-test="label-filter"]').select('Service');
-    
-    cy.get('[data-test="class-card"]').each(($card) => {
-      cy.wrap($card).find('[data-test="class-label"]').should('contain', 'Service');
-    });
-  });
-  
-  it('should filter by multiple labels', () => {
-    cy.get('[data-test="label-filter"]').select(['Service', 'RestController']);
-    
-    cy.get('[data-test="class-card"]').each(($card) => {
-      cy.wrap($card).find('[data-test="class-label"]').should('satisfy', ($el) => {
-        const text = $el.text();
-        return text.includes('Service') || text.includes('RestController');
-      });
-    });
-  });
-  
-  it('should search by class name', () => {
-    cy.get('[data-test="search-input"]').type('User');
-    
-    cy.get('[data-test="class-card"]').each(($card) => {
-      cy.wrap($card).should('contain', 'User');
-    });
-  });
-  
-  it('should clear filters', () => {
-    cy.get('[data-test="label-filter"]').select('Service');
-    cy.get('[data-test="clear-filter-btn"]').click();
-    
-    cy.get('[data-test="class-card"]').should('have.length.gt', 1);
-  });
-});
-
-describe('Graph Visualization', () => {
-  beforeEach(() => {
-    cy.resetDatabase();
-    cy.seedArchitectureData();
-    cy.visit('/architecture/graph');
-  });
-  
-  it('should display graph', () => {
-    cy.get('[data-test="graph-container"]').should('be.visible');
-    cy.get('[data-test="graph-node"]').should('have.length.at.least', 1);
-  });
-  
-  it('should highlight node on hover', () => {
-    const node = cy.get('[data-test="graph-node"]').first();
-    node.trigger('mouseover');
-    
-    node.should('have.class', 'highlighted');
-  });
-  
-  it('should show node details on click', () => {
-    cy.get('[data-test="graph-node"]').first().click();
-    
-    cy.get('[data-test="node-tooltip"]').should('be.visible');
-  });
-  
-  it('should zoom in and out', () => {
-    cy.get('[data-test="zoom-in-btn"]').click();
-    cy.get('[data-test="graph-container"]').should('have.class', 'zoomed-in');
-    
-    cy.get('[data-test="zoom-out-btn"]').click();
-    cy.get('[data-test="graph-container"]').should('not.have.class', 'zoomed-in');
-  });
-  
-  it('should enter fullscreen mode', () => {
-    cy.get('[data-test="fullscreen-btn"]').click();
-    
-    cy.get('[data-test="graph-container"]').should('have.class', 'fullscreen');
-  });
-});
-```
-
----
-
 ## Тестовые сценарии
 
 ### Сценарий: Просмотр класса
@@ -714,6 +579,17 @@ sequenceDiagram
 |----------|----------|
 | Unit тесты | Все компоненты покрыты |
 | Store тесты | Все actions покрыты |
-| E2E тесты | Просмотр и фильтрация проверены |
 | Граф | Визуализация работает корректно |
 | Навигация | Переходы между классами работают |
+
+---
+
+## Запуск тестов
+
+```bash
+# Из директории src/main/vue
+cd src\main\vue
+set CI=true && npm run test
+
+# Запуск тестов конкретного модуля
+set CI=true && npm run test -- architecture

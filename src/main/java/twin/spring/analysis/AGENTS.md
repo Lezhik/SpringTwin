@@ -130,8 +130,8 @@ public enum AnalysisStatus {
 @RequiredArgsConstructor
 public class AstIndexerService {
     
-    private final ClassRepository classRepository;
-    private final MethodRepository methodRepository;
+    private final ClassNodeRepository classNodeRepository;
+    private final MethodNodeRepository methodNodeRepository;
     private final SpringAnnotationDetector annotationDetector;
     private final PackageFilterService packageFilter;
     
@@ -146,8 +146,8 @@ public class AstIndexerService {
             List<Path> javaFiles = findJavaFiles(projectPath);
             
             // Парсинг и индексация
-            List<Class> classes = new ArrayList<>();
-            List<Method> methods = new ArrayList<>();
+            List<ClassNode> classes = new ArrayList<>();
+            List<MethodNode> methods = new ArrayList<>();
             
             for (Path javaFile : javaFiles) {
                 CompilationUnit cu = parseJavaFile(javaFile);
@@ -173,13 +173,13 @@ public class AstIndexerService {
     /**
      * Извлекает классы из CompilationUnit.
      */
-    private List<Class> extractClasses(CompilationUnit cu, Path filePath) {
+    private List<ClassNode> extractClasses(CompilationUnit cu, Path filePath) {
         return cu.findAll(ClassOrInterfaceDeclaration.class).stream()
             .map(classDecl -> {
                 List<String> annotations = annotationDetector.detectAnnotations(classDecl);
                 List<String> labels = annotationDetector.resolveLabels(annotations);
                 
-                return Class.builder()
+                return ClassNode.builder()
                     .name(classDecl.getNameAsString())
                     .fullName(getFullName(cu, classDecl))
                     .packageName(cu.getPackageDeclaration()
@@ -195,9 +195,9 @@ public class AstIndexerService {
     /**
      * Извлекает методы из CompilationUnit.
      */
-    private List<Method> extractMethods(CompilationUnit cu) {
+    private List<MethodNode> extractMethods(CompilationUnit cu) {
         return cu.findAll(MethodDeclaration.class).stream()
-            .map(methodDecl -> Method.builder()
+            .map(methodDecl -> MethodNode.builder()
                 .name(methodDecl.getNameAsString())
                 .signature(methodDecl.getSignature().asString())
                 .returnType(methodDecl.getType().asString())
@@ -288,8 +288,8 @@ public class SpringAnnotationDetector {
 @RequiredArgsConstructor
 public class BytecodeAnalyzerService {
     
-    private final ClassRepository classRepository;
-    private final MethodRepository methodRepository;
+    private final ClassNodeRepository classNodeRepository;
+    private final MethodNodeRepository methodNodeRepository;
     private final PackageFilterService packageFilter;
     
     /**

@@ -1,6 +1,8 @@
 # AGENTS.md: Тестирование модуля App (Frontend)
 
-Правила и структура тестирования для корневого модуля app UI. Содержит тестовые профили для Vitest unit тестов и Cypress E2E тестов.
+Правила и структура тестирования для корневого модуля app UI. Содержит тестовые профили для Vitest unit тестов.
+
+**Примечание:** E2E тесты выполняются на backend с использованием Playwright. См. [`src/test/java/AGENTS.md`](../../../../test/java/AGENTS.md) для деталей.
 
 ---
 
@@ -8,19 +10,16 @@
 
 ```
 src/test/vue/app/
-├── unit/
+├── view/
+│   ├── App.spec.ts
 │   ├── AppLayout.spec.ts
-│   ├── AppNavigation.spec.ts
 │   ├── AppHeader.spec.ts
 │   ├── AppFooter.spec.ts
-│   └── store/
-│       └── appStore.spec.ts
-├── e2e/
-│   ├── navigation.cy.ts
-│   ├── layout.cy.ts
-│   └── health.cy.ts
-└── profile/
-    └── AppTestProfile.ts
+│   └── AppSidebar.spec.ts
+├── store/
+│   └── app.store.spec.ts
+└── service/
+    └── app.service.spec.ts
 ```
 
 ---
@@ -395,11 +394,11 @@ describe('AppHeader', () => {
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { setActivePinia, createPinia } from 'pinia';
-import { useAppStore } from '@/app/store/appStore';
-import { appApi } from '@/app/api/appApi';
+import { useAppStore } from '@/app/store/app.store';
+import { appApi } from '@/app/api';
 import { AppTestProfile } from './profile/AppTestProfile';
 
-vi.mock('@/app/api/appApi');
+vi.mock('@/app/api');
 
 describe('appStore', () => {
   let store: ReturnType<typeof useAppStore>;
@@ -498,151 +497,6 @@ describe('appStore', () => {
 
 ---
 
-## E2E тесты (Cypress)
-
-### navigation.cy.ts
-
-```typescript
-/**
- * E2E тесты для навигации.
- */
-describe('Navigation', () => {
-  beforeEach(() => {
-    cy.visit('/');
-  });
-  
-  it('should navigate to Architecture page', () => {
-    cy.get('[data-test="menu-item"]').contains('Architecture').click();
-    
-    cy.url().should('include', '/architecture');
-    cy.get('[data-test="architecture-page"]').should('be.visible');
-  });
-  
-  it('should navigate to Analysis page', () => {
-    cy.get('[data-test="menu-item"]').contains('Analysis').click();
-    
-    cy.url().should('include', '/analysis');
-    cy.get('[data-test="analysis-page"]').should('be.visible');
-  });
-  
-  it('should navigate to Reports page', () => {
-    cy.get('[data-test="menu-item"]').contains('Reports').click();
-    
-    cy.url().should('include', '/report');
-    cy.get('[data-test="report-page"]').should('be.visible');
-  });
-  
-  it('should navigate to MCP page', () => {
-    cy.get('[data-test="menu-item"]').contains('MCP').click();
-    
-    cy.url().should('include', '/mcp');
-    cy.get('[data-test="mcp-page"]').should('be.visible');
-  });
-  
-  it('should highlight active menu item', () => {
-    cy.get('[data-test="menu-item"]').contains('Architecture').click();
-    
-    cy.get('[data-test="menu-item"].active').should('contain', 'Architecture');
-  });
-  
-  it('should show breadcrumbs', () => {
-    cy.get('[data-test="menu-item"]').contains('Architecture').click();
-    
-    cy.get('[data-test="breadcrumbs"]').should('be.visible');
-    cy.get('[data-test="breadcrumb-item"]').should('have.length.at.least', 1);
-  });
-  
-  it('should navigate via breadcrumb', () => {
-    cy.get('[data-test="menu-item"]').contains('Architecture').click();
-    cy.get('[data-test="breadcrumb-item"]').first().click();
-    
-    cy.url().should('eq', Cypress.config().baseUrl + '/');
-  });
-});
-
-describe('Layout', () => {
-  beforeEach(() => {
-    cy.visit('/');
-  });
-  
-  it('should display header', () => {
-    cy.get('[data-test="app-header"]').should('be.visible');
-    cy.get('[data-test="app-name"]').should('contain', 'Spring Twin');
-  });
-  
-  it('should display sidebar', () => {
-    cy.get('[data-test="app-sidebar"]').should('be.visible');
-  });
-  
-  it('should toggle sidebar', () => {
-    cy.get('[data-test="toggle-sidebar-btn"]').click();
-    
-    cy.get('[data-test="app-sidebar"]').should('have.class', 'collapsed');
-    
-    cy.get('[data-test="toggle-sidebar-btn"]').click();
-    
-    cy.get('[data-test="app-sidebar"]').should('not.have.class', 'collapsed');
-  });
-  
-  it('should display footer', () => {
-    cy.get('[data-test="app-footer"]').should('be.visible');
-  });
-  
-  it('should show health indicator', () => {
-    cy.get('[data-test="health-indicator"]').should('be.visible');
-  });
-  
-  it('should show notifications', () => {
-    // Trigger an action that shows notification
-    cy.get('[data-test="menu-item"]').contains('Projects').click();
-    
-    // If there's a notification, it should be visible
-    cy.get('body').then(($body) => {
-      if ($body.find('[data-test="notification"]').length > 0) {
-        cy.get('[data-test="notification"]').should('be.visible');
-      }
-    });
-  });
-  
-  it('should dismiss notification', () => {
-    // Manually trigger notification via store
-    cy.window().then((win) => {
-      win.$store.dispatch('app/showSuccess', 'Test notification');
-    });
-    
-    cy.get('[data-test="notification"]').should('be.visible');
-    cy.get('[data-test="dismiss-notification"]').click();
-    
-    cy.get('[data-test="notification"]').should('not.exist');
-  });
-});
-
-describe('Health Check', () => {
-  beforeEach(() => {
-    cy.visit('/');
-  });
-  
-  it('should show healthy status', () => {
-    cy.get('[data-test="health-indicator"]')
-      .should('have.class', 'healthy');
-  });
-  
-  it('should show health details on hover', () => {
-    cy.get('[data-test="health-indicator"]').trigger('mouseover');
-    
-    cy.get('[data-test="health-tooltip"]').should('be.visible');
-  });
-  
-  it('should show neo4j status', () => {
-    cy.get('[data-test="health-indicator"]').trigger('mouseover');
-    
-    cy.get('[data-test="health-tooltip"]').should('contain', 'neo4j');
-  });
-});
-```
-
----
-
 ## Тестовые сценарии
 
 ### Сценарий: Навигация по приложению
@@ -693,7 +547,18 @@ sequenceDiagram
 |----------|----------|
 | Unit тесты | Все компоненты покрыты |
 | Store тесты | Все actions покрыты |
-| E2E тесты | Навигация проверена |
 | Layout | Header, Sidebar, Footer работают |
 | Health | Индикатор здоровья работает |
 | Notifications | Уведомления отображаются и скрываются |
+
+---
+
+## Запуск тестов
+
+```bash
+# Из директории src/main/vue
+cd src\main\vue
+set CI=true && npm run test
+
+# Запуск тестов конкретного модуля
+set CI=true && npm run test -- app

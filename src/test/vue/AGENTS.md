@@ -1,4 +1,4 @@
-# AGENTS.md: Правила тестирования Frontend (Vitest/Cypress)
+# AGENTS.md: Правила тестирования Frontend (Vitest)
 
 Данный документ содержит специфические правила и стандарты для тестирования frontend-части проекта SpringTwin.
 
@@ -7,9 +7,10 @@
 ## Технологический стек
 
 - **Unit тесты**: Vitest
-- **E2E тесты**: Cypress
-- **Моки**: vi (Vitest), Cypress stubs
-- **Интеграция**: Testcontainers (Spring Boot)
+- **Моки**: vi (Vitest)
+- **Компонентное тестирование**: @vue/test-utils
+
+**Примечание:** E2E тесты выполняются на backend с использованием Playwright. См. `src/test/java/AGENTS.md` для деталей.
 
 ---
 
@@ -25,14 +26,30 @@
 
 ```mermaid
 graph TD
-    Unit[Unit тесты - Vitest] --> Component[Компонентные тесты]
-    Component --> Integration[Интеграционные тесты]
-    Integration --> E2E[E2E тесты - Cypress]
+    subgraph Frontend Tests
+        Unit[Unit тесты - Vitest]
+        Component[Компонентные тесты]
+        Store[Store тесты]
+    end
+    
+    subgraph Backend Tests
+        E2E[E2E тесты - Playwright]
+    end
     
     Unit -->|Быстрые| Feedback[Обратная связь]
     Component -->|Средние| Feedback
+    Store -->|Средние| Feedback
     E2E -->|Медленные| Feedback
+    
+    style E2E fill:#f9f,stroke:#333
 ```
+
+### Разделение ответственности
+
+| Уровень | Расположение | Покрытие | Инструменты |
+|---------|--------------|----------|-------------|
+| **Unit** | `src/test/vue/<module>/` | Компоненты, store, сервисы | Vitest |
+| **E2E** | `src/test/java/twin/spring/e2e/` | Пользовательские сценарии | Playwright (backend) |
 
 ---
 
@@ -44,43 +61,77 @@ graph TD
 src/test/vue/
 ├── app/
 │   ├── view/
+│   │   ├── App.spec.ts
+│   │   ├── AppFooter.spec.ts
+│   │   ├── AppHeader.spec.ts
+│   │   ├── AppLayout.spec.ts
+│   │   ├── AppSidebar.spec.ts
+│   │   └── NavItem.spec.ts
 │   ├── store/
+│   │   └── app.store.spec.ts
 │   └── service/
+│       └── app.service.spec.ts
 ├── project/
 │   ├── view/
+│   │   └── ProjectView.spec.ts
 │   ├── store/
+│   │   └── project.store.spec.ts
 │   └── service/
+│       └── project.service.spec.ts
 ├── architecture/
 │   ├── view/
+│   │   └── ArchitectureView.spec.ts
 │   ├── store/
+│   │   └── architecture.store.spec.ts
 │   └── service/
+│       └── architecture.service.spec.ts
 ├── analysis/
 │   ├── view/
+│   │   └── AnalysisView.spec.ts
 │   ├── store/
+│   │   └── analysis.store.spec.ts
 │   └── service/
+│       └── analysis.service.spec.ts
 ├── report/
 │   ├── view/
+│   │   └── ReportView.spec.ts
 │   ├── store/
+│   │   └── report.store.spec.ts
 │   └── service/
+│       └── report.service.spec.ts
 └── mcp/
     ├── view/
+    │   └── McpView.spec.ts
     ├── store/
+    │   └── mcp.store.spec.ts
     └── service/
+        └── mcp.service.spec.ts
 ```
 
-Важно: не должно быть папки src/test/vue/src ! Код должен быть организован строго по модулям!
+**Важно:** Не должно быть папки `src/test/vue/src`! Код должен быть организован строго по модулям!
 
 ### Именование тестов
 
-```
+```typescript
 // Файл теста
 <component>.spec.ts        // Unit тесты
-<component>.cy.ts          // Cypress E2E тесты
 
 // Примеры
-ProjectListView.spec.ts
+ProjectView.spec.ts
 ProjectDetailView.spec.ts
-project-workflow.cy.ts
+project.store.spec.ts
+project.service.spec.ts
+```
+
+### Именование тест-кейсов
+
+```typescript
+// Формат: should_<expectedBehavior>_when_<condition>
+describe('ProjectView', () => {
+  it('should render project list correctly', () => { });
+  it('should display loading state when fetching data', () => { });
+  it('should show error message when request fails', () => { });
+});
 ```
 
 ---
@@ -89,24 +140,45 @@ project-workflow.cy.ts
 
 ### Концепция
 
-Тестовые профили - это TypeScript модули с фабриками для создания тестовых данных.
+Тестовые профили - это TypeScript модули с фабриками для создания тестовых данных. Профили используются для унификации тестовых данных между frontend unit тестами и backend тестами.
+
+### Расположение
+
+Профили находятся в отдельных файлах внутри модулей или в общем месте:
+
+```
+src/test/vue/
+├── profiles/
+│   ├── project.profile.ts
+│   ├── architecture.profile.ts
+│   └── ...
+```
 
 ### Пример профиля
 
 ```typescript
-// test/profiles/project.profile.ts
-import { Project, CreateProjectRequest } from '@/project/domain/Project';
+// profiles/project.profile.ts
+import type { Project, CreateProjectRequest } from '@/project/domain/Project';
 
+/**
+ * Тестовый профиль для модуля Project.
+ * Предоставляет фабрики тестовых данных для unit тестов.
+ */
 export class ProjectTestProfile {
+  
+  // Константы для повторного использования
+  static readonly DEFAULT_PROJECT_ID = 'test-project-id';
+  static readonly DEFAULT_PROJECT_NAME = 'Test Project';
+  static readonly DEFAULT_PROJECT_PATH = '/path/to/project';
   
   /**
    * Создает тестовый проект с базовыми данными.
    */
   static createDefaultProject(): Project {
     return {
-      id: 'test-project-id',
-      name: 'Test Project',
-      path: '/path/to/project',
+      id: this.DEFAULT_PROJECT_ID,
+      name: this.DEFAULT_PROJECT_NAME,
+      path: this.DEFAULT_PROJECT_PATH,
       includePackages: ['com.example'],
       excludePackages: ['com.example.config'],
     };
@@ -146,6 +218,19 @@ export class ProjectTestProfile {
     };
   }
 }
+```
+
+### Использование профилей
+
+```typescript
+import { ProjectTestProfile } from '@/test/vue/profiles/project.profile';
+
+describe('ProjectView', () => {
+  it('should render project list', () => {
+    const projects = ProjectTestProfile.createProjectList(3);
+    // ... тест
+  });
+});
 ```
 
 ---
@@ -203,64 +288,51 @@ export default defineConfig({
 ### Тестирование компонентов
 
 ```typescript
-// project/view/ProjectListView.spec.ts
+// project/view/ProjectView.spec.ts
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { mount } from '@vue/test-utils';
-import { createStore } from 'vuex';
-import ProjectListView from '@/project/view/ProjectListView.vue';
-import { ProjectTestProfile } from '@/test/profiles/project.profile';
+import { createPinia, setActivePinia } from 'pinia';
+import ProjectView from '@/project/view/ProjectView.vue';
+import { ProjectTestProfile } from '@/test/vue/profiles/project.profile';
 
-describe('ProjectListView', () => {
-  let store: any;
-  
+describe('ProjectView', () => {
   beforeEach(() => {
-    store = createStore({
-      modules: {
-        project: {
-          namespaced: true,
-          state: {
-            projects: ProjectTestProfile.createProjectList(3),
-            isLoading: false,
-            error: null,
-          },
-          actions: {
-            fetchProjects: vi.fn(),
-          },
-        },
-      },
-    });
+    // Создаем новый Pinia instance для каждого теста
+    setActivePinia(createPinia());
   });
   
-  it('renders project list correctly', () => {
-    const wrapper = mount(ProjectListView, {
+  it('should render project list correctly', () => {
+    const wrapper = mount(ProjectView, {
       global: {
-        plugins: [store],
+        plugins: [createPinia()],
       },
     });
     
     expect(wrapper.find('[name="project-list"]').exists()).toBe(true);
-    expect(wrapper.findAll('[role="article"]')).toHaveLength(3);
   });
   
-  it('displays loading state', () => {
-    store.state.project.isLoading = true;
-    
-    const wrapper = mount(ProjectListView, {
+  it('should display loading state when fetching data', () => {
+    const wrapper = mount(ProjectView, {
       global: {
-        plugins: [store],
+        plugins: [createPinia()],
       },
     });
     
+    // Проверяем наличие индикатора загрузки
     expect(wrapper.find('[role="status"]').exists()).toBe(true);
   });
   
-  it('calls fetchProjects on mount', async () => {
+  it('should call fetchProjects on mount', async () => {
     const fetchProjects = vi.fn();
-    store.modules.project.actions.fetchProjects = fetchProjects;
     
-    mount(ProjectListView, {
+    mount(ProjectView, {
       global: {
-        plugins: [store],
+        plugins: [createPinia()],
+        mocks: {
+          $store: {
+            dispatch: fetchProjects,
+          },
+        },
       },
     });
     
@@ -272,46 +344,76 @@ describe('ProjectListView', () => {
 ### Тестирование Pinia store
 
 ```typescript
-// project/store/actions.spec.ts
-import { describe, it, expect, vi } from 'vitest';
-import actions from '@/project/store/actions';
-import { ProjectTestProfile } from '@/test/profiles/project.profile';
+// project/store/project.store.spec.ts
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { setActivePinia, createPinia } from 'pinia';
+import { useProjectStore } from '@/project/store/project.store';
+import { ProjectTestProfile } from '@/test/vue/profiles/project.profile';
 
-describe('Project Store Actions', () => {
-  it('fetchProjects commits setProjects on success', async () => {
-    const projects = ProjectTestProfile.createProjectList(2);
-    const commit = vi.fn();
-    const dispatch = vi.fn();
-    
-    // Мокаем API
-    vi.mock('@/project/api/projectApi', () => ({
-      default: {
-        getAll: () => Promise.resolve(projects),
-      },
-    }));
-    
-    await actions.fetchProjects({ commit, dispatch });
-    
-    expect(commit).toHaveBeenCalledWith('setLoading', true);
-    expect(commit).toHaveBeenCalledWith('setProjects', projects);
-    expect(commit).toHaveBeenCalledWith('setLoading', false);
+describe('Project Store', () => {
+  beforeEach(() => {
+    setActivePinia(createPinia());
   });
   
-  it('fetchProjects commits setError on failure', async () => {
-    const commit = vi.fn();
-    const dispatch = vi.fn();
-    const error = new Error('Network error');
+  it('should initialize with empty projects', () => {
+    const store = useProjectStore();
     
-    vi.mock('@/project/api/projectApi', () => ({
-      default: {
-        getAll: () => Promise.reject(error),
+    expect(store.projects).toEqual([]);
+    expect(store.isLoading).toBe(false);
+    expect(store.error).toBeNull();
+  });
+  
+  it('should fetch projects successfully', async () => {
+    const store = useProjectStore();
+    const projects = ProjectTestProfile.createProjectList(2);
+    
+    // Мокаем API
+    vi.mock('@/project/api', () => ({
+      projectApi: {
+        getAll: vi.fn(() => Promise.resolve(projects)),
       },
     }));
     
-    await actions.fetchProjects({ commit, dispatch });
+    await store.fetchProjects();
     
-    expect(commit).toHaveBeenCalledWith('setError', error.message);
-    expect(commit).toHaveBeenCalledWith('setLoading', false);
+    expect(store.projects).toHaveLength(2);
+    expect(store.isLoading).toBe(false);
+  });
+  
+  it('should handle fetch error', async () => {
+    const store = useProjectStore();
+    const error = new Error('Network error');
+    
+    // Мокаем API с ошибкой
+    vi.mock('@/project/api', () => ({
+      projectApi: {
+        getAll: vi.fn(() => Promise.reject(error)),
+      },
+    }));
+    
+    await store.fetchProjects();
+    
+    expect(store.error).toBe('Network error');
+    expect(store.isLoading).toBe(false);
+  });
+  
+  it('should add new project', () => {
+    const store = useProjectStore();
+    const newProject = ProjectTestProfile.createDefaultProject();
+    
+    store.addProject(newProject);
+    
+    expect(store.projects).toContainEqual(newProject);
+  });
+  
+  it('should remove project by id', () => {
+    const store = useProjectStore();
+    const project = ProjectTestProfile.createDefaultProject();
+    store.projects = [project];
+    
+    store.removeProject(project.id);
+    
+    expect(store.projects).not.toContainEqual(project);
   });
 });
 ```
@@ -322,185 +424,117 @@ describe('Project Store Actions', () => {
 // project/service/project.service.spec.ts
 import { describe, it, expect, vi } from 'vitest';
 import { ProjectService } from '@/project/service/project.service';
-import { ProjectTestProfile } from '@/test/profiles/project.profile';
+import { ProjectTestProfile } from '@/test/vue/profiles/project.profile';
 
 describe('ProjectService', () => {
-  it('transformProjectForDisplay formats project data correctly', () => {
+  it('should transform project for display correctly', () => {
     const project = ProjectTestProfile.createDefaultProject();
     const service = new ProjectService();
     
     const result = service.transformProjectForDisplay(project);
     
-    expect(result.displayName).toBe('Test Project');
-    expect(result.displayPath).toBe('/path/to/project');
+    expect(result.displayName).toBe(ProjectTestProfile.DEFAULT_PROJECT_NAME);
+    expect(result.displayPath).toBe(ProjectTestProfile.DEFAULT_PROJECT_PATH);
+  });
+  
+  it('should format project path correctly', () => {
+    const project = ProjectTestProfile.createProject('Test', '/very/long/path/to/project');
+    const service = new ProjectService();
+    
+    const result = service.transformProjectForDisplay(project);
+    
+    expect(result.displayPath.length).toBeLessThanOrEqual(50);
   });
 });
 ```
 
 ---
 
-## E2E тесты (Cypress)
+## Моки (Vitest)
 
-**Примечание:** На текущем этапе MVP Cypress не настроен. Интеграция E2E тестов планируется в будущих фазах.
-
-Планируемая конфигурация Cypress (после настройки):
+### Мокирование модулей
 
 ```typescript
-// cypress.config.ts (планируется)
-import { defineConfig } from 'cypress';
-
-export default defineConfig({
-  e2e: {
-    baseUrl: 'http://localhost:8080',
-    specPattern: '../../../src/test/vue/**/*.cy.ts',
-    supportFile: '../../../src/test/vue/support/index.ts',
-    setupNodeEvents(on, config) {
-      // Интеграция с Spring Boot через testcontainers
-    },
-  },
-});
-```
-
-### Семантические селекторы
-
-Используйте атрибуты `name` и `role` для селекторов:
-
-```typescript
-// Хорошо
-cy.get('[name="btn-new-project"]').click();
-cy.get('[role="navigation"]').find('[name="btn-refresh"]');
-cy.get('[data-id="project-123"]');
-
-// Плохо
-cy.get('.btn-primary').click();
-cy.get('#new-project-btn').click();
-cy.get('button').first().click();
-```
-
-### Тестирование сценариев
-
-```typescript
-// project-workflow.cy.ts
-describe('Project Workflow', () => {
-  
-  beforeEach(() => {
-    // Заполнение данных в БД через API
-    cy.resetDatabase();
-    cy.seedTestData();
-  });
-  
-  it('should create a new project', () => {
-    cy.visit('/projects');
-    
-    // Открыть форму создания
-    cy.get('[name="btn-new-project"]').click();
-    
-    // Заполнить форму
-    cy.get('[name="input-project-name"]').type('My New Project');
-    cy.get('[name="input-project-path"]').type('/path/to/project');
-    cy.get('[name="input-include-packages"]').type('com.example');
-    
-    // Сохранить
-    cy.get('[name="btn-save-project"]').click();
-    
-    // Проверить результат
-    cy.get('[role="alert"]').should('contain', 'Project created');
-    cy.get('[name="project-list"]').should('contain', 'My New Project');
-  });
-  
-  it('should display project details', () => {
-    // Создать тестовый проект через API
-    cy.createProject(ProjectTestProfile.createDefaultProject());
-    
-    cy.visit('/projects');
-    cy.get('[name="project-list"]').find('[role="article"]').first().click();
-    
-    cy.get('[name="project-detail"]').within(() => {
-      cy.get('[name="project-name"]').should('contain', 'Test Project');
-      cy.get('[name="project-path"]').should('contain', '/path/to/project');
-    });
-  });
-  
-  it('should handle validation errors', () => {
-    cy.visit('/projects/new');
-    
-    // Попытка сохранить без имени
-    cy.get('[name="btn-save-project"]').click();
-    
-    cy.get('[role="alert"]').should('contain', 'Name is required');
-  });
-});
-```
-
-### Интеграция с Spring Boot
-
-```typescript
-// support/index.ts
-import { ProjectTestProfile } from '@/test/profiles/project.profile';
-
-declare global {
-  namespace Cypress {
-    interface Chainable {
-      resetDatabase(): Chainable<void>;
-      seedTestData(): Chainable<void>;
-      createProject(project: any): Chainable<void>;
-    }
-  }
-}
-
-Cypress.Commands.add('resetDatabase', () => {
-  cy.request('POST', '/api/v1/test/reset-database');
-});
-
-Cypress.Commands.add('seedTestData', () => {
-  cy.request('POST', '/api/v1/test/seed-data');
-});
-
-Cypress.Commands.add('createProject', (project) => {
-  cy.request('POST', '/api/v1/projects', project);
-});
-```
-
----
-
-## Моки
-
-### Vitest (vi)
-
-```typescript
-// Мок модуля
-vi.mock('@/project/api/projectApi', () => ({
-  default: {
+// Мок модуля API
+vi.mock('@/project/api', () => ({
+  projectApi: {
     getAll: vi.fn(() => Promise.resolve([])),
     getById: vi.fn((id) => Promise.resolve({ id })),
+    create: vi.fn((data) => Promise.resolve(data)),
+    update: vi.fn((id, data) => Promise.resolve({ id, ...data })),
+    delete: vi.fn((id) => Promise.resolve()),
   },
 }));
 
+// Мок с динамическими данными
+vi.mock('@/project/api', () => {
+  const projects = [
+    { id: '1', name: 'Project 1' },
+    { id: '2', name: 'Project 2' },
+  ];
+  
+  return {
+    projectApi: {
+      getAll: vi.fn(() => Promise.resolve(projects)),
+    },
+  };
+});
+```
+
+### Мокирование функций
+
+```typescript
 // Мок функции
 const mockFetch = vi.fn();
 vi.stubGlobal('fetch', mockFetch);
 
-// Шпион
+// Мок console
 const consoleSpy = vi.spyOn(console, 'log');
+const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+
+// Мок localStorage
+const localStorageMock = {
+  getItem: vi.fn(),
+  setItem: vi.fn(),
+  removeItem: vi.fn(),
+  clear: vi.fn(),
+};
+vi.stubGlobal('localStorage', localStorageMock);
 ```
 
-### Cypress
+### Мокирование Pinia store
 
 ```typescript
-// Мок API ответа
-cy.intercept('GET', '/api/v1/projects', {
-  statusCode: 200,
-  body: ProjectTestProfile.createProjectList(3),
-}).as('getProjects');
+import { vi } from 'vitest';
+import { createTestingPinia } from '@pinia/testing';
 
-cy.intercept('POST', '/api/v1/projects', {
-  statusCode: 201,
-  body: { id: 'new-id', name: 'Created Project' },
-}).as('createProject');
-
-// Использование
-cy.visit('/projects');
-cy.wait('@getProjects');
+it('should work with mocked store', () => {
+  const wrapper = mount(MyComponent, {
+    global: {
+      plugins: [
+        createTestingPinia({
+          createSpy: vi.fn,
+          initialState: {
+            project: {
+              projects: ProjectTestProfile.createProjectList(2),
+            },
+          },
+        }),
+      ],
+    },
+  });
+  
+  const store = useProjectStore();
+  
+  // Проверка начального состояния
+  expect(store.projects).toHaveLength(2);
+  
+  // Вызов action
+  store.fetchProjects();
+  
+  // Проверка вызова
+  expect(store.fetchProjects).toHaveBeenCalled();
+});
 ```
 
 ---
@@ -509,16 +543,18 @@ cy.wait('@getProjects');
 
 ### Требования
 
-- Все Vue компоненты должны покрываться unit тестами
-- Все Pinia actions должны покрываться unit тестами
-- Все критические пользовательские сценарии должны покрываться E2E тестами (после настройки Cypress)
+| Тип | Покрытие |
+|-----|----------|
+| Vue компоненты | Все компоненты должны иметь unit тесты |
+| Pinia stores | Все actions и getters должны покрываться тестами |
+| Сервисы | Все публичные методы должны покрываться тестами |
 
 ### Запуск тестов
 
 Тесты запускаются из директории `src/main/vue`:
 
 ```bash
-# Unit тесты (из директории src/main/vue)
+# Unit тесты
 cd src\main\vue
 set CI=true && npm run test
 
@@ -527,6 +563,9 @@ npm run test:coverage
 
 # Unit тесты с UI
 set CI=true && npm run test:ui
+
+# Запуск конкретного теста
+npm run test -- project.store.spec.ts
 ```
 
 Для запуска всех тестов проекта (backend + frontend):
@@ -536,7 +575,7 @@ set CI=true && npm run test:ui
 gradlew.bat test
 ```
 
-Примечание: Gradle автоматически вызывает `set CI=true && npm run test` при сборке frontend.
+**Примечание:** Gradle автоматически вызывает `set CI=true && npm run test` при сборке frontend.
 
 ---
 
@@ -548,7 +587,7 @@ gradlew.bat test
 beforeEach(() => {
   // Сброс состояния перед каждым тестом
   vi.clearAllMocks();
-  cy.resetDatabase();
+  setActivePinia(createPinia());
 });
 
 afterEach(() => {
@@ -562,31 +601,54 @@ afterEach(() => {
 ```typescript
 // Используйте осмысленные имена
 const existingProject = ProjectTestProfile.createDefaultProject();
-const expectedProjectName = 'Test Project';
+const expectedProjectName = ProjectTestProfile.DEFAULT_PROJECT_NAME;
 
 // Не используйте магические значения
-const projectId = 'test-project-id';
+const projectId = ProjectTestProfile.DEFAULT_PROJECT_ID;
 const nonExistingId = 'non-existing-id';
+
+// Используйте описательные названия тестов
+it('should display error message when project name is empty', () => {
+  // ...
+});
 ```
 
 ### 3. Тестирование граничных случаев
 
 ```typescript
-it('handles empty project list', () => {
-  store.state.project.projects = [];
-  
-  const wrapper = mount(ProjectListView, {
-    global: { plugins: [store] },
+describe('ProjectView edge cases', () => {
+  it('should handle empty project list', () => {
+    const wrapper = mount(ProjectView, {
+      global: { plugins: [createPinia()] },
+    });
+    
+    expect(wrapper.find('[name="empty-state"]').exists()).toBe(true);
   });
   
-  expect(wrapper.find('[name="empty-state"]').exists()).toBe(true);
-});
-
-it('handles long project names', () => {
-  const longName = 'A'.repeat(200);
-  const project = ProjectTestProfile.createProject(longName, '/path');
+  it('should handle long project names', () => {
+    const longName = 'A'.repeat(200);
+    const project = ProjectTestProfile.createProject(longName, '/path');
+    
+    const service = new ProjectService();
+    const result = service.transformProjectForDisplay(project);
+    
+    expect(result.displayName.length).toBeLessThanOrEqual(100);
+  });
   
-  // Проверка обрезки или переноса
+  it('should handle special characters in project name', () => {
+    const specialName = '<script>alert("xss")</script>';
+    const project = ProjectTestProfile.createProject(specialName, '/path');
+    
+    const wrapper = mount(ProjectView, {
+      global: {
+        plugins: [createPinia()],
+      },
+      props: { project },
+    });
+    
+    // Проверка что скрипт не выполняется
+    expect(wrapper.html()).not.toContain('<script>');
+  });
 });
 ```
 
@@ -595,24 +657,38 @@ it('handles long project names', () => {
 При исправлении ошибок добавляйте автотесты:
 
 ```typescript
-it('handles concurrent project updates correctly', () => {
-  // Тест для бага #456: Race condition при одновременном редактировании
-  
-  cy.createProject({ id: 'test-id', name: 'Original' });
-  
-  // Одновременное редактирование
-  cy.window().then((win) => {
-    win.dispatchEvent(new CustomEvent('project-update', { 
-      detail: { id: 'test-id', name: 'Updated 1' } 
-    }));
-    win.dispatchEvent(new CustomEvent('project-update', { 
-      detail: { id: 'test-id', name: 'Updated 2' } 
-    }));
+describe('Bug #456: Race condition fix', () => {
+  it('should handle concurrent project updates correctly', async () => {
+    const store = useProjectStore();
+    const project = ProjectTestProfile.createDefaultProject();
+    
+    // Одновременное обновление
+    await Promise.all([
+      store.updateProject({ ...project, name: 'Updated 1' }),
+      store.updateProject({ ...project, name: 'Updated 2' }),
+    ]);
+    
+    // Проверка что состояние консистентно
+    expect(store.projects[0].name).toBeDefined();
+    expect(store.error).toBeNull();
   });
-  
-  // Проверка корректной обработки
-  cy.get('[name="project-name"]').should('not.be.empty');
 });
+```
+
+### 5. Семантические селекторы
+
+Используйте атрибуты `data-test`, `name` и `role` для селекторов:
+
+```typescript
+// Хорошо
+wrapper.find('[data-test="btn-save"]');
+wrapper.find('[name="project-form"]');
+wrapper.find('[role="navigation"]');
+
+// Плохо
+wrapper.find('.btn-primary');
+wrapper.find('#save-button');
+wrapper.find('div.container > button');
 ```
 
 ---
@@ -628,6 +704,7 @@ gradlew.bat test
 ```
 
 Отдельно для UI:
+
 ```bash
 cd src\main\vue
 set CI=true && npm run test

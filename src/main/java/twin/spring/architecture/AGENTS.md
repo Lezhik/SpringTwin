@@ -1,6 +1,6 @@
 # AGENTS.md: Модуль Architecture (Backend)
 
-Центральный модуль, содержащий модели графа архитектуры проекта. Определяет узлы (Class, Method, Endpoint) и связи между ними.
+Центральный модуль, содержащий модели графа архитектуры проекта. Определяет узлы (ClassNode, MethodNode, EndpointNode, FieldNode) и связи между ними.
 
 ---
 
@@ -25,10 +25,10 @@ src/main/java/twin/spring/architecture/
 │   ├── MethodResponse.java             # DTO ответа для метода
 │   └── EndpointResponse.java           # DTO ответа для endpoint
 ├── domain/
-│   ├── Class.java                      # Узел: Java класс
-│   ├── Method.java                     # Узел: Метод класса
-│   ├── Endpoint.java                   # Узел: REST endpoint
-│   ├── Field.java                      # Узел: Поле класса
+│   ├── ClassNode.java                  # Узел: Java класс
+│   ├── MethodNode.java                 # Узел: Метод класса
+│   ├── EndpointNode.java               # Узел: REST endpoint
+│   ├── FieldNode.java                  # Узел: Поле класса
 │   └── relation/
 │       ├── DependsOn.java              # Связь: DI зависимость
 │       ├── Calls.java                  # Связь: Вызов метода
@@ -45,21 +45,21 @@ src/main/java/twin/spring/architecture/
 │       ├── MethodMapper.java           # Маппер для Method
 │       └── EndpointMapper.java         # Маппер для Endpoint
 └── repository/
-    ├── ClassRepository.java            # Репозиторий для классов
-    ├── MethodRepository.java           # Репозиторий для методов
-    └── EndpointRepository.java         # Репозиторий для endpoints
+    ├── ClassNodeRepository.java        # Репозиторий для классов
+    ├── MethodNodeRepository.java       # Репозиторий для методов
+    └── EndpointNodeRepository.java     # Репозиторий для endpoints
 ```
 
 ---
 
 ## Доменные модели
 
-### Class - Java класс
+### ClassNode - Java класс
 
 ```java
 /**
  * Java класс в анализируемом проекте.
- * 
+ *
  * <p>Узел Neo4j с динамическими метками на основе Spring аннотаций.</p>
  */
 @Node
@@ -68,7 +68,7 @@ src/main/java/twin/spring/architecture/
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class Class {
+public class ClassNode {
     
     @Id
     @GeneratedValue
@@ -95,11 +95,11 @@ public class Class {
     
     /** Методы класса */
     @Relationship(type = "HAS_METHOD", direction = Relationship.Direction.OUTGOING)
-    private List<Method> methods;
+    private List<MethodNode> methods;
 }
 ```
 
-### Method - Метод класса
+### MethodNode - Метод класса
 
 ```java
 /**
@@ -111,7 +111,7 @@ public class Class {
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class Method {
+public class MethodNode {
     
     @Id
     @GeneratedValue
@@ -134,11 +134,11 @@ public class Method {
     
     /** Родительский класс */
     @Relationship(type = "HAS_METHOD", direction = Relationship.Direction.INCOMING)
-    private Class parentClass;
+    private ClassNode parentClass;
 }
 ```
 
-### Endpoint - REST endpoint
+### EndpointNode - REST endpoint
 
 ```java
 /**
@@ -150,7 +150,7 @@ public class Method {
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class Endpoint {
+public class EndpointNode {
     
     @Id
     @GeneratedValue
@@ -170,7 +170,7 @@ public class Endpoint {
     
     /** Метод, экспонирующий endpoint */
     @Relationship(type = "EXPOSES_ENDPOINT", direction = Relationship.Direction.INCOMING)
-    private Method exposingMethod;
+    private MethodNode exposingMethod;
 }
 ```
 
@@ -197,7 +197,7 @@ public class DependsOn {
     private Long id;
     
     @TargetNode
-    private Class targetClass;
+    private ClassNode targetClass;
     
     /** Имя поля для инъекции */
     private String fieldName;
@@ -226,7 +226,7 @@ public class Calls {
     private Long id;
     
     @TargetNode
-    private Method targetMethod;
+    private MethodNode targetMethod;
     
     /** Позиция в исходном коде */
     private Integer lineNumber;
@@ -252,7 +252,7 @@ public class ExposesEndpoint {
     private Long id;
     
     @TargetNode
-    private Endpoint endpoint;
+    private EndpointNode endpoint;
 }
 ```
 
@@ -305,114 +305,114 @@ public class ClassLabelService {
 
 ## Репозитории
 
-### ClassRepository
+### ClassNodeRepository
 
 ```java
 /**
  * Репозиторий для работы с классами в Neo4j.
  */
 @Repository
-public interface ClassRepository extends ReactiveNeo4jRepository<Class, String> {
+public interface ClassNodeRepository extends ReactiveNeo4jRepository<ClassNode, String> {
     
     /**
      * Найти класс по полному имени.
      */
-    Mono<Class> findByFullName(String fullName);
+    Mono<ClassNode> findByFullName(String fullName);
     
     /**
      * Найти все классы в пакете.
      */
-    Flux<Class> findByPackageNameStartingWith(String packageName);
+    Flux<ClassNode> findByPackageNameStartingWith(String packageName);
     
     /**
      * Найти классы по метке.
      */
-    Flux<Class> findByLabelsContaining(String label);
+    Flux<ClassNode> findByLabelsContaining(String label);
     
     /**
      * Найти все контроллеры.
      */
-    @Query("MATCH (c:Class:Controller) RETURN c")
-    Flux<Class> findAllControllers();
+    @Query("MATCH (c:ClassNode:Controller) RETURN c")
+    Flux<ClassNode> findAllControllers();
     
     /**
      * Найти все сервисы.
      */
-    @Query("MATCH (c:Class:Service) RETURN c")
-    Flux<Class> findAllServices();
+    @Query("MATCH (c:ClassNode:Service) RETURN c")
+    Flux<ClassNode> findAllServices();
     
     /**
      * Найти зависимости класса.
      */
-    @Query("MATCH (c:Class {id: $id})-[:DEPENDS_ON]->(dep:Class) RETURN dep")
-    Flux<Class> findDependencies(String id);
+    @Query("MATCH (c:ClassNode {id: $id})-[:DEPENDS_ON]->(dep:ClassNode) RETURN dep")
+    Flux<ClassNode> findDependencies(String id);
     
     /**
      * Найти классы, зависящие от данного.
      */
-    @Query("MATCH (c:Class)-[:DEPENDS_ON]->(target:Class {id: $id}) RETURN c")
-    Flux<Class> findDependents(String id);
+    @Query("MATCH (c:ClassNode)-[:DEPENDS_ON]->(target:ClassNode {id: $id}) RETURN c")
+    Flux<ClassNode> findDependents(String id);
 }
 ```
 
-### MethodRepository
+### MethodNodeRepository
 
 ```java
 /**
  * Репозиторий для работы с методами.
  */
 @Repository
-public interface MethodRepository extends ReactiveNeo4jRepository<Method, String> {
+public interface MethodNodeRepository extends ReactiveNeo4jRepository<MethodNode, String> {
     
     /**
      * Найти методы класса.
      */
-    Flux<Method> findByParentClassId(String classId);
+    Flux<MethodNode> findByParentClassId(String classId);
     
     /**
      * Найти метод по имени и классу.
      */
-    @Query("MATCH (c:Class {id: $classId})-[:HAS_METHOD]->(m:Method {name: $name}) RETURN m")
-    Mono<Method> findByClassIdAndName(String classId, String name);
+    @Query("MATCH (c:ClassNode {id: $classId})-[:HAS_METHOD]->(m:MethodNode {name: $name}) RETURN m")
+    Mono<MethodNode> findByClassIdAndName(String classId, String name);
     
     /**
      * Найти вызовы метода.
      */
-    @Query("MATCH (m:Method {id: $id})-[:CALLS]->(called:Method) RETURN called")
-    Flux<Method> findCalledMethods(String id);
+    @Query("MATCH (m:MethodNode {id: $id})-[:CALLS]->(called:MethodNode) RETURN called")
+    Flux<MethodNode> findCalledMethods(String id);
     
     /**
      * Найти вызывающие методы.
      */
-    @Query("MATCH (caller:Method)-[:CALLS]->(m:Method {id: $id}) RETURN caller")
-    Flux<Method> findCallingMethods(String id);
+    @Query("MATCH (caller:MethodNode)-[:CALLS]->(m:MethodNode {id: $id}) RETURN caller")
+    Flux<MethodNode> findCallingMethods(String id);
 }
 ```
 
-### EndpointRepository
+### EndpointNodeRepository
 
 ```java
 /**
  * Репозиторий для работы с endpoints.
  */
 @Repository
-public interface EndpointRepository extends ReactiveNeo4jRepository<Endpoint, String> {
+public interface EndpointNodeRepository extends ReactiveNeo4jRepository<EndpointNode, String> {
     
     /**
      * Найти endpoint по пути и методу.
      */
-    Mono<Endpoint> findByPathAndHttpMethod(String path, String httpMethod);
+    Mono<EndpointNode> findByPathAndHttpMethod(String path, String httpMethod);
     
     /**
      * Найти все endpoints с HTTP методом.
      */
-    Flux<Endpoint> findByHttpMethod(String httpMethod);
+    Flux<EndpointNode> findByHttpMethod(String httpMethod);
     
     /**
      * Найти endpoint по экспонирующему методу.
      */
-    @Query("MATCH (m:Method {id: $methodId})-[:EXPOSES_ENDPOINT]->(e:Endpoint) RETURN e")
-    Mono<Endpoint> findByExposingMethodId(String methodId);
+    @Query("MATCH (m:MethodNode {id: $methodId})-[:EXPOSES_ENDPOINT]->(e:EndpointNode) RETURN e")
+    Mono<EndpointNode> findByExposingMethodId(String methodId);
 }
 ```
 
@@ -470,8 +470,8 @@ graph TD
 ```java
 public class ArchitectureTestProfile {
     
-    public static Class createDefaultClass() {
-        return Class.builder()
+    public static ClassNode createDefaultClassNode() {
+        return ClassNode.builder()
             .id("test-class-id")
             .name("TestService")
             .fullName("com.example.TestService")
@@ -481,8 +481,8 @@ public class ArchitectureTestProfile {
             .build();
     }
     
-    public static Method createDefaultMethod() {
-        return Method.builder()
+    public static MethodNode createDefaultMethodNode() {
+        return MethodNode.builder()
             .id("test-method-id")
             .name("doSomething")
             .signature("public void doSomething()")
@@ -491,8 +491,8 @@ public class ArchitectureTestProfile {
             .build();
     }
     
-    public static Endpoint createDefaultEndpoint() {
-        return Endpoint.builder()
+    public static EndpointNode createDefaultEndpointNode() {
+        return EndpointNode.builder()
             .id("test-endpoint-id")
             .path("/api/test")
             .httpMethod("GET")

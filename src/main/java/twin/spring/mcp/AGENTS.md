@@ -384,7 +384,7 @@ public class GetMethodContextTool implements McpToolExecutor {
 @RequiredArgsConstructor
 public class SearchArchitectureTool implements McpToolExecutor {
     
-    private final ClassRepository classRepository;
+    private final ClassNodeRepository classNodeRepository;
     
     @Override
     public String getName() {
@@ -430,7 +430,7 @@ public class SearchArchitectureTool implements McpToolExecutor {
         
         log.info("Searching architecture: {} (type: {}, limit: {})", query, type, limit);
         
-        return classRepository.searchByName(query, limit)
+        return classNodeRepository.searchByName(query, limit)
             .collectList()
             .map(results -> McpContext.builder()
                 .contextType("SEARCH_RESULTS")

@@ -1,6 +1,8 @@
 # AGENTS.md: Тестирование модуля Report (Frontend)
 
-Правила и структура тестирования для модуля report UI. Содержит тестовые профили для Vitest unit тестов и Cypress E2E тестов.
+Правила и структура тестирования для модуля report UI. Содержит тестовые профили для Vitest unit тестов.
+
+**Примечание:** E2E тесты выполняются на backend с использованием Playwright. См. [`src/test/java/AGENTS.md`](../../../../test/java/AGENTS.md) для деталей.
 
 ---
 
@@ -8,19 +10,16 @@
 
 ```
 src/test/vue/report/
-├── unit/
-│   ├── ReportGenerator.spec.ts
+├── view/
+│   ├── ReportView.spec.ts
 │   ├── EndpointReport.spec.ts
 │   ├── ClassReport.spec.ts
 │   ├── MethodReport.spec.ts
-│   ├── LlmExport.spec.ts
-│   └── store/
-│       └── reportStore.spec.ts
-├── e2e/
-│   ├── report-generation.cy.ts
-│   └── llm-export.cy.ts
-└── profile/
-    └── ReportTestProfile.ts
+│   └── LlmExport.spec.ts
+├── store/
+│   └── report.store.spec.ts
+└── service/
+    └── report.service.spec.ts
 ```
 
 ---
@@ -232,23 +231,23 @@ export class ReportTestProfile {
 
 ## Unit тесты (Vitest)
 
-### ReportGenerator.spec.ts
+### ReportView.spec.ts
 
 ```typescript
 /**
- * Unit тесты для компонента ReportGenerator.
+ * Unit тесты для компонента ReportView.
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { mount } from '@vue/test-utils';
 import { createTestingPinia } from '@pinia/testing';
-import ReportGenerator from '@/report/view/ReportGenerator.vue';
+import ReportView from '@/report/view/ReportView.vue';
 import { ReportTestProfile } from './profile/ReportTestProfile';
 
-describe('ReportGenerator', () => {
+describe('ReportView', () => {
   let wrapper: any;
   
   beforeEach(() => {
-    wrapper = mount(ReportGenerator, {
+    wrapper = mount(ReportView, {
       global: {
         plugins: [
           createTestingPinia({
@@ -508,11 +507,11 @@ describe('LlmExport', () => {
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { setActivePinia, createPinia } from 'pinia';
-import { useReportStore } from '@/report/store/reportStore';
-import { reportApi } from '@/report/api/reportApi';
+import { useReportStore } from '@/report/store/report.store';
+import { reportApi } from '@/report/api';
 import { ReportTestProfile } from './profile/ReportTestProfile';
 
-vi.mock('@/report/api/reportApi');
+vi.mock('@/report/api');
 
 describe('reportStore', () => {
   let store: ReturnType<typeof useReportStore>;
@@ -603,140 +602,6 @@ describe('reportStore', () => {
 
 ---
 
-## E2E тесты (Cypress)
-
-### report-generation.cy.ts
-
-```typescript
-/**
- * E2E тесты для генерации отчетов.
- */
-describe('Report Generation', () => {
-  beforeEach(() => {
-    cy.resetDatabase();
-    cy.seedArchitectureData();
-    cy.visit('/report');
-  });
-  
-  it('should generate class report', () => {
-    cy.get('[data-test="report-type-selector"]').select('CLASS');
-    cy.get('[data-test="element-search"]').type('UserService');
-    cy.get('[data-test="search-result"]').first().click();
-    cy.get('[data-test="generate-btn"]').click();
-    
-    cy.get('[data-test="class-report"]').should('be.visible');
-    cy.get('[data-test="class-name"]').should('contain', 'UserService');
-  });
-  
-  it('should generate endpoint report', () => {
-    cy.get('[data-test="report-type-selector"]').select('ENDPOINT');
-    cy.get('[data-test="element-search"]').type('/api/users');
-    cy.get('[data-test="search-result"]').first().click();
-    cy.get('[data-test="generate-btn"]').click();
-    
-    cy.get('[data-test="endpoint-report"]').should('be.visible');
-    cy.get('[data-test="endpoint-path"]').should('contain', '/api/users');
-  });
-  
-  it('should generate method report', () => {
-    cy.get('[data-test="report-type-selector"]').select('METHOD');
-    cy.get('[data-test="element-search"]').type('getAllUsers');
-    cy.get('[data-test="search-result"]').first().click();
-    cy.get('[data-test="generate-btn"]').click();
-    
-    cy.get('[data-test="method-report"]').should('be.visible');
-    cy.get('[data-test="method-name"]').should('contain', 'getAllUsers');
-  });
-  
-  it('should navigate from report to class', () => {
-    // Generate class report first
-    cy.get('[data-test="report-type-selector"]').select('CLASS');
-    cy.get('[data-test="element-search"]').type('UserService');
-    cy.get('[data-test="search-result"]').first().click();
-    cy.get('[data-test="generate-btn"]').click();
-    
-    // Click on dependency
-    cy.get('[data-test="dependency-link"]').first().click();
-    
-    // Should show new report
-    cy.get('[data-test="class-report"]').should('be.visible');
-  });
-  
-  it('should show call chain in endpoint report', () => {
-    cy.get('[data-test="report-type-selector"]').select('ENDPOINT');
-    cy.get('[data-test="element-search"]').type('/api/users');
-    cy.get('[data-test="search-result"]').first().click();
-    cy.get('[data-test="generate-btn"]').click();
-    
-    cy.get('[data-test="call-chain-item"]').should('have.length.at.least', 1);
-  });
-});
-
-describe('LLM Export', () => {
-  beforeEach(() => {
-    cy.resetDatabase();
-    cy.seedArchitectureData();
-    cy.visit('/report');
-  });
-  
-  it('should export report for LLM', () => {
-    // Generate report first
-    cy.get('[data-test="report-type-selector"]').select('CLASS');
-    cy.get('[data-test="element-search"]').type('UserService');
-    cy.get('[data-test="search-result"]').first().click();
-    cy.get('[data-test="generate-btn"]').click();
-    
-    // Export
-    cy.get('[data-test="export-btn"]').click();
-    
-    cy.get('[data-test="llm-export"]').should('be.visible');
-    cy.get('[data-test="structured-data"]').should('exist');
-  });
-  
-  it('should copy export to clipboard', () => {
-    // Generate and export
-    cy.get('[data-test="report-type-selector"]').select('CLASS');
-    cy.get('[data-test="element-search"]').type('UserService');
-    cy.get('[data-test="search-result"]').first().click();
-    cy.get('[data-test="generate-btn"]').click();
-    cy.get('[data-test="export-btn"]').click();
-    
-    cy.get('[data-test="copy-btn"]').click();
-    
-    cy.get('[data-test="notification"]').should('contain', 'Copied to clipboard');
-  });
-  
-  it('should download export as file', () => {
-    // Generate and export
-    cy.get('[data-test="report-type-selector"]').select('CLASS');
-    cy.get('[data-test="element-search"]').type('UserService');
-    cy.get('[data-test="search-result"]').first().click();
-    cy.get('[data-test="generate-btn"]').click();
-    cy.get('[data-test="export-btn"]').click();
-    
-    cy.get('[data-test="download-btn"]').click();
-    
-    // Verify download
-    cy.readFile('cypress/downloads/UserService-context.json').should('exist');
-  });
-  
-  it('should switch export format', () => {
-    // Generate and export
-    cy.get('[data-test="report-type-selector"]').select('CLASS');
-    cy.get('[data-test="element-search"]').type('UserService');
-    cy.get('[data-test="search-result"]').first().click();
-    cy.get('[data-test="generate-btn"]').click();
-    cy.get('[data-test="export-btn"]').click();
-    
-    cy.get('[data-test="format-selector"]').select('markdown');
-    
-    cy.get('[data-test="markdown-view"]').should('be.visible');
-  });
-});
-```
-
----
-
 ## Тестовые сценарии
 
 ### Сценарий: Генерация отчета по классу
@@ -800,7 +665,18 @@ sequenceDiagram
 |----------|----------|
 | Unit тесты | Все компоненты покрыты |
 | Store тесты | Все actions покрыты |
-| E2E тесты | Генерация отчетов проверена |
 | Экспорт | JSON и Markdown форматы работают |
 | Навигация | Переходы между отчетами работают |
 | Copy/Download | Функции экспорта работают |
+
+---
+
+## Запуск тестов
+
+```bash
+# Из директории src/main/vue
+cd src\main\vue
+set CI=true && npm run test
+
+# Запуск тестов конкретного модуля
+set CI=true && npm run test -- report

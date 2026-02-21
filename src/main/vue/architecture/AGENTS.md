@@ -305,10 +305,10 @@ function resetView() {
 
 <script setup lang="ts">
 import { useRouter } from 'vue-router';
-import { Class } from '../domain/Class';
+import { ClassNode } from '../domain/ClassNode';
 
 interface Props {
-  classData: Class;
+  classData: ClassNode;
 }
 
 const props = defineProps<Props>();
@@ -389,12 +389,12 @@ function clearFilter() {
  * Состояние модуля architecture.
  */
 export interface ArchitectureState {
-  classes: Class[];
-  methods: Method[];
-  endpoints: Endpoint[];
-  currentClass: Class | null;
-  currentMethod: Method | null;
-  currentEndpoint: Endpoint | null;
+  classes: ClassNode[];
+  methods: MethodNode[];
+  endpoints: EndpointNode[];
+  currentClass: ClassNode | null;
+  currentMethod: MethodNode | null;
+  currentEndpoint: EndpointNode | null;
   graphData: GraphData | null;
   isLoading: boolean;
   error: string | null;
@@ -419,9 +419,9 @@ export const state: ArchitectureState = {
 import { ActionTree } from 'vuex';
 import { ArchitectureState } from './state';
 import { RootState } from '@/app/store';
-import { ClassApi } from '../api/ClassApi';
-import { MethodApi } from '../api/MethodApi';
-import { EndpointApi } from '../api/EndpointApi';
+import { ClassNodeApi } from '../api/ClassNodeApi';
+import { MethodNodeApi } from '../api/MethodNodeApi';
+import { EndpointNodeApi } from '../api/EndpointNodeApi';
 
 export const actions: ActionTree<ArchitectureState, RootState> = {
   
@@ -429,7 +429,7 @@ export const actions: ActionTree<ArchitectureState, RootState> = {
     commit('setLoading', true);
     
     try {
-      const classes = await ClassApi.getAll();
+      const classes = await ClassNodeApi.getAll();
       commit('setClasses', classes);
     } catch (error) {
       commit('setError', error.message);
@@ -442,7 +442,7 @@ export const actions: ActionTree<ArchitectureState, RootState> = {
     commit('setLoading', true);
     
     try {
-      const clazz = await ClassApi.getById(id);
+      const clazz = await ClassNodeApi.getById(id);
       commit('setCurrentClass', clazz);
     } catch (error) {
       commit('setError', error.message);
@@ -453,7 +453,7 @@ export const actions: ActionTree<ArchitectureState, RootState> = {
   
   async fetchClassDependencies({ commit }, id: string) {
     try {
-      const dependencies = await ClassApi.getDependencies(id);
+      const dependencies = await ClassNodeApi.getDependencies(id);
       commit('setGraphData', dependencies);
     } catch (error) {
       commit('setError', error.message);
@@ -462,7 +462,7 @@ export const actions: ActionTree<ArchitectureState, RootState> = {
   
   async fetchMethods({ commit }, classId: string) {
     try {
-      const methods = await MethodApi.getByClassId(classId);
+      const methods = await MethodNodeApi.getByClassId(classId);
       commit('setMethods', methods);
     } catch (error) {
       commit('setError', error.message);
@@ -471,7 +471,7 @@ export const actions: ActionTree<ArchitectureState, RootState> = {
   
   async fetchEndpoints({ commit }) {
     try {
-      const endpoints = await EndpointApi.getAll();
+      const endpoints = await EndpointNodeApi.getAll();
       commit('setEndpoints', endpoints);
     } catch (error) {
       commit('setError', error.message);
@@ -528,20 +528,20 @@ export const getters: GetterTree<ArchitectureState, RootState> = {
 
 ## API
 
-### ClassApi.ts
+### ClassNodeApi.ts
 
 ```typescript
 import { apiClient } from '@/app/api/client';
-import { Class, GraphData } from '../domain/Class';
+import { ClassNode, GraphData } from '../domain/ClassNode';
 
-export const ClassApi = {
+export const ClassNodeApi = {
   
-  async getAll(): Promise<Class[]> {
+  async getAll(): Promise<ClassNode[]> {
     const response = await apiClient.get('/api/v1/classes');
     return response.data;
   },
   
-  async getById(id: string): Promise<Class> {
+  async getById(id: string): Promise<ClassNode> {
     const response = await apiClient.get(`/api/v1/classes/${id}`);
     return response.data;
   },
@@ -551,12 +551,12 @@ export const ClassApi = {
     return response.data;
   },
   
-  async getMethods(id: string): Promise<Method[]> {
+  async getMethods(id: string): Promise<MethodNode[]> {
     const response = await apiClient.get(`/api/v1/classes/${id}/methods`);
     return response.data;
   },
   
-  async search(query: string): Promise<Class[]> {
+  async search(query: string): Promise<ClassNode[]> {
     const response = await apiClient.get('/api/v1/classes/search', {
       params: { q: query }
     });
@@ -565,50 +565,50 @@ export const ClassApi = {
 };
 ```
 
-### MethodApi.ts
+### MethodNodeApi.ts
 
 ```typescript
 import { apiClient } from '@/app/api/client';
-import { Method } from '../domain/Method';
+import { MethodNode } from '../domain/MethodNode';
 
-export const MethodApi = {
+export const MethodNodeApi = {
   
-  async getById(id: string): Promise<Method> {
+  async getById(id: string): Promise<MethodNode> {
     const response = await apiClient.get(`/api/v1/methods/${id}`);
     return response.data;
   },
   
-  async getByClassId(classId: string): Promise<Method[]> {
+  async getByClassId(classId: string): Promise<MethodNode[]> {
     const response = await apiClient.get(`/api/v1/classes/${classId}/methods`);
     return response.data;
   },
   
-  async getCalls(id: string): Promise<Method[]> {
+  async getCalls(id: string): Promise<MethodNode[]> {
     const response = await apiClient.get(`/api/v1/methods/${id}/calls`);
     return response.data;
   },
 };
 ```
 
-### EndpointApi.ts
+### EndpointNodeApi.ts
 
 ```typescript
 import { apiClient } from '@/app/api/client';
-import { Endpoint } from '../domain/Endpoint';
+import { EndpointNode } from '../domain/EndpointNode';
 
-export const EndpointApi = {
+export const EndpointNodeApi = {
   
-  async getAll(): Promise<Endpoint[]> {
+  async getAll(): Promise<EndpointNode[]> {
     const response = await apiClient.get('/api/v1/endpoints');
     return response.data;
   },
   
-  async getById(id: string): Promise<Endpoint> {
+  async getById(id: string): Promise<EndpointNode> {
     const response = await apiClient.get(`/api/v1/endpoints/${id}`);
     return response.data;
   },
   
-  async getByPath(path: string, method: string): Promise<Endpoint> {
+  async getByPath(path: string, method: string): Promise<EndpointNode> {
     const response = await apiClient.get('/api/v1/endpoints/search', {
       params: { path, method }
     });
@@ -621,23 +621,23 @@ export const EndpointApi = {
 
 ## Доменные модели
 
-### domain/Class.ts
+### domain/ClassNode.ts
 
 ```typescript
-export interface Class {
+export interface ClassNode {
   id: string;
   name: string;
   fullName: string;
   packageName: string;
   labels: string[];
   modifiers: string[];
-  methods?: Method[];
+  methods?: MethodNode[];
   dependencies?: Dependency[];
 }
 
 export interface Dependency {
   id: string;
-  targetClass: Class;
+  targetClass: ClassNode;
   fieldName: string;
   injectionType: string;
 }
@@ -664,10 +664,10 @@ export interface GraphEdge {
 }
 ```
 
-### domain/Method.ts
+### domain/MethodNode.ts
 
 ```typescript
-export interface Method {
+export interface MethodNode {
   id: string;
   name: string;
   signature: string;
@@ -683,10 +683,10 @@ export interface MethodParameter {
 }
 ```
 
-### domain/Endpoint.ts
+### domain/EndpointNode.ts
 
 ```typescript
-export interface Endpoint {
+export interface EndpointNode {
   id: string;
   path: string;
   httpMethod: string;

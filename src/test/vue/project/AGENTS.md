@@ -1,6 +1,8 @@
 # AGENTS.md: Тестирование модуля Project (Frontend)
 
-Правила и структура тестирования для модуля project UI. Содержит тестовые профили для Vitest unit тестов и Cypress E2E тестов.
+Правила и структура тестирования для модуля project UI. Содержит тестовые профили для Vitest unit тестов.
+
+**Примечание:** E2E тесты выполняются на backend с использованием Playwright. См. [`src/test/java/AGENTS.md`](../../../../test/java/AGENTS.md) для деталей.
 
 ---
 
@@ -8,17 +10,14 @@
 
 ```
 src/test/vue/project/
-├── unit/
+├── view/
+│   ├── ProjectView.spec.ts
 │   ├── ProjectList.spec.ts
-│   ├── ProjectForm.spec.ts
-│   ├── ProjectCard.spec.ts
-│   └── store/
-│       └── projectStore.spec.ts
-├── e2e/
-│   ├── project-management.cy.ts
-│   └── project-configuration.cy.ts
-└── profile/
-    └── ProjectTestProfile.ts
+│   └── ProjectForm.spec.ts
+├── store/
+│   └── project.store.spec.ts
+└── service/
+    └── project.service.spec.ts
 ```
 
 ---
@@ -305,11 +304,11 @@ describe('ProjectForm', () => {
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { setActivePinia, createPinia } from 'pinia';
-import { useProjectStore } from '@/project/store/projectStore';
-import { projectApi } from '@/project/api/projectApi';
+import { useProjectStore } from '@/project/store/project.store';
+import { projectApi } from '@/project/api';
 import { ProjectTestProfile } from './profile/ProjectTestProfile';
 
-vi.mock('@/project/api/projectApi');
+vi.mock('@/project/api');
 
 describe('projectStore', () => {
   let store: ReturnType<typeof useProjectStore>;
@@ -417,154 +416,6 @@ describe('projectStore', () => {
 
 ---
 
-## E2E тесты (Cypress)
-
-### project-management.cy.ts
-
-```typescript
-/**
- * E2E тесты для управления проектами.
- */
-describe('Project Management', () => {
-  beforeEach(() => {
-    cy.resetDatabase();
-    cy.visit('/projects');
-  });
-  
-  it('should display project list', () => {
-    cy.seedProjects();
-    
-    cy.get('[data-test="project-card"]').should('have.length.at.least', 1);
-    cy.get('[data-test="project-card"]').first().should('contain', 'Test Project');
-  });
-  
-  it('should create new project', () => {
-    cy.get('[data-test="create-project-btn"]').click();
-    
-    cy.get('input[name="name"]').type('New Test Project');
-    cy.get('input[name="path"]').type('/path/to/project');
-    cy.get('[data-test="add-include-package"]').click();
-    cy.get('[data-test="include-package-input"]').type('com.example');
-    cy.get('[data-test="submit-btn"]').click();
-    
-    cy.get('[data-test="project-card"]').should('contain', 'New Test Project');
-    cy.get('[data-test="notification"]').should('contain', 'Project created successfully');
-  });
-  
-  it('should edit existing project', () => {
-    cy.seedProjects();
-    
-    cy.get('[data-test="project-card"]').first()
-      .find('[data-test="edit-project-btn"]')
-      .click();
-    
-    cy.get('input[name="name"]').clear().type('Updated Project Name');
-    cy.get('[data-test="submit-btn"]').click();
-    
-    cy.get('[data-test="project-card"]').first()
-      .should('contain', 'Updated Project Name');
-  });
-  
-  it('should delete project', () => {
-    cy.seedProjects();
-    
-    const projectName = 'Test Project';
-    
-    cy.get('[data-test="project-card"]').first()
-      .find('[data-test="delete-project-btn"]')
-      .click();
-    
-    cy.get('[data-test="confirm-delete-btn"]').click();
-    
-    cy.get('[data-test="project-card"]')
-      .should('not.contain', projectName);
-  });
-  
-  it('should show validation errors', () => {
-    cy.get('[data-test="create-project-btn"]').click();
-    cy.get('[data-test="submit-btn"]').click();
-    
-    cy.get('.error-message').should('contain', 'Name is required');
-    cy.get('.error-message').should('contain', 'Path is required');
-  });
-  
-  it('should cancel project creation', () => {
-    cy.get('[data-test="create-project-btn"]').click();
-    cy.get('input[name="name"]').type('Cancelled Project');
-    cy.get('[data-test="cancel-btn"]').click();
-    
-    cy.get('[data-test="project-card"]')
-      .should('not.contain', 'Cancelled Project');
-  });
-});
-
-describe('Project Configuration', () => {
-  beforeEach(() => {
-    cy.resetDatabase();
-    cy.seedProjects();
-    cy.visit('/projects');
-  });
-  
-  it('should configure include packages', () => {
-    cy.get('[data-test="project-card"]').first()
-      .find('[data-test="edit-project-btn"]')
-      .click();
-    
-    // Add include package
-    cy.get('[data-test="add-include-package"]').click();
-    cy.get('[data-test="include-package-input"]').last().type('com.newpackage');
-    
-    cy.get('[data-test="submit-btn"]').click();
-    
-    // Verify package was added
-    cy.get('[data-test="project-card"]').first()
-      .find('[data-test="edit-project-btn"]')
-      .click();
-    
-    cy.get('[data-test="include-package-input"]')
-      .should('contain.value', 'com.newpackage');
-  });
-  
-  it('should configure exclude packages', () => {
-    cy.get('[data-test="project-card"]').first()
-      .find('[data-test="edit-project-btn"]')
-      .click();
-    
-    // Add exclude package
-    cy.get('[data-test="add-exclude-package"]').click();
-    cy.get('[data-test="exclude-package-input"]').last().type('com.excluded');
-    
-    cy.get('[data-test="submit-btn"]').click();
-    
-    // Verify package was added
-    cy.get('[data-test="project-card"]').first()
-      .find('[data-test="edit-project-btn"]')
-      .click();
-    
-    cy.get('[data-test="exclude-package-input"]')
-      .should('contain.value', 'com.excluded');
-  });
-  
-  it('should remove package from list', () => {
-    cy.get('[data-test="project-card"]').first()
-      .find('[data-test="edit-project-btn"]')
-      .click();
-    
-    // Add a package
-    cy.get('[data-test="add-include-package"]').click();
-    cy.get('[data-test="include-package-input"]').last().type('com.toremove');
-    
-    // Remove it
-    cy.get('[data-test="remove-include-package"]').last().click();
-    
-    cy.get('[data-test="include-package-input"]')
-      .should('not.contain.value', 'com.toremove');
-  });
-});
-```
-
----
-
 ## Тестовые сценарии
 
 ### Сценарий: Создание проекта
@@ -619,6 +470,17 @@ sequenceDiagram
 |----------|----------|
 | Unit тесты | Все компоненты покрыты |
 | Store тесты | Все actions и mutations покрыты |
-| E2E тесты | CRUD операции проверены |
 | Валидация | Ошибки отображаются корректно |
 | Состояния | Loading и empty states проверены |
+
+---
+
+## Запуск тестов
+
+```bash
+# Из директории src/main/vue
+cd src\main\vue
+set CI=true && npm run test
+
+# Запуск тестов конкретного модуля
+set CI=true && npm run test -- project

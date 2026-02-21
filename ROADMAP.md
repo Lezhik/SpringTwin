@@ -61,9 +61,10 @@ gantt
 
 | Задача | Описание | Приоритет |
 |--------|----------|-----------|
-| I1.1 | Настроить Cypress для e2e тестов | High |
-| I1.2 | Создать testcontainers конфигурацию | High |
-| I1.3 | Настроить CI/CD pipeline (опционально) | Low |
+| I1.1 | Настроить Playwright для E2E тестов (запускаются из Spring Boot тестов) | High |
+| I1.2 | Настроить Neo4j Embedded для тестов | High |
+| I1.3 | Настроить Integration тесты для REST API (WebTestClient, BaseIntegrationTest, тестовые профили) | High |
+| I1.4 | Настроить CI/CD pipeline (опционально) | Low |
 
 #### Критерии приемки Sprint 1
 
@@ -83,7 +84,7 @@ gantt
 
 | Задача | Описание | Приоритет |
 |--------|----------|-----------|
-| B2.1 | Создать domain модели: Class, Method, Endpoint | High |
+| B2.1 | Создать domain модели: ClassNode, MethodNode, EndpointNode | High |
 | B2.2 | Создать domain модели связей: DEPENDS_ON, CALLS, etc. | High |
 | B2.3 | Создать ReactiveNeo4jRepository для каждого узла | High |
 | B2.4 | Реализовать migration модуль для Neo4j | High |
@@ -102,9 +103,9 @@ gantt
 
 | Задача | Описание | Приоритет |
 |--------|----------|-----------|
-| M2.1 | Создать v0001 миграции для Class узлов | High |
-| M2.2 | Создать v0001 миграции для Method узлов | High |
-| M2.3 | Создать v0001 миграции для Endpoint узлов | High |
+| M2.1 | Создать v0001 миграции для ClassNode узлов | High |
+| M2.2 | Создать v0001 миграции для MethodNode узлов | High |
+| M2.3 | Создать v0001 миграции для EndpointNode узлов | High |
 | M2.4 | Создать v0001 миграции для связей | High |
 | M2.5 | Настроить автозапуск миграций | High |
 
@@ -113,7 +114,8 @@ gantt
 - [ ] Neo4j embedded запускается корректно
 - [ ] Миграции выполняются автоматически при старте
 - [ ] Можно создавать и читать узлы через API
-- [ ] Unit тесты для repository проходят
+- [ ] Unit тесты для сервисов проходят
+- [ ] Integration тесты для REST API endpoints проходят
 - [ ] E2E тест для создания узла проходит
 
 ---
@@ -132,7 +134,7 @@ gantt
 | B3.2 | Реализовать Java AST парсер (JavaParser) | High |
 | B3.3 | Обнаружение Spring аннотаций | High |
 | B3.4 | Извлечение constructor injection зависимостей | High |
-| B3.5 | Создание узлов Class в графе | High |
+| B3.5 | Создание узлов ClassNode в графе | High |
 | B3.6 | Создание связей DEPENDS_ON | High |
 | B3.7 | Формирование labels на основе аннотаций | Medium |
 
@@ -159,10 +161,11 @@ gantt
 #### Критерии приемки Sprint 3
 
 - [ ] Можно настроить include/exclude пакеты через UI
-- [ ] Запуск индексации создает узлы Class в Neo4j
+- [ ] Запуск индексации создает узлы ClassNode в Neo4j
 - [ ] Связи DEPENDS_ON корректно создаются
 - [ ] Labels формируются на основе Spring аннотаций
 - [ ] Unit тесты покрывают AST анализ
+- [ ] Integration тесты покрывают REST API
 - [ ] E2E тест проверяет полный цикл индексации
 
 ---
@@ -180,9 +183,9 @@ gantt
 | B4.3 | Извлечение Method invocations | High |
 | B4.4 | Извлечение Field accesses | High |
 | B4.5 | Извлечение Object instantiations | High |
-| B4.6 | Создание узлов Method в графе | High |
+| B4.6 | Создание узлов MethodNode в графе | High |
 | B4.7 | Создание связей CALLS, ACCESSES_FIELD, INSTANTIATES | High |
-| B4.8 | Обнаружение @RequestMapping и создание Endpoint узлов | Medium |
+| B4.8 | Обнаружение @RequestMapping и создание EndpointNode узлов | Medium |
 | B4.9 | Создание связей EXPOSES_ENDPOINT | Medium |
 
 #### Frontend Tasks
@@ -195,12 +198,14 @@ gantt
 
 #### Критерии приемки Sprint 4
 
-- [ ] Анализ байткода создает узлы Method
+- [ ] Анализ байткода создает узлы MethodNode
 - [ ] Связи CALLS корректно создаются
 - [ ] Связи INSTANTIATES корректно создаются
-- [ ] Endpoints обнаруживаются и создаются
+- [ ] EndpointNode обнаруживаются и создаются
 - [ ] Фильтрация по include/exclude работает
-- [ ] Unit и E2E тесты проходят
+- [ ] Unit тесты проходят
+- [ ] Integration тесты проходят
+- [ ] E2E тесты проходят
 
 ---
 
@@ -250,7 +255,9 @@ gantt
 - [ ] Можно сгенерировать отчет по методу
 - [ ] Отчет содержит зависимости и связи
 - [ ] JSON экспорт работает корректно
-- [ ] Unit и E2E тесты проходят
+- [ ] Unit тесты проходят
+- [ ] Integration тесты проходят
+- [ ] E2E тесты проходят
 
 ---
 
@@ -380,7 +387,7 @@ graph LR
 - **Backend:** Java 21+, Spring Boot 4.x, WebFlux, Neo4j
 - **Frontend:** Vue.js, TypeScript, Pinia
 - **Сборка:** Gradle 8.5+, Kotlin DSL
-- **Тесты:** JUnit, Vitest, Cypress, Testcontainers
+- **Тесты:** JUnit 5 (Unit + Integration), Vitest (Frontend Unit), Playwright (E2E из Spring Boot тестов), Neo4j Embedded
 
 ---
 
@@ -398,4 +405,4 @@ graph LR
 ---
 
 *Документ создан: 2026-02-18*
-*Последнее обновление: 2026-02-18*
+*Последнее обновление: 2026-02-21*
