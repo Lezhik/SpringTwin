@@ -2,11 +2,9 @@ package spring.twin.scanner;
 
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import spring.twin.bytecode.BytecodeReaderService;
 
-import java.io.ByteArrayInputStream;
-import java.io.DataInputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.*;
@@ -50,11 +48,14 @@ public class ClassScanningService {
      */
     private final Path tmpDirectory;
 
+    private final BytecodeReaderService bytecodeReader;
+
     /**
      * Creates a new ClassScanningService with the default tmp directory.
      */
     public ClassScanningService() {
         this.tmpDirectory = Path.of(TMP_DIR);
+        this.bytecodeReader = new BytecodeReaderService();
     }
 
     /**
@@ -65,6 +66,7 @@ public class ClassScanningService {
      */
     public ClassScanningService(Path tmpDirectory) {
         this.tmpDirectory = tmpDirectory;
+        this.bytecodeReader = new BytecodeReaderService();
     }
 
     /**
@@ -267,89 +269,8 @@ public class ClassScanningService {
      * @return the fully qualified class name, or null if parsing fails
      */
     String extractClassName(byte[] classBytes) {
-        try (DataInputStream dis = new DataInputStream(new ByteArrayInputStream(classBytes))) {
-            // Read magic number
-            int magic = dis.readInt();
-            if (magic != 0xCAFEBABE) {
-                log.warn("Invalid class file magic number: {}", Integer.toHexString(magic));
-                return null;
-            }
-
-            // Skip minor and major version
-            dis.skipBytes(4);
-
-            // Read constant pool count
-            int constantPoolCount = dis.readUnsignedShort();
-
-            // First pass: collect all UTF-8 strings and track which indices are Class entries
-            String[] utf8Strings = new String[constantPoolCount];
-            int[] classNameIndices = new int[constantPoolCount]; // Stores the UTF-8 index for each Class entry
-
-            for (int i = 1; i < constantPoolCount; i++) {
-                int tag = dis.readUnsignedByte();
-
-                switch (tag) {
-                    case 1: // UTF-8
-                        utf8Strings[i] = dis.readUTF();
-                        break;
-                    case 3: // Integer
-                    case 4: // Float
-                        dis.skipBytes(4);
-                        break;
-                    case 5: // Long
-                    case 6: // Double
-                        dis.skipBytes(8);
-                        i++; // Long and Double take two slots
-                        break;
-                    case 7: // Class
-                        classNameIndices[i] = dis.readUnsignedShort();
-                        break;
-                    case 8: // String
-                    case 16: // MethodType
-                    case 19: // Module
-                    case 20: // Package
-                        dis.skipBytes(2);
-                        break;
-                    case 9: // Fieldref
-                    case 10: // Methodref
-                    case 11: // InterfaceMethodref
-                        dis.skipBytes(4);
-                        break;
-                    case 12: // NameAndType
-                        dis.skipBytes(4);
-                        break;
-                    case 15: // MethodHandle
-                        dis.skipBytes(3);
-                        break;
-                    case 18: // InvokeDynamic
-                        dis.skipBytes(4);
-                        break;
-                    default:
-                        log.warn("Unknown constant pool tag: {} at index {}", tag, i);
-                        return null;
-                }
-            }
-
-            // Skip access flags
-            dis.skipBytes(2);
-
-            // Read this_class index - this points to a Class entry in the constant pool
-            int thisClassIndex = dis.readUnsignedShort();
-
-            // Get the UTF-8 string index from the Class entry
-            int utf8Index = classNameIndices[thisClassIndex];
-            String className = utf8Strings[utf8Index];
-
-            // Convert internal format (slashes) to dot notation
-            if (className != null) {
-                return className.replace('/', '.');
-            }
-
-            return null;
-        } catch (IOException e) {
-            log.warn("Error parsing class file", e);
-            return null;
-        }
+        var poolData = bytecodeReader.readConstantPool(classBytes);
+        return bytecodeReader.extractClassName(poolData);
     }
 
     /**
