@@ -6,7 +6,7 @@ plugins {
 
 group = "spring.twin"
 version = "0.0.1-SNAPSHOT"
-description = "Static code analisys helper to producre refactoring tasks for legacy Spring Boot projects"
+description = "Static code analisys helper to produce refactoring tasks for legacy Spring Boot projects"
 
 java {
 	toolchain {
