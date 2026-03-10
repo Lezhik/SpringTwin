@@ -165,9 +165,8 @@ public class ClassScanningService {
                 
                 zis.closeEntry();
             }
-        } catch (IOException e) {
-            log.error("Error reading archive: {}", archivePath, e);
-            throw e;
+        } catch (Throwable t) {
+            log.error("Error reading archive: {}", archivePath, t);
         }
     }
 

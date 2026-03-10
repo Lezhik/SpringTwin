@@ -76,13 +76,12 @@ public class SpringDiAnalyzerService {
      * @param classBytes the class file bytes to analyze
      * @param className the fully qualified class name
      * @param classpath map of all class names in the project to their file paths
+     * @param inheritanceTree the pre-built inheritance tree for the classpath
      * @return analysis result containing node and edges, or null if not a Spring component
      */
-    private ComponentAnalysisResult analyzeClass(byte[] classBytes, String className, Map<String, Path> classpath) {
+    private ComponentAnalysisResult analyzeClass(byte[] classBytes, String className, Map<String, Path> classpath,
+                                                  Map<String, Set<String>> inheritanceTree) {
         log.debug("Analyzing class: {}", className);
-
-        // Build inheritance tree for the entire classpath
-        Map<String, Set<String>> inheritanceTree = inheritanceTreeService.buildTree(classpath);
 
         // Parse class file to extract annotations and members
         ClassInfo classInfo = parseClassInfo(classBytes);
@@ -121,6 +120,10 @@ public class SpringDiAnalyzerService {
     public List<ComponentAnalysisResult> analyzeClasspath(Map<String, Path> classpath) {
         log.info("Analyzing classpath with {} classes", classpath.size());
 
+        // Build inheritance tree once for the entire classpath
+        Map<String, Set<String>> inheritanceTree = inheritanceTreeService.buildTree(classpath);
+        log.debug("Built inheritance tree with {} entries", inheritanceTree.size());
+
         List<ComponentAnalysisResult> results = new ArrayList<>();
 
         for (Map.Entry<String, Path> entry : classpath.entrySet()) {
@@ -129,7 +132,7 @@ public class SpringDiAnalyzerService {
 
             try {
                 byte[] classBytes = java.nio.file.Files.readAllBytes(classPath);
-                ComponentAnalysisResult result = analyzeClass(classBytes, className, classpath);
+                ComponentAnalysisResult result = analyzeClass(classBytes, className, classpath, inheritanceTree);
                 if (result != null) {
                     results.add(result);
                 }
