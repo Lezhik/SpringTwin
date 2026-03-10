@@ -8,6 +8,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Objects;
+import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -46,7 +47,7 @@ class BytecodeReaderServiceTest {
 
         // Collect non-null UTF-8 strings (array contains nulls for non-UTF8 entries)
         var utf8List = java.util.Arrays.stream(poolData.utf8Strings())
-            .filter(s -> s != null)
+            .filter(Objects::nonNull)
             .toList();
 
         // Verify specific classes from constant pool
@@ -109,7 +110,7 @@ class BytecodeReaderServiceTest {
 
         // Collect non-null UTF-8 strings (array contains nulls for non-UTF8 entries)
         var utf8List = java.util.Arrays.stream(poolData.utf8Strings())
-            .filter(s -> s != null)
+            .filter(Objects::nonNull)
             .toList();
 
         // Verify specific class names from constant pool
@@ -297,6 +298,35 @@ class BytecodeReaderServiceTest {
 
         // Then
         assertThat(info).isNull();
+    }
+
+    // ========================================================================
+    // Tests for parseClassAnnotations method
+    // ========================================================================
+
+    @Test
+    void shouldReturnEmptyAnnotationsForBaseNonComponentClass() throws IOException {
+        // Given - class without any Spring annotations
+        byte[] classBytes = loadClassBytes("spring/twin/analysis/fixtures/BaseNonComponentClass.class");
+
+        // When
+        Set<String> annotations = bytecodeReader.parseClassAnnotations(classBytes);
+
+        // Then
+        assertThat(annotations).isEmpty();
+    }
+
+    @Test
+    void shouldReturnComponentAnnotationForConcreteComponentClass() throws IOException {
+        // Given - class with @Component annotation
+        byte[] classBytes = loadClassBytes("spring/twin/analysis/fixtures/ConcreteComponentClass.class");
+
+        // When
+        Set<String> annotations = bytecodeReader.parseClassAnnotations(classBytes);
+
+        // Then
+        assertThat(annotations).hasSize(1);
+        assertThat(annotations).contains("Lorg/springframework/stereotype/Component;");
     }
 
     // ========================================================================

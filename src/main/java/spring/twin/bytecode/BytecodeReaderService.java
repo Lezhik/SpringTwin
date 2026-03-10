@@ -6,7 +6,9 @@ import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Service for reading bytecode information from .class files.
@@ -188,6 +190,188 @@ public class BytecodeReaderService {
             return null;
         }
         return internalName.replace('/', '.').replace('$', '.');
+    }
+
+    /**
+     * Parses class-level annotations from bytecode.
+     *
+     * @param classBytes the class file bytes
+     * @return set of annotation internal names
+     */
+    public Set<String> parseClassAnnotations(byte[] classBytes) {
+        Set<String> annotations = new HashSet<>();
+
+        try (DataInputStream dis = new DataInputStream(new ByteArrayInputStream(classBytes))) {
+            // Skip magic, version, constant pool
+            dis.skipBytes(8);
+
+            int constantPoolCount = dis.readUnsignedShort();
+
+            // Skip constant pool
+            for (int i = 1; i < constantPoolCount; i++) {
+                int tag = dis.readUnsignedByte();
+                switch (tag) {
+                    case 1 -> dis.skipBytes(dis.readUnsignedShort()); // UTF-8
+                    case 3, 4 -> dis.skipBytes(4); // Integer, Float
+                    case 5, 6 -> { // Long, Double
+                        dis.skipBytes(8);
+                        i++;
+                    }
+                    case 7, 8, 16, 19, 20 -> dis.skipBytes(2); // Class, String, MethodType, Module, Package
+                    case 9, 10, 11, 12, 18 -> dis.skipBytes(4); // Fieldref, Methodref, InterfaceMethodref, NameAndType, InvokeDynamic
+                    case 15 -> dis.skipBytes(3); // MethodHandle
+                    default -> {
+                        log.warn("Unknown tag {} at index {}", tag, i);
+                        return annotations;
+                    }
+                }
+            }
+
+            // Skip access flags, this_class, superclass
+            dis.skipBytes(6);
+
+            // Skip interfaces
+            int interfacesCount = dis.readUnsignedShort();
+            dis.skipBytes(interfacesCount * 2);
+
+            // Skip fields
+            int fieldsCount = dis.readUnsignedShort();
+            for (int i = 0; i < fieldsCount; i++) {
+                skipFieldOrMethod(dis);
+            }
+
+            // Skip methods
+            int methodsCount = dis.readUnsignedShort();
+            for (int i = 0; i < methodsCount; i++) {
+                skipFieldOrMethod(dis);
+            }
+
+            // Read class attributes (this is where RuntimeVisibleAnnotations is)
+            int attributesCount = dis.readUnsignedShort();
+            for (int i = 0; i < attributesCount; i++) {
+                String attrName = readUtf8FromPool(dis, classBytes);
+                int attrLength = dis.readInt();
+
+                if ("RuntimeVisibleAnnotations".equals(attrName)) {
+                    annotations.addAll(parseRuntimeVisibleAnnotations(dis, classBytes));
+                } else {
+                    dis.skipBytes(attrLength);
+                }
+            }
+
+        } catch (IOException e) {
+            log.warn("Error parsing class annotations", e);
+        }
+
+        return annotations;
+    }
+
+    /**
+     * Reads a UTF-8 string from the constant pool using the index from the stream.
+     */
+    private String readUtf8FromPool(DataInputStream dis, byte[] classBytes) throws IOException {
+        int index = dis.readUnsignedShort();
+        return getUtf8FromPool(classBytes, index);
+    }
+
+    /**
+     * Extracts a UTF-8 string from the constant pool at the given index.
+     */
+    private String getUtf8FromPool(byte[] classBytes, int index) throws IOException {
+        try (DataInputStream dis = new DataInputStream(new ByteArrayInputStream(classBytes))) {
+            dis.skipBytes(8); // magic + version
+            int count = dis.readUnsignedShort();
+
+            for (int i = 1; i < count && i <= index; i++) {
+                int tag = dis.readUnsignedByte();
+                if (i == index && tag == 1) {
+                    return dis.readUTF();
+                }
+
+                switch (tag) {
+                    case 1 -> dis.skipBytes(dis.readUnsignedShort());
+                    case 3, 4 -> dis.skipBytes(4);
+                    case 5, 6 -> {
+                        dis.skipBytes(8);
+                        i++;
+                    }
+                    case 7, 8, 16, 19, 20 -> dis.skipBytes(2);
+                    case 9, 10, 11, 12, 18 -> dis.skipBytes(4);
+                    case 15 -> dis.skipBytes(3);
+                    default -> throw new IOException("Unknown tag: " + tag);
+                }
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Parses RuntimeVisibleAnnotations attribute to extract annotation type descriptors.
+     */
+    private Set<String> parseRuntimeVisibleAnnotations(DataInputStream dis, byte[] classBytes) throws IOException {
+        Set<String> annotations = new HashSet<>();
+        int numAnnotations = dis.readUnsignedShort();
+
+        for (int i = 0; i < numAnnotations; i++) {
+            int typeIndex = dis.readUnsignedShort();
+            String typeDescriptor = getUtf8FromPool(classBytes, typeIndex);
+            if (typeDescriptor != null) {
+                annotations.add(typeDescriptor);
+            }
+
+            // Skip annotation element-value pairs
+            int numElementValuePairs = dis.readUnsignedShort();
+            for (int j = 0; j < numElementValuePairs; j++) {
+                dis.skipBytes(2); // element_name_index
+                skipElementValue(dis);
+            }
+        }
+
+        return annotations;
+    }
+
+    /**
+     * Skips an annotation element value.
+     */
+    private void skipElementValue(DataInputStream dis) throws IOException {
+        int tag = dis.readUnsignedByte();
+        switch (tag) {
+            case 'B', 'C', 'D', 'F', 'I', 'J', 'S', 'Z', 's', 'c' -> dis.skipBytes(2);
+            case 'e' -> dis.skipBytes(4); // enum: type_name_index + const_name_index
+            case '@' -> skipAnnotation(dis); // nested annotation
+            case '[' -> {
+                int numValues = dis.readUnsignedShort();
+                for (int i = 0; i < numValues; i++) {
+                    skipElementValue(dis);
+                }
+            }
+            default -> dis.skipBytes(2);
+        }
+    }
+
+    /**
+     * Skips a nested annotation.
+     */
+    private void skipAnnotation(DataInputStream dis) throws IOException {
+        dis.skipBytes(2); // type_index
+        int numElementValuePairs = dis.readUnsignedShort();
+        for (int i = 0; i < numElementValuePairs; i++) {
+            dis.skipBytes(2); // element_name_index
+            skipElementValue(dis);
+        }
+    }
+
+    /**
+     * Skips a field or method structure in the class file.
+     */
+    private void skipFieldOrMethod(DataInputStream dis) throws IOException {
+        dis.skipBytes(6); // access_flags, name_index, descriptor_index
+        int attributesCount = dis.readUnsignedShort();
+        for (int i = 0; i < attributesCount; i++) {
+            dis.skipBytes(2); // attribute_name_index
+            int attributeLength = dis.readInt();
+            dis.skipBytes(attributeLength);
+        }
     }
 
     /**
