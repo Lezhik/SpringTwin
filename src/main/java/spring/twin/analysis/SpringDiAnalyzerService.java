@@ -7,6 +7,7 @@ import spring.twin.dto.DiEdgeDto;
 import spring.twin.dto.DiNodeDto;
 import spring.twin.dto.types.EdgeType;
 import spring.twin.dto.types.InjectionType;
+import spring.twin.scanner.IncludeExcludeFilter;
 
 import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
@@ -77,10 +78,12 @@ public class SpringDiAnalyzerService {
      * @param className the fully qualified class name
      * @param classpath map of all class names in the project to their file paths
      * @param inheritanceTree the pre-built inheritance tree for the classpath
+     * @param filter optional filter to exclude certain classes from dependencies; if null, all classes are included
      * @return analysis result containing node and edges, or null if not a Spring component
      */
     private ComponentAnalysisResult analyzeClass(byte[] classBytes, String className, Map<String, Path> classpath,
-                                                  Map<String, Set<String>> inheritanceTree) {
+                                                  Map<String, Set<String>> inheritanceTree,
+                                                  IncludeExcludeFilter filter) {
         log.debug("Analyzing class: {}", className);
 
         // Parse class file to extract annotations and members
@@ -103,7 +106,7 @@ public class SpringDiAnalyzerService {
         DiNodeDto node = createNode(className, componentLabel);
 
         // Extract DI dependencies
-        List<DiEdgeDto> edges = extractDependencies(className, classInfo, inheritanceTree, classpath);
+        List<DiEdgeDto> edges = extractDependencies(className, classInfo, inheritanceTree, classpath, filter);
 
         return new ComponentAnalysisResult(node, edges);
     }
@@ -115,9 +118,10 @@ public class SpringDiAnalyzerService {
      * and extracts their dependency injection relationships.
      *
      * @param classpath map of all class names to their file paths
+     * @param filter optional filter to exclude certain classes from analysis; if null, all classes are analyzed
      * @return list of component analysis results, one for each Spring component found
      */
-    public List<ComponentAnalysisResult> analyzeClasspath(Map<String, Path> classpath) {
+    public List<ComponentAnalysisResult> analyzeClasspath(Map<String, Path> classpath, IncludeExcludeFilter filter) {
         log.info("Analyzing classpath with {} classes", classpath.size());
 
         // Build inheritance tree once for the entire classpath
@@ -130,9 +134,15 @@ public class SpringDiAnalyzerService {
             String className = entry.getKey();
             Path classPath = entry.getValue();
 
+            // Skip if filter is provided and class doesn't match
+            if (filter != null && !filter.matches(className)) {
+                log.debug("Skipping class {} - does not match filter", className);
+                continue;
+            }
+
             try {
                 byte[] classBytes = java.nio.file.Files.readAllBytes(classPath);
-                ComponentAnalysisResult result = analyzeClass(classBytes, className, classpath, inheritanceTree);
+                ComponentAnalysisResult result = analyzeClass(classBytes, className, classpath, inheritanceTree, filter);
                 if (result != null) {
                     results.add(result);
                 }
@@ -396,13 +406,14 @@ public class SpringDiAnalyzerService {
      */
     private List<DiEdgeDto> extractDependencies(String className, ClassInfo classInfo,
                                                 Map<String, Set<String>> inheritanceTree,
-                                                Map<String, Path> classpath) {
+                                                Map<String, Path> classpath,
+                                                IncludeExcludeFilter filter) {
         List<DiEdgeDto> edges = new ArrayList<>();
 
         // Extract field injections (@Autowired)
         for (FieldInfo field : classInfo.fields()) {
             if (field.hasAutowired()) {
-                List<String> targetClasses = resolveDependencyTargets(field.fieldType(), inheritanceTree, classpath);
+                List<String> targetClasses = resolveDependencyTargets(field.fieldType(), inheritanceTree, classpath, filter);
                 for (String target : targetClasses) {
                     DiEdgeDetailsDto details = new DiEdgeDetailsDto(
                         InjectionType.FIELD,
@@ -424,7 +435,7 @@ public class SpringDiAnalyzerService {
                 if (isPrimaryConstructor) {
                     int paramIndex = 0;
                     for (String paramType : method.parameterTypes()) {
-                        List<String> targetClasses = resolveDependencyTargets(paramType, inheritanceTree, classpath);
+                        List<String> targetClasses = resolveDependencyTargets(paramType, inheritanceTree, classpath, filter);
                         for (String target : targetClasses) {
                             DiEdgeDetailsDto details = new DiEdgeDetailsDto(
                                 InjectionType.CONSTRUCTOR,
@@ -480,11 +491,13 @@ public class SpringDiAnalyzerService {
      * @param dependencyType the fully qualified type of the dependency
      * @param inheritanceTree the inheritance tree for finding implementations
      * @param classpath the classpath map
+     * @param filter optional filter to exclude certain classes from dependencies; if null, all classes are included
      * @return list of target class names
      */
     private List<String> resolveDependencyTargets(String dependencyType,
                                                    Map<String, Set<String>> inheritanceTree,
-                                                   Map<String, Path> classpath) {
+                                                   Map<String, Path> classpath,
+                                                   IncludeExcludeFilter filter) {
         List<String> targets = new ArrayList<>();
 
         // Check if the dependency type is in classpath
@@ -493,25 +506,29 @@ public class SpringDiAnalyzerService {
             // Check if it's an interface or abstract class
             if (isInterfaceOrAbstract(dependencyPath)) {
                 // Find all concrete implementations that are Spring components
-                findConcreteSpringComponents(dependencyType, inheritanceTree, classpath, targets);
+                findConcreteSpringComponents(dependencyType, inheritanceTree, classpath, targets, filter);
             } else {
                 // It's a concrete class in our classpath
                 // Check if it's a Spring component
                 if (isSpringComponent(dependencyPath)) {
-                    targets.add(dependencyType);
+                    // Apply filter if provided
+                    if (filter == null || filter.matches(dependencyType)) {
+                        targets.add(dependencyType);
+                    }
                 } else {
                     // Not a Spring component, find descendants that are
-                    findConcreteSpringComponents(dependencyType, inheritanceTree, classpath, targets);
+                    findConcreteSpringComponents(dependencyType, inheritanceTree, classpath, targets, filter);
                 }
             }
         } else {
             // Dependency type not in classpath, try to find implementations
-            findConcreteSpringComponents(dependencyType, inheritanceTree, classpath, targets);
+            findConcreteSpringComponents(dependencyType, inheritanceTree, classpath, targets, filter);
         }
 
-        if (targets.isEmpty()) {
+        if (targets.isEmpty() && filter == null) {
             // Fallback: add the dependency type even if not found
             // This preserves the dependency information for external types
+            // Only apply fallback when no filter is set
             targets.add(dependencyType);
         }
 
@@ -525,11 +542,13 @@ public class SpringDiAnalyzerService {
      * @param inheritanceTree the inheritance tree
      * @param classpath the classpath map
      * @param targets list to collect target class names into
+     * @param filter optional filter to exclude certain classes from dependencies; if null, all classes are included
      */
     private void findConcreteSpringComponents(String parentType,
                                                Map<String, Set<String>> inheritanceTree,
                                                Map<String, Path> classpath,
-                                               List<String> targets) {
+                                               List<String> targets,
+                                               IncludeExcludeFilter filter) {
         Set<String> allDescendants = inheritanceTreeService.findAllDescendants(parentType, inheritanceTree);
 
         for (String descendant : allDescendants) {
@@ -537,7 +556,10 @@ public class SpringDiAnalyzerService {
             if (descendantPath != null && !isInterfaceOrAbstract(descendantPath)) {
                 // Check if the descendant is a Spring component
                 if (isSpringComponent(descendantPath)) {
-                    targets.add(descendant);
+                    // Apply filter if provided
+                    if (filter == null || filter.matches(descendant)) {
+                        targets.add(descendant);
+                    }
                 }
             }
         }

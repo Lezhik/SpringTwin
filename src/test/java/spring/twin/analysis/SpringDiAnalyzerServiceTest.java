@@ -4,6 +4,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import spring.twin.dto.DiEdgeDto;
 import spring.twin.dto.types.InjectionType;
+import spring.twin.scanner.IncludeExcludeFilter;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -36,7 +37,7 @@ class SpringDiAnalyzerServiceTest {
         Map<String, Path> classpath = buildClasspath();
 
         // When
-        var results = analyzer.analyzeClasspath(classpath);
+        var results = analyzer.analyzeClasspath(classpath, null);
 
         // Then
         var serviceComponent = results.stream()
@@ -55,7 +56,7 @@ class SpringDiAnalyzerServiceTest {
         Map<String, Path> classpath = buildClasspath();
 
         // When
-        var results = analyzer.analyzeClasspath(classpath);
+        var results = analyzer.analyzeClasspath(classpath, null);
 
         // Then
         var repositoryComponent = results.stream()
@@ -81,7 +82,7 @@ class SpringDiAnalyzerServiceTest {
         Map<String, Path> classpath = buildClasspath();
 
         // When
-        var results = analyzer.analyzeClasspath(classpath);
+        var results = analyzer.analyzeClasspath(classpath, null);
 
         // Then
         var controllerComponent = results.stream()
@@ -116,7 +117,7 @@ class SpringDiAnalyzerServiceTest {
         Map<String, Path> classpath = buildClasspath();
 
         // When
-        var results = analyzer.analyzeClasspath(classpath);
+        var results = analyzer.analyzeClasspath(classpath, null);
 
         // Then
         var configComponent = results.stream()
@@ -134,7 +135,7 @@ class SpringDiAnalyzerServiceTest {
         Map<String, Path> classpath = buildClasspath();
 
         // When
-        var results = analyzer.analyzeClasspath(classpath);
+        var results = analyzer.analyzeClasspath(classpath, null);
 
         // Then
         // ParentClass should not be in results as it has no Spring annotations
@@ -152,7 +153,7 @@ class SpringDiAnalyzerServiceTest {
         Map<String, Path> classpath = buildClasspath();
 
         // When
-        var results = analyzer.analyzeClasspath(classpath);
+        var results = analyzer.analyzeClasspath(classpath, null);
 
         // Then
         var component = results.stream()
@@ -170,7 +171,7 @@ class SpringDiAnalyzerServiceTest {
         Map<String, Path> classpath = buildClasspath();
 
         // When
-        var results = analyzer.analyzeClasspath(classpath);
+        var results = analyzer.analyzeClasspath(classpath, null);
 
         // Then
         var paymentService = results.stream()
@@ -197,7 +198,7 @@ class SpringDiAnalyzerServiceTest {
         Map<String, Path> classpath = buildClasspath();
 
         // When
-        var results = analyzer.analyzeClasspath(classpath);
+        var results = analyzer.analyzeClasspath(classpath, null);
 
         // Then
         // Should find all Spring components in the fixtures
@@ -230,7 +231,7 @@ class SpringDiAnalyzerServiceTest {
         Map<String, Path> emptyClasspath = new HashMap<>();
 
         // When
-        var results = analyzer.analyzeClasspath(emptyClasspath);
+        var results = analyzer.analyzeClasspath(emptyClasspath, null);
 
         // Then
         assertThat(results).isEmpty();
@@ -245,7 +246,7 @@ class SpringDiAnalyzerServiceTest {
         Map<String, Path> classpath = buildClasspath();
 
         // When
-        var results = analyzer.analyzeClasspath(classpath);
+        var results = analyzer.analyzeClasspath(classpath, null);
 
         // Then
         var controllerComponent = results.stream()
@@ -281,7 +282,7 @@ class SpringDiAnalyzerServiceTest {
         Map<String, Path> classpath = buildClasspath();
 
         // When
-        var results = analyzer.analyzeClasspath(classpath);
+        var results = analyzer.analyzeClasspath(classpath, null);
 
         // Then
         var serviceComponent = results.stream()
@@ -308,7 +309,7 @@ class SpringDiAnalyzerServiceTest {
         Map<String, Path> classpath = buildClasspath();
 
         // When
-        var results = analyzer.analyzeClasspath(classpath);
+        var results = analyzer.analyzeClasspath(classpath, null);
 
         // Then
         var serviceComponent = results.stream()
@@ -336,7 +337,7 @@ class SpringDiAnalyzerServiceTest {
         Map<String, Path> classpath = buildClasspath();
 
         // When
-        var results = analyzer.analyzeClasspath(classpath);
+        var results = analyzer.analyzeClasspath(classpath, null);
 
         // Then
         var controllerComponent = results.stream()
@@ -366,6 +367,99 @@ class SpringDiAnalyzerServiceTest {
             assertThat(edge.details().injectionType()).isEqualTo(InjectionType.FIELD);
             assertThat(edge.details().fieldName()).isEqualTo("testInterface");
         }
+    }
+
+    @Test
+    void shouldFilterComponentsAndEdgesWithIncludeFilter() {
+        // Given - Include only PaymentService (which depends on PaymentProcessor interface)
+        // PaymentProcessor resolves to StripePaymentProcessor (Component)
+        // StripePaymentProcessor is NOT in the include filter, so edge to it should be excluded
+        Map<String, Path> classpath = buildClasspath();
+        IncludeExcludeFilter filter = new IncludeExcludeFilter(
+            "spring.twin.analysis.fixtures.PaymentService",
+            null
+        );
+
+        // When
+        var results = analyzer.analyzeClasspath(classpath, filter);
+
+        // Then - Only PaymentService should be in results
+        var componentNames = results.stream()
+            .map(r -> r.node().name())
+            .toList();
+        
+        assertThat(componentNames).containsExactly("PaymentService");
+        assertThat(componentNames).doesNotContain("StripePaymentProcessor", "ServiceClass", "RepositoryClass");
+
+        // Verify PaymentService has NO edges because its dependency (StripePaymentProcessor)
+        // is filtered out and not included in results
+        var paymentService = results.stream()
+            .filter(r -> r.node().name().equals("PaymentService"))
+            .findFirst()
+            .orElse(null);
+        assertThat(paymentService).isNotNull();
+        assertThat(paymentService.edges()).isEmpty();
+
+        // Verify no edges point to excluded classes
+        for (var result : results) {
+            for (DiEdgeDto edge : result.edges()) {
+                String targetClass = edge.to();
+                assertThat(targetClass)
+                    .as("Edge target %s should match include filter", targetClass)
+                    .isEqualTo("spring.twin.analysis.fixtures.PaymentService");
+            }
+        }
+    }
+
+    @Test
+    void shouldFilterComponentsAndEdgesWithExcludeFilter() {
+        // Given - Exclude StripePaymentProcessor
+        // PaymentService depends on PaymentProcessor interface which resolves to StripePaymentProcessor
+        // The edge to StripePaymentProcessor should be excluded since it's filtered out
+        Map<String, Path> classpath = buildClasspath();
+        IncludeExcludeFilter filter = new IncludeExcludeFilter(
+            null,
+            "spring.twin.analysis.fixtures.StripePaymentProcessor"
+        );
+
+        // When
+        var results = analyzer.analyzeClasspath(classpath, filter);
+
+        // Then - StripePaymentProcessor should not be in results
+        var componentNames = results.stream()
+            .map(r -> r.node().name())
+            .toList();
+        
+        assertThat(componentNames).doesNotContain("StripePaymentProcessor");
+        // PaymentService should still be present but without edge to excluded class
+        assertThat(componentNames).contains("PaymentService");
+
+        // Verify PaymentService has NO edges because its dependency target is excluded
+        var paymentService = results.stream()
+            .filter(r -> r.node().name().equals("PaymentService"))
+            .findFirst()
+            .orElse(null);
+        assertThat(paymentService).isNotNull();
+        assertThat(paymentService.edges()).isEmpty();
+
+        // Verify no edges point to excluded StripePaymentProcessor
+        for (var result : results) {
+            for (DiEdgeDto edge : result.edges()) {
+                String targetClass = edge.to();
+                assertThat(targetClass)
+                    .as("Edge target should not be excluded class")
+                    .isNotEqualTo("spring.twin.analysis.fixtures.StripePaymentProcessor");
+            }
+        }
+
+        // Verify other components with non-excluded dependencies still have their edges
+        var repositoryComponent = results.stream()
+            .filter(r -> r.node().name().equals("RepositoryClass"))
+            .findFirst()
+            .orElse(null);
+        assertThat(repositoryComponent).isNotNull();
+        assertThat(repositoryComponent.edges()).hasSize(1);
+        assertThat(repositoryComponent.edges().getFirst().to()).isEqualTo("spring.twin.analysis.fixtures.ServiceClass");
     }
 
     // ======================================================================

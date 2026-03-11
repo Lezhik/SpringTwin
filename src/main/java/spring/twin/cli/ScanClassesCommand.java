@@ -103,8 +103,8 @@ public class ScanClassesCommand implements CommandLineRunner, ExitCodeGenerator 
 
         log.info("After filtering: {} classes remain for analysis", filteredClasses.size());
 
-        // Analyze Spring DI dependencies
-        var analysisResults = analyzerService.analyzeClasspath(filteredClasses);
+        // Analyze Spring DI dependencies with filter
+        var analysisResults = analyzerService.analyzeClasspath(filteredClasses, filter);
 
         // Build the DI graph
         List<DiNodeDto> nodes = new ArrayList<>();
@@ -121,6 +121,9 @@ public class ScanClassesCommand implements CommandLineRunner, ExitCodeGenerator 
         ObjectMapper mapper = new ObjectMapper()
             .enable(SerializationFeature.INDENT_OUTPUT);
         mapper.writeValue(Path.of(args.outputPath).toFile(), graph);
+
+        // Clean up tmp directory before exit
+        scanningService.cleanTmp();
 
         log.info("DI graph written to: {}", args.outputPath);
         System.out.println("Successfully analyzed " + nodes.size() + " Spring components");
