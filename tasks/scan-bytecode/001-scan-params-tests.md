@@ -1,6 +1,6 @@
 # 001-scan-params — Тесты
 
-## Статус: pending
+## Статус: complete
 
 ## Описание
 
