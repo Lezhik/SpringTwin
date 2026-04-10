@@ -1,6 +1,6 @@
 # 004-class-file-scanner — Тесты
 
-## Статус: pending
+## Статус: complete
 
 ## Описание
 
@@ -9,6 +9,12 @@ Unit тесты для `ClassFileScanner`. Тесты создают време�
 ## Тестируемый класс
 
 `spring.twin.scan.ClassFileScanner`
+
+## Целевые классы
+
+Исходные коды проверяемых файлов должны быть добавлены в src/test/java
+В результате сборки проекта они попадут в build/classes/java/test
+И их можно будет использовать в тестах из этой папки.
 
 ## Класс тестов
 
@@ -22,10 +28,10 @@ Unit тесты для `ClassFileScanner`. Тесты создают време�
 4. `testScan_nestedDirectories_returnsAll()` — `.class` файлы в поддиректориях → все найдены рекурсивно
 5. `testScan_ignoresNonClassFiles()` — файлы `.java`, `.txt` в директории → не включаются в результат
 6. `testScan_nonExistentDir_throwsUncheckedIOException()` — несуществующая директория → `UncheckedIOException`
-7. `testToClassName_simpleClass_returnsFqcn()` — `com/example/Service.class` → `com.example.Service`
-8. `testToClassName_nestedPackage_returnsFqcn()` — `com/example/service/OrderService.class` → `com.example.service.OrderService`
+7. `testToClassName_simpleClass_returnsFqcn()` — `spring/twin/testee/service/Service.class` → `spring.twin.service.Service`
+8. `testToClassName_nestedPackage_returnsFqcn()` — `spring/twin/testee/service/OrderService.class` → `spring.twin.service.OrderService`
 9. `testToClassName_defaultPackage_returnsSimpleClassName()` — `Service.class` → `Service`
-10. `testToClassName_innerClass_returnsFqcnWithDollar()` — `com/example/Outer$Inner.class` → `com.example.Outer$Inner`
+10. `testToClassName_innerClass_returnsFqcnWithDollar()` — `spring/twin/testee/Outer$Inner.class` → `spring.twin.Outer$Inner`
 11. `testToClassName_nonClassFile_returnsEmpty()` — файл без расширения `.class` → `Optional.empty()`
 
 ## Сценарии
