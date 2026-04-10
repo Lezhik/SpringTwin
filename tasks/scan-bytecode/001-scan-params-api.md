@@ -1,6 +1,6 @@
 # 001-scan-params — API
 
-## Статус: pending
+## Статус: complete
 
 ## Описание
 
