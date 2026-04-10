@@ -1,6 +1,6 @@
 # 002-fqcn-normalizer — Тесты
 
-## Статус: pending
+## Статус: complete
 
 ## Описание
 

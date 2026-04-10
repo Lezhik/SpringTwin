@@ -26,8 +26,11 @@ public final class FqcnNormalizer {
         if (internalName == null) {
             return Optional.empty();
         }
-        // TODO: implement conversion logic
-        return Optional.empty();
+        // Filter primitive types
+        if (isPrimitiveInternalName(internalName)) {
+            return Optional.empty();
+        }
+        return Optional.of(internalToFqcn(internalName));
     }
 
     /**
@@ -45,10 +48,26 @@ public final class FqcnNormalizer {
      * @return FQCN of the base type, or {@code Optional.empty()} for primitives and primitive arrays
      */
     public static Optional<String> fromDescriptor(String descriptor) {
-        if (descriptor == null) {
+        if (descriptor == null || descriptor.isEmpty()) {
             return Optional.empty();
         }
-        // TODO: implement descriptor parsing
+        // Strip array brackets
+        String remaining = descriptor;
+        while (remaining.startsWith("[")) {
+            remaining = remaining.substring(1);
+        }
+        
+        // Check for primitive after stripping arrays
+        if (remaining.length() == 1 && isPrimitiveDescriptorChar(remaining.charAt(0))) {
+            return Optional.empty();
+        }
+        
+        // Handle object types L...;
+        if (remaining.startsWith("L") && remaining.endsWith(";")) {
+            String internalName = remaining.substring(1, remaining.length() - 1);
+            return Optional.of(internalToFqcn(internalName));
+        }
+        
         return Optional.empty();
     }
 
@@ -63,7 +82,23 @@ public final class FqcnNormalizer {
         if (internalName == null) {
             return null;
         }
-        // TODO: implement conversion
-        return internalName;
+        return internalName.replace('/', '.');
+    }
+    
+    /**
+     * Checks if an internal name represents a primitive type.
+     */
+    private static boolean isPrimitiveInternalName(String name) {
+        return "int".equals(name) || "long".equals(name) || "boolean".equals(name)
+                || "byte".equals(name) || "short".equals(name) || "char".equals(name)
+                || "float".equals(name) || "double".equals(name) || "void".equals(name);
+    }
+    
+    /**
+     * Checks if a character represents a primitive type in descriptor notation.
+     */
+    private static boolean isPrimitiveDescriptorChar(char c) {
+        return c == 'I' || c == 'J' || c == 'Z' || c == 'B'
+                || c == 'S' || c == 'C' || c == 'F' || c == 'D' || c == 'V';
     }
 }

@@ -1,6 +1,6 @@
 # 002-fqcn-normalizer — Реализация
 
-## Статус: pending
+## Статус: complete
 
 ## Описание
 
