@@ -1,6 +1,6 @@
 # 002-fqcn-normalizer — API
 
-## Статус: pending
+## Статус: complete
 
 ## Описание
 
