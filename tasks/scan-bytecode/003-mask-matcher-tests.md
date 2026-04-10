@@ -1,6 +1,6 @@
 # 003-mask-matcher — Тесты
 
-## Статус: pending
+## Статус: complete
 
 ## Описание
 
