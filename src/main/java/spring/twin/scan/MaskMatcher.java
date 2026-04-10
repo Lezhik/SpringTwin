@@ -66,6 +66,11 @@ public final class MaskMatcher {
      * @return true if FQCN matches the pattern; false otherwise
      */
     private static boolean matchesWildcard(String fqcn, String mask) {
+        // Handle empty mask (just wildcards) - matches anything
+        if (mask.isEmpty()) {
+            return true;
+        }
+        
         // Escape special regex characters except * and ?
         StringBuilder regex = new StringBuilder();
         regex.append("^");
@@ -101,8 +106,14 @@ public final class MaskMatcher {
      * @return true if FQCN should be included; false otherwise
      */
     public static boolean shouldInclude(String fqcn, List<String> includeMasks, List<String> excludeMasks) {
-        // Check exclude first
-        if (matchesAny(fqcn, excludeMasks)) {
+        // Empty include masks means include all (unless exclude matches)
+        if (includeMasks == null || includeMasks.isEmpty()) {
+            // Include all, unless excluded
+            return !(excludeMasks != null && !excludeMasks.isEmpty() && matchesAny(fqcn, excludeMasks));
+        }
+        
+        // Check exclude first (only if exclude is not empty)
+        if (excludeMasks != null && !excludeMasks.isEmpty() && matchesAny(fqcn, excludeMasks)) {
             return false;
         }
         

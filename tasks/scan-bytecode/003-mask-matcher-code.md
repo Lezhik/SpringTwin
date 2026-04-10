@@ -1,6 +1,6 @@
 # 003-mask-matcher — Реализация
 
-## Статус: pending
+## Статус: complete
 
 ## Описание
 

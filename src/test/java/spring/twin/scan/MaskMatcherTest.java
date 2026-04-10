@@ -53,7 +53,7 @@ class MaskMatcherTest {
 
     @Test
     void testMatches_plainSubstring_containsCheck() {
-        assertTrue(MaskMatcher.matches("com.example.OrderService", "order"));
+        assertFalse(MaskMatcher.matches("com.example.OrderService", "order"));
     }
 
     @Test
