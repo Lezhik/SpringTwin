@@ -1,6 +1,6 @@
 # 005-generic-type-extractor — Тесты
 
-## Статус: pending
+## Статус: completed
 
 ## Описание
 
