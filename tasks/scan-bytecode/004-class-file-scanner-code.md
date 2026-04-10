@@ -1,6 +1,6 @@
 # 004-class-file-scanner — Реализация
 
-## Статус: pending
+## Статус: completed
 
 ## Описание
 

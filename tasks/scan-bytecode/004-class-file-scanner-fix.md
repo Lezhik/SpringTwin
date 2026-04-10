@@ -1,6 +1,6 @@
 # 004-class-file-scanner — Исправление
 
-## Статус: pending
+## Статус: completed
 
 ## Описание
 

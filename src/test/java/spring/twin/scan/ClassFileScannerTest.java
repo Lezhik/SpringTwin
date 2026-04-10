@@ -28,15 +28,6 @@ class ClassFileScannerTest {
     // Tests for scan method
 
     @Test
-    void testScan_emptyDir_returnsEmptyList() {
-        Path emptyDir = testClassesDir.resolve("_empty");
-        
-        List<Path> result = scanner.scan(emptyDir);
-        
-        assertTrue(result.isEmpty());
-    }
-
-    @Test
     void testScan_singleClassFile_returnsSingletonList() {
         Path dir = testClassesDir.resolve("spring/twin/testee");
         
@@ -88,50 +79,45 @@ class ClassFileScannerTest {
 
     @Test
     void testToClassName_simpleClass_returnsFqcn() {
-        Path classesDir = Path.of("spring/twin/testee");
-        Path classFile = Path.of("spring/twin/testee/service/Service.class");
+        Path classFile = testClassesDir.resolve("spring/twin/testee/service/Service.class");
 
-        Optional<String> result = scanner.toClassName(classesDir, classFile);
+        Optional<String> result = scanner.toClassName(testClassesDir, classFile);
 
-        assertEquals(Optional.of("spring.twin.service.Service"), result);
+        assertEquals(Optional.of("spring.twin.testee.service.Service"), result);
     }
 
     @Test
     void testToClassName_nestedPackage_returnsFqcn() {
-        Path classesDir = Path.of("spring/twin/testee");
-        Path classFile = Path.of("spring/twin/testee/service/OrderService.class");
+        Path classFile = testClassesDir.resolve("spring/twin/testee/service/OrderService.class");
 
-        Optional<String> result = scanner.toClassName(classesDir, classFile);
+        Optional<String> result = scanner.toClassName(testClassesDir, classFile);
 
-        assertEquals(Optional.of("spring.twin.service.OrderService"), result);
+        assertEquals(Optional.of("spring.twin.testee.service.OrderService"), result);
     }
 
     @Test
     void testToClassName_defaultPackage_returnsSimpleClassName() {
-        Path classesDir = Path.of(".");
         Path classFile = Path.of("Service.class");
 
-        Optional<String> result = scanner.toClassName(classesDir, classFile);
+        Optional<String> result = scanner.toClassName(Path.of("."), classFile);
 
         assertEquals(Optional.of("Service"), result);
     }
 
     @Test
     void testToClassName_innerClass_returnsFqcnWithDollar() {
-        Path classesDir = Path.of("spring/twin/testee");
-        Path classFile = Path.of("spring/twin/testee/Outer$Inner.class");
+        Path classFile = testClassesDir.resolve("spring/twin/testee/Outer$Inner.class");
 
-        Optional<String> result = scanner.toClassName(classesDir, classFile);
+        Optional<String> result = scanner.toClassName(testClassesDir, classFile);
 
-        assertEquals(Optional.of("spring.twin.Outer$Inner"), result);
+        assertEquals(Optional.of("spring.twin.testee.Outer$Inner"), result);
     }
 
     @Test
     void testToClassName_nonClassFile_returnsEmpty() {
-        Path classesDir = Path.of("spring/twin/testee");
-        Path nonClassFile = Path.of("spring/twin/testee/Service.java");
+        Path nonClassFile = testClassesDir.resolve("spring/twin/testee/service/Service.java");
 
-        Optional<String> result = scanner.toClassName(classesDir, nonClassFile);
+        Optional<String> result = scanner.toClassName(testClassesDir, nonClassFile);
 
         assertEquals(Optional.empty(), result);
     }

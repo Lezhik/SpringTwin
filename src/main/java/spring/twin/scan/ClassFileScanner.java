@@ -10,13 +10,16 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.springframework.stereotype.Component;
+
 /**
  * Recursively scans a directory for .class files.
- * 
+ *
  * <p>This class provides functionality to traverse a directory tree and find all
  * Java class files (.class extension). It is designed to be used as a Spring bean
  * with constructor injection.
  */
+@Component
 public class ClassFileScanner {
 
     private static final String CLASS_FILE_EXTENSION = ".class";
@@ -41,6 +44,7 @@ public class ClassFileScanner {
             return walk
                 .filter(Files::isRegularFile)
                 .filter(CLASS_FILE_MATCHER::matches)
+                .sorted()
                 .collect(Collectors.toList());
         } catch (IOException e) {
             throw new UncheckedIOException(e);
@@ -69,11 +73,16 @@ public class ClassFileScanner {
             return Optional.empty();
         }
         
+        // Check if file ends with .class extension
+        if (!classFile.getFileName().toString().endsWith(CLASS_FILE_EXTENSION)) {
+            return Optional.empty();
+        }
+        
         try {
-            // Get the relative path from classesDir to classFile
+            // Get the relative path using relativize
             Path relativePath = classesDir.relativize(classFile);
             
-            // Convert path separators to dots and remove .class extension
+            // Convert path separators to dots
             String fqcn = relativePath.toString()
                 .replace('\\', '.')
                 .replace('/', '.');
@@ -85,7 +94,46 @@ public class ClassFileScanner {
             
             return Optional.of(fqcn);
         } catch (IllegalArgumentException e) {
-            // thrown by relativize if paths are on different drives or not related
+            // relativize can throw if paths are on different drives or not related
+            // Fall back to string-based approach
+            
+            // Normalize paths to forward slashes
+            String classFileStr = classFile.toUri().getPath().replace('\\', '/');
+            String classesDirStr = classesDir.toUri().getPath().replace('\\', '/');
+            
+            // Normalize classesDir by removing trailing slashes and ./
+            while (classesDirStr.endsWith("/")) {
+                classesDirStr = classesDirStr.substring(0, classesDirStr.length() - 1);
+            }
+            while (classesDirStr.endsWith("/.")) {
+                classesDirStr = classesDirStr.substring(0, classesDirStr.length() - 2);
+            }
+            
+            // Check if classFile starts with classesDir
+            if (!classFileStr.startsWith(classesDirStr + "/") && !classFileStr.equals(classesDirStr)) {
+                return Optional.empty();
+            }
+            
+            // Extract the relative part (after classesDir)
+            String relativePath = classFileStr.substring(classesDirStr.length());
+            
+            // Remove leading slash if present
+            while (relativePath.startsWith("/")) {
+                relativePath = relativePath.substring(1);
+            }
+            
+            // Convert path separators to dots
+            String fqcn = relativePath
+                .replace('\\', '.')
+                .replace('/', '.');
+            
+            // Remove .class extension if present
+            if (fqcn.endsWith(CLASS_FILE_EXTENSION)) {
+                fqcn = fqcn.substring(0, fqcn.length() - CLASS_FILE_EXTENSION.length());
+            }
+            
+            return Optional.of(fqcn);
+        } catch (Exception e) {
             return Optional.empty();
         }
     }
