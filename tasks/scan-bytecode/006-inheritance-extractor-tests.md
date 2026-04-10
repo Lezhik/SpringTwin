@@ -1,6 +1,6 @@
 # 006-inheritance-extractor — Тесты
 
-## Статус: pending
+## Статус: completed
 
 ## Описание
 
