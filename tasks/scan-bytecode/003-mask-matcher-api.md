@@ -1,6 +1,6 @@
 # 003-mask-matcher — API
 
-## Статус: pending
+## Статус: complete
 
 ## Описание
 
