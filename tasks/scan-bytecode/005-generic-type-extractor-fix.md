@@ -1,6 +1,6 @@
 # 005-generic-type-extractor — Исправление
 
-## Статус: pending
+## Статус: complete
 
 ## Описание
 

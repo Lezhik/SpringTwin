@@ -64,7 +64,7 @@ graph TD
 | 002 | +          | fqcn-normalizer           | Нормализация имён классов из JVM дескрипторов                       | —             |
 | 003 | +          | mask-matcher              | Сопоставление FQCN с масками include/exclude                        | —             |
 | 004 | +          | class-file-scanner        | Рекурсивное сканирование директории для поиска .class файлов        | —             |
-| 005 | -          | generic-type-extractor    | Извлечение типов из generic-сигнатур                                | 002           |
+| 005 | +          | generic-type-extractor    | Извлечение типов из generic-сигнатур                                | 002           |
 | 006 | -          | inheritance-extractor     | Извлечение зависимостей наследования и имплементации                | 002, 005      |
 | 007 | -          | field-type-extractor      | Извлечение зависимостей по типам полей                              | 002, 005      |
 | 008 | -          | method-type-extractor     | Извлечение зависимостей по типам параметров и возвращаемых значений | 002, 005      |
@@ -106,10 +106,10 @@ graph TD
 - [+] [004-class-file-scanner-fix](scan-bytecode/004-class-file-scanner-fix.md)
 
 ### Фича 005: generic-type-extractor
-- [ ] [005-generic-type-extractor-api](scan-bytecode/005-generic-type-extractor-api.md)
-- [ ] [005-generic-type-extractor-tests](scan-bytecode/005-generic-type-extractor-tests.md)
-- [ ] [005-generic-type-extractor-code](scan-bytecode/005-generic-type-extractor-code.md)
-- [ ] [005-generic-type-extractor-fix](scan-bytecode/005-generic-type-extractor-fix.md)
+- [+] [005-generic-type-extractor-api](scan-bytecode/005-generic-type-extractor-api.md)
+- [+] [005-generic-type-extractor-tests](scan-bytecode/005-generic-type-extractor-tests.md)
+- [+] [005-generic-type-extractor-code](scan-bytecode/005-generic-type-extractor-code.md)
+- [+] [005-generic-type-extractor-fix](scan-bytecode/005-generic-type-extractor-fix.md)
 
 ### Фича 006: inheritance-extractor
 - [ ] [006-inheritance-extractor-api](scan-bytecode/006-inheritance-extractor-api.md)

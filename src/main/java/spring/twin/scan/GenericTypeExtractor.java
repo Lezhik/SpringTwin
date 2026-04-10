@@ -2,12 +2,10 @@ package spring.twin.scan;
 
 import java.util.HashSet;
 import java.util.Set;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * Utility class for extracting types from JVM generic signatures.
- * 
+ *
  * <p>This class parses generic signatures in JVM format and extracts all referenced
  * types as Fully Qualified Class Names (FQCN). It handles class, method, and field
  * generic parameters, including nested generics.
@@ -25,47 +23,25 @@ public final class GenericTypeExtractor {
      * field signatures, and method signatures. It extracts the base type, its generic
      * parameters, and any nested generics.
      *
-     * <p>Examples of input signatures:
+     * <p>Scanning rules:
      * <ul>
-     *   <li>Class: {@code <T:Ljava/lang/Object;>Ljava/lang/Object;}</li>
-     *   <li>Field: {@code Ljava/util/List<Ljava/lang/String;>;}</li>
-     *   <li>Method: {@code (Ljava/util/List<Ljava/lang/String;>;)Ljava/util/Map<Ljava/lang/String;Ljava/lang/Integer;>;;}</li>
+     *   <li>On 'L' - collects characters until ';' as internal class name</li>
+     *   <li>On '<' - starts generic parameter region, types inside also extracted</li>
+     *   <li>On 'T' - formal type parameter (like T:), skips until ';'</li>
+     *   <li>Primitive descriptors (I, J, B, S, C, F, D, Z, V) are skipped</li>
+     *   <li>Arrays ([) are skipped, but base type is extracted</li>
      * </ul>
      *
      * @param signature the JVM generic signature to parse (e.g., {@code Ljava/util/List<Ljava/lang/String;>;})
-     * @return a set of all extracted FQCN types, or an empty set if signature is null or contains no reference types
+     * @return a set of all extracted FQCN types, or an empty set if signature is null or empty
      */
     public static Set<String> extractTypes(String signature) {
-        if (signature == null) {
+        if (signature == null || signature.isEmpty()) {
             return Set.of();
         }
-        
+
         Set<String> types = new HashSet<>();
-        
-        // Extract from field/method signatures (start with L or [)
-        if (signature.startsWith("L") || signature.startsWith("[")) {
-            types.addAll(extractTypeNames(signature));
-        }
-        
-        // Extract from class signatures (start with <)
-        if (signature.startsWith("<")) {
-            Pattern typePattern = Pattern.compile("L([^;]+);");
-            Matcher matcher = typePattern.matcher(signature);
-            while (matcher.find()) {
-                String internalName = matcher.group(1);
-                // Handle type arguments within class signature
-                int typeArgStart = internalName.indexOf('<');
-                if (typeArgStart > 0) {
-                    String baseType = internalName.substring(0, typeArgStart);
-                    FqcnNormalizer.fromInternalName(baseType).ifPresent(types::add);
-                    // Extract nested types from type arguments
-                    extractNestedTypes(internalName.substring(typeArgStart), types);
-                } else {
-                    FqcnNormalizer.fromInternalName(internalName).ifPresent(types::add);
-                }
-            }
-        }
-        
+        scanSignature(signature, types, true);
         return types;
     }
 
@@ -81,82 +57,207 @@ public final class GenericTypeExtractor {
      *   <li>{@code Ljava/util/Map<Ljava/lang/String;Ljava/lang/Integer;>;} → {@code [java.util.Map, java.lang.String, java.lang.Integer]}</li>
      * </ul>
      *
+     * <p>Scanning rules:
+     * <ul>
+     *   <li>On 'L' - collects characters until ';' as internal class name</li>
+     *   <li>On '<' - starts generic parameter region, types inside also extracted</li>
+     *   <li>On 'T' - formal type parameter, skips until ';'</li>
+     *   <li>Primitive descriptors (I, J, B, S, C, F, D, Z, V) are skipped</li>
+     *   <li>Arrays ([) are skipped, but base type is extracted</li>
+     * </ul>
+     *
      * @param typeSignature the JVM type signature to parse (e.g., {@code Ljava/util/List<Ljava/lang/String;>;})
-     * @return a set of all extracted FQCN types from the signature
+     * @return a set of all extracted FQCN types from the signature, or an empty set if signature is null or empty
      */
     public static Set<String> extractTypeNames(String typeSignature) {
-        Set<String> types = new HashSet<>();
-        
         if (typeSignature == null || typeSignature.isEmpty()) {
-            return types;
+            return Set.of();
         }
-        
-        // Pattern to match: Lclass/name<arg1<arg2>;arg3;...;
-        // or simple: Lclass/name;
-        Pattern typePattern = Pattern.compile("L([^;]+);");
-        Matcher matcher = typePattern.matcher(typeSignature);
-        
-        while (matcher.find()) {
-            String fullType = matcher.group(1);
-            extractNestedTypes(fullType, types);
-        }
-        
+
+        Set<String> types = new HashSet<>();
+        scanSignature(typeSignature, types, false);
         return types;
     }
 
     /**
-     * Extracts nested generic types from a type string that may contain type arguments.
+     * Scans a signature character by character and extracts all type references.
+     *
+     * @param signature the signature to scan
+     * @param types the set to collect extracted types into
+     * @param isClassSignature whether this is a class-level signature (may have formal type parameters)
      */
-    private static void extractNestedTypes(String typeString, Set<String> types) {
-        // First, extract the base type before any type arguments
-        int genericStart = typeString.indexOf('<');
-        String baseType;
-        String remainingArgs;
-        
-        if (genericStart > 0) {
-            baseType = typeString.substring(0, genericStart);
-            remainingArgs = typeString.substring(genericStart);
-            FqcnNormalizer.fromInternalName(baseType).ifPresent(types::add);
-        } else {
-            remainingArgs = typeString;
-        }
-        
-        // Process remaining type arguments recursively
-        if (!remainingArgs.isEmpty() && remainingArgs.startsWith("<")) {
-            // Remove outer <> and process
-            String args = remainingArgs.substring(1, remainingArgs.lastIndexOf('>'));
-            Pattern nestedPattern = Pattern.compile("L([^;]+);");
-            Matcher nestedMatcher = nestedPattern.matcher(args);
-            while (nestedMatcher.find()) {
-                String nestedType = nestedMatcher.group(1);
-                extractNestedTypes(nestedType, types);
+    private static void scanSignature(String signature, Set<String> types, boolean isClassSignature) {
+        int length = signature.length();
+        int i = 0;
+
+        while (i < length) {
+            char c = signature.charAt(i);
+
+            if (c == '[') {
+                // Array marker - skip it, base type will be processed next
+                i++;
+            } else if (c == 'L') {
+                // Object type - extract internal name until ';'
+                int end = findNextSemicolon(signature, i + 1);
+                if (end > i) {
+                    String internalName = extractInternalName(signature, i + 1, end);
+                    // Check for generic parameters within this type
+                    int genericStart = internalName.indexOf('<');
+                    if (genericStart > 0) {
+                        String baseType = internalName.substring(0, genericStart);
+                        FqcnNormalizer.fromInternalName(baseType).ifPresent(types::add);
+                        // Process generic arguments
+                        String genericArgs = internalName.substring(genericStart);
+                        scanGenericArguments(genericArgs, types);
+                    } else {
+                        FqcnNormalizer.fromInternalName(internalName).ifPresent(types::add);
+                    }
+                    i = end + 1;
+                } else {
+                    i++;
+                }
+            } else if (c == 'T') {
+                // Formal type parameter - skip until ';'
+                int end = findNextSemicolon(signature, i + 1);
+                i = end + 1;
+            } else if (c == '<') {
+                // Start of generic parameter section (at class level)
+                int end = findMatchingAngleBracket(signature, i);
+                if (end > i) {
+                    String genericSection = signature.substring(i + 1, end);
+                    scanGenericArguments(genericSection, types);
+                    i = end + 1;
+                } else {
+                    i++;
+                }
+            } else if (isPrimitiveDescriptor(c)) {
+                // Primitive - skip
+                i++;
+            } else {
+                // Other characters (like *, +, - for wildcards) - skip
+                i++;
             }
-            
-            // Handle recursive nesting like List<List<String>>
-            int idx = 0;
-            int depth = 0;
-            StringBuilder current = new StringBuilder();
-            for (char c : args.toCharArray()) {
-                if (c == '<') {
-                    depth++;
-                    if (depth == 1) {
-                        // Start of nested type argument
-                        current = new StringBuilder();
+        }
+    }
+
+    /**
+     * Scans generic arguments section character by character.
+     *
+     * @param args the generic arguments string (without outer <>)
+     * @param types the set to collect extracted types into
+     */
+    private static void scanGenericArguments(String args, Set<String> types) {
+        int length = args.length();
+        int i = 0;
+
+        while (i < length) {
+            char c = args.charAt(i);
+
+            if (c == '[') {
+                // Array marker - skip
+                i++;
+            } else if (c == 'L') {
+                // Object type - extract until ';'
+                int end = findNextSemicolon(args, i + 1);
+                if (end > i) {
+                    String internalName = extractInternalName(args, i + 1, end);
+                    // Check for nested generics
+                    int genericStart = internalName.indexOf('<');
+                    if (genericStart > 0) {
+                        String baseType = internalName.substring(0, genericStart);
+                        FqcnNormalizer.fromInternalName(baseType).ifPresent(types::add);
+                        // Process nested generic arguments
+                        String nestedArgs = internalName.substring(genericStart);
+                        scanGenericArguments(nestedArgs, types);
                     } else {
-                        current.append(c);
+                        FqcnNormalizer.fromInternalName(internalName).ifPresent(types::add);
                     }
-                } else if (c == '>') {
-                    depth--;
-                    if (depth == 0) {
-                        // End of nested type argument
-                        extractNestedTypes(current.toString(), types);
-                    } else {
-                        current.append(c);
-                    }
-                } else if (depth > 0) {
-                    current.append(c);
+                    i = end + 1;
+                } else {
+                    i++;
+                }
+            } else if (c == 'T') {
+                // Formal type parameter - skip until ';'
+                int end = findNextSemicolon(args, i + 1);
+                i = end + 1;
+            } else if (c == '+' || c == '-' || c == '*') {
+                // Wildcard markers - skip
+                i++;
+            } else if (isPrimitiveDescriptor(c)) {
+                // Primitive - skip
+                i++;
+            } else {
+                // Other characters
+                i++;
+            }
+        }
+    }
+
+    /**
+     * Finds the next semicolon in the string, accounting for nested angle brackets.
+     *
+     * @param str the string to search
+     * @param start the starting position
+     * @return the position of the next semicolon, or -1 if not found
+     */
+    private static int findNextSemicolon(String str, int start) {
+        int depth = 0;
+        for (int i = start; i < str.length(); i++) {
+            char c = str.charAt(i);
+            if (c == '<') {
+                depth++;
+            } else if (c == '>') {
+                depth--;
+            } else if (c == ';' && depth == 0) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    /**
+     * Finds the matching closing angle bracket for an opening one.
+     *
+     * @param str the string to search
+     * @param openPos the position of the opening '<'
+     * @return the position of the matching '>', or -1 if not found
+     */
+    private static int findMatchingAngleBracket(String str, int openPos) {
+        int depth = 1;
+        for (int i = openPos + 1; i < str.length(); i++) {
+            char c = str.charAt(i);
+            if (c == '<') {
+                depth++;
+            } else if (c == '>') {
+                depth--;
+                if (depth == 0) {
+                    return i;
                 }
             }
         }
+        return -1;
+    }
+
+    /**
+     * Extracts internal name from signature, handling possible nested generics.
+     *
+     * @param signature the signature string
+     * @param start the start position (after 'L')
+     * @param end the end position (at ';')
+     * @return the internal name, possibly including generic arguments
+     */
+    private static String extractInternalName(String signature, int start, int end) {
+        return signature.substring(start, end);
+    }
+
+    /**
+     * Checks if a character represents a primitive type descriptor.
+     *
+     * @param c the character to check
+     * @return true if the character is a primitive descriptor
+     */
+    private static boolean isPrimitiveDescriptor(char c) {
+        return c == 'I' || c == 'J' || c == 'B' || c == 'S' || c == 'C'
+                || c == 'F' || c == 'D' || c == 'Z' || c == 'V';
     }
 }

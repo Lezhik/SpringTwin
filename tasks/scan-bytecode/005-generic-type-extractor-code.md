@@ -1,6 +1,6 @@
 # 005-generic-type-extractor — Реализация
 
-## Статус: pending
+## Статус: complete
 
 ## Описание
 
