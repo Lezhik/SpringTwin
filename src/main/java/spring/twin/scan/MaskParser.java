@@ -1,6 +1,6 @@
 package spring.twin.scan;
 
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -15,23 +15,22 @@ public final class MaskParser {
 
     /**
      * Parses a raw mask string into a list of trimmed, non-empty masks.
-     * 
+     *
      * @param raw the raw mask string (semicolon-separated)
-     * @return list of parsed masks, or empty list if raw is null or empty
+     * @return list of parsed masks, or empty list if raw is null or blank
      */
     public static List<String> parseMasks(String raw) {
-        if (raw == null || raw.isEmpty()) {
-            return List.of();
+        if (raw == null || raw.isBlank()) {
+            return Collections.emptyList();
         }
         
-        List<String> masks = new ArrayList<>();
-        String[] parts = raw.split(";");
-        for (String part : parts) {
+        List<String> masks = new java.util.ArrayList<>();
+        for (String part : raw.split(";")) {
             String trimmed = part.trim();
             if (!trimmed.isEmpty()) {
                 masks.add(trimmed);
             }
         }
-        return masks;
+        return List.copyOf(masks);
     }
 }

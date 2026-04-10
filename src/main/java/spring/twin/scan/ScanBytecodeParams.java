@@ -18,8 +18,16 @@ public record ScanBytecodeParams(
         List<String> excludeMasks) {
 
     /**
+     * Compact constructor that wraps lists in {@code List.of()} for immutability.
+     */
+    public ScanBytecodeParams {
+        includeMasks = List.copyOf(includeMasks);
+        excludeMasks = List.copyOf(excludeMasks);
+    }
+
+    /**
      * Factory method to create ScanBytecodeParams from raw mask strings.
-     * 
+     *
      * @param classesDir path to directory with .class files
      * @param outputFile path to output JSON file
      * @param includeRaw raw include masks string (semicolon-separated)
