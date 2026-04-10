@@ -82,28 +82,28 @@ graph TD
 Каждая фича имеет 4 задачи в порядке реализации: **api** → **tests** → **code** → **fix**
 
 ### Фича 001: scan-params
-- [ ] [001-scan-params-api](scan-bytecode/001-scan-params-api.md)
-- [ ] [001-scan-params-tests](scan-bytecode/001-scan-params-tests.md)
-- [ ] [001-scan-params-code](scan-bytecode/001-scan-params-code.md)
-- [ ] [001-scan-params-fix](scan-bytecode/001-scan-params-fix.md)
+- [+] [001-scan-params-api](scan-bytecode/001-scan-params-api.md)
+- [+] [001-scan-params-tests](scan-bytecode/001-scan-params-tests.md)
+- [+] [001-scan-params-code](scan-bytecode/001-scan-params-code.md)
+- [+] [001-scan-params-fix](scan-bytecode/001-scan-params-fix.md)
 
 ### Фича 002: fqcn-normalizer
-- [ ] [002-fqcn-normalizer-api](scan-bytecode/002-fqcn-normalizer-api.md)
-- [ ] [002-fqcn-normalizer-tests](scan-bytecode/002-fqcn-normalizer-tests.md)
-- [ ] [002-fqcn-normalizer-code](scan-bytecode/002-fqcn-normalizer-code.md)
-- [ ] [002-fqcn-normalizer-fix](scan-bytecode/002-fqcn-normalizer-fix.md)
+- [+] [002-fqcn-normalizer-api](scan-bytecode/002-fqcn-normalizer-api.md)
+- [+] [002-fqcn-normalizer-tests](scan-bytecode/002-fqcn-normalizer-tests.md)
+- [+] [002-fqcn-normalizer-code](scan-bytecode/002-fqcn-normalizer-code.md)
+- [+] [002-fqcn-normalizer-fix](scan-bytecode/002-fqcn-normalizer-fix.md)
 
 ### Фича 003: mask-matcher
-- [ ] [003-mask-matcher-api](scan-bytecode/003-mask-matcher-api.md)
-- [ ] [003-mask-matcher-tests](scan-bytecode/003-mask-matcher-tests.md)
-- [ ] [003-mask-matcher-code](scan-bytecode/003-mask-matcher-code.md)
-- [ ] [003-mask-matcher-fix](scan-bytecode/003-mask-matcher-fix.md)
+- [+] [003-mask-matcher-api](scan-bytecode/003-mask-matcher-api.md)
+- [+] [003-mask-matcher-tests](scan-bytecode/003-mask-matcher-tests.md)
+- [+] [003-mask-matcher-code](scan-bytecode/003-mask-matcher-code.md)
+- [+] [003-mask-matcher-fix](scan-bytecode/003-mask-matcher-fix.md)
 
 ### Фича 004: class-file-scanner
-- [ ] [004-class-file-scanner-api](scan-bytecode/004-class-file-scanner-api.md)
-- [ ] [004-class-file-scanner-tests](scan-bytecode/004-class-file-scanner-tests.md)
-- [ ] [004-class-file-scanner-code](scan-bytecode/004-class-file-scanner-code.md)
-- [ ] [004-class-file-scanner-fix](scan-bytecode/004-class-file-scanner-fix.md)
+- [+] [004-class-file-scanner-api](scan-bytecode/004-class-file-scanner-api.md)
+- [+] [004-class-file-scanner-tests](scan-bytecode/004-class-file-scanner-tests.md)
+- [+] [004-class-file-scanner-code](scan-bytecode/004-class-file-scanner-code.md)
+- [+] [004-class-file-scanner-fix](scan-bytecode/004-class-file-scanner-fix.md)
 
 ### Фича 005: generic-type-extractor
 - [ ] [005-generic-type-extractor-api](scan-bytecode/005-generic-type-extractor-api.md)

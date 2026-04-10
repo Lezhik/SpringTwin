@@ -1,6 +1,6 @@
 # 005-generic-type-extractor — API
 
-## Статус: pending
+## Статус: completed
 
 ## Описание
 
