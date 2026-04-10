@@ -1,6 +1,6 @@
 # 006-inheritance-extractor — API
 
-## Статус: pending
+## Статус: completed
 
 ## Описание
 
