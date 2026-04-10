@@ -1,6 +1,6 @@
 # 004-class-file-scanner — API
 
-## Статус: pending
+## Статус: complete
 
 ## Описание
 
