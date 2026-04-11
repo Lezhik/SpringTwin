@@ -74,15 +74,48 @@ generate-refactoring → tasks.json
 
 ### Структура
 
-Структура должна соответствовать структуре Map<String, Set<String>> где ключом выступает полное имя класса,а в множестве содержаться все классы, на которые он ссылается.
+Структура должна соответствовать структуре Map<String, Map<String, Set<LinkDetails>>> 
+где ключом выступает полное имя класса, 
+ключ второго уровня - полное имея класса, на который он ссылается
+а детали запись с информацией о ссылке
+
+LinkDetails: 
+``` json
+{
+  type: "FIELD",
+  details: "orderRepository"
+}
+```
+
+type определяет тип связи (базовый класс, поле итп),
+поле details описывает данные о связи и зависит от типа:
+- type: SUPERCLASS - базовый класс, поле details пустое
+- type: INTERFACE - имплментируемый интерфейс, поле details пустое
+- type: FIELD - поле класса, в поле details имя поля
+- type: STATIC_BLOCK - используется в статическом блоке инициализации, поле details пустое
+- type: METHOD - используется в методе, как возвращаемый тип, аргумент или в коде метода, в поле details сигнатура метода
+- type: CLASS_ANNOTATION - аннотация к классу, поле details пустое
+- type: FIELD_ANNOTATION - аннотация к полю, в details имя поля
+- type: METHOD_ANNOTATION - аннотация к методу, в details сигнатура метода
+- type: METHOD_ARG_ANNOTATION - аннотация к аргументу метода, в details сигнатура метода
+
+ВАЖНО! извлеченные generic типы имеют такой же тип ссылки, как тип, для которого они извлекались.
+для LinkType перегружаются equals/hashCode, чтобы избежать в Set дублирования одинаковых ссылок 
 
 ``` json
 {
   "com.example.OrderService": [
-	"com.example.PaymentClient", "com.example.repository.OrderRepository"
+	"com.example.PaymentClient": [
+	  {"type": "FIELD", "details": "paymentClient"}.
+	], 
+	"com.example.repository.OrderRepository": [
+	  {"type": "FIELD", "details": "paymentClient"}.
+	]
   ],
   "com.example.repository.OrderRepository": [
-	"com.example.model.OrderModel"
+	"com.example.model.OrderModel": [
+	  {"type": "METHOD", "details": "Lcom/example/model/OrderModel;add(Lcom/example/model/OrderModel;)"}
+	]
   ]
 }
 ```
