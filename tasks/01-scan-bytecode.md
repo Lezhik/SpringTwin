@@ -30,6 +30,7 @@ graph TD
     SVC --> WRITER[DependencyJsonWriter]
     BUILDER --> ANALYZER[BytecodeClassAnalyzer]
     BUILDER --> MATCHER[MaskMatcher]
+    BUILDER --> MERGER[InnerClassMerger]
     ANALYZER --> NORM[FqcnNormalizer]
     ANALYZER --> INH[InheritanceExtractor]
     ANALYZER --> FIELD[FieldTypeExtractor]
@@ -40,6 +41,8 @@ graph TD
     METHOD --> GEN
     ANN --> GEN
     NORM --> GEN
+    PARAMS -.-> |mergeInnerClasses| BUILDER
+    BUILDER -.-> |if mergeInnerClasses| MERGER
 ```
 
 ## Пакеты
@@ -75,7 +78,13 @@ graph TD
 | 013 | +          | dependency-json-writer    | Запись графа зависимостей в JSON файл                               | —             |
 | 014 | +          | scan-bytecode-service     | Главный сервис пайплайна scan-bytecode                              | 001, 012, 013 |
 | 015 | +          | cli-command               | CLI команда scan-bytecode                                           | 001, 014      |
-| 016 | -          | e2e-tests                 | End-to-end тесты полного пайплайна                                  | 015           |
+| 016 | +          | e2e-tests                 | End-to-end тесты полного пайплайна                                  | 015           |
+| 017 | -          | inner-class-merger        | Утилитный класс для объединения вложенных классов с родительскими   | —             |
+| 018 | -          | scan-params-merge         | Добавление поля mergeInnerClasses в ScanBytecodeParams              | —             |
+| 019 | -          | graph-builder-merge       | Поддержка merge-inner-classes в DependencyGraphBuilder              | 017           |
+| 020 | -          | service-merge             | Передача mergeInnerClasses из ScanBytecodeParams в builder          | 018, 019      |
+| 021 | -          | cli-merge                 | Добавление опции --merge-inner-classes в CLI команду                | 018, 020      |
+| 022 | -          | e2e-merge-tests           | End-to-end тесты для merge-inner-classes                            | 021           |
 
 ## Чек-лист задач
 
@@ -176,3 +185,39 @@ graph TD
 - [ ] [016-e2e-tests-tests](scan-bytecode/016-e2e-tests-tests.md)
 - [ ] [016-e2e-tests-code](scan-bytecode/016-e2e-tests-code.md)
 - [ ] [016-e2e-tests-fix](scan-bytecode/016-e2e-tests-fix.md)
+
+### Фича 017: inner-class-merger
+- [ ] [017-inner-class-merger-api](scan-bytecode/017-inner-class-merger-api.md)
+- [ ] [017-inner-class-merger-tests](scan-bytecode/017-inner-class-merger-tests.md)
+- [ ] [017-inner-class-merger-code](scan-bytecode/017-inner-class-merger-code.md)
+- [ ] [017-inner-class-merger-fix](scan-bytecode/017-inner-class-merger-fix.md)
+
+### Фича 018: scan-params-merge
+- [ ] [018-scan-params-merge-api](scan-bytecode/018-scan-params-merge-api.md)
+- [ ] [018-scan-params-merge-tests](scan-bytecode/018-scan-params-merge-tests.md)
+- [ ] [018-scan-params-merge-code](scan-bytecode/018-scan-params-merge-code.md)
+- [ ] [018-scan-params-merge-fix](scan-bytecode/018-scan-params-merge-fix.md)
+
+### Фича 019: graph-builder-merge
+- [ ] [019-graph-builder-merge-api](scan-bytecode/019-graph-builder-merge-api.md)
+- [ ] [019-graph-builder-merge-tests](scan-bytecode/019-graph-builder-merge-tests.md)
+- [ ] [019-graph-builder-merge-code](scan-bytecode/019-graph-builder-merge-code.md)
+- [ ] [019-graph-builder-merge-fix](scan-bytecode/019-graph-builder-merge-fix.md)
+
+### Фича 020: service-merge
+- [ ] [020-service-merge-api](scan-bytecode/020-service-merge-api.md)
+- [ ] [020-service-merge-tests](scan-bytecode/020-service-merge-tests.md)
+- [ ] [020-service-merge-code](scan-bytecode/020-service-merge-code.md)
+- [ ] [020-service-merge-fix](scan-bytecode/020-service-merge-fix.md)
+
+### Фича 021: cli-merge
+- [ ] [021-cli-merge-api](scan-bytecode/021-cli-merge-api.md)
+- [ ] [021-cli-merge-tests](scan-bytecode/021-cli-merge-tests.md)
+- [ ] [021-cli-merge-code](scan-bytecode/021-cli-merge-code.md)
+- [ ] [021-cli-merge-fix](scan-bytecode/021-cli-merge-fix.md)
+
+### Фича 022: e2e-merge-tests
+- [ ] [022-e2e-merge-tests-api](scan-bytecode/022-e2e-merge-tests-api.md)
+- [ ] [022-e2e-merge-tests-tests](scan-bytecode/022-e2e-merge-tests-tests.md)
+- [ ] [022-e2e-merge-tests-code](scan-bytecode/022-e2e-merge-tests-code.md)
+- [ ] [022-e2e-merge-tests-fix](scan-bytecode/022-e2e-merge-tests-fix.md)
