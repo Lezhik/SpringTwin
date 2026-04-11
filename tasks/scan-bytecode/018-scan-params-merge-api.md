@@ -1,6 +1,6 @@
 # 018-scan-params-merge — API
 
-## Статус: pending
+## Статус: complete
 
 ## Описание
 
