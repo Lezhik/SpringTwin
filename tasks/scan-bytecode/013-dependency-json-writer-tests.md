@@ -1,6 +1,6 @@
 # 013-dependency-json-writer — Тесты
 
-## Статус: pending
+## Статус: complete
 
 ## Описание
 
