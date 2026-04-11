@@ -1,6 +1,6 @@
 # 015-cli-command — Тесты
 
-## Статус: pending
+## Статус: complete
 
 ## Описание
 
