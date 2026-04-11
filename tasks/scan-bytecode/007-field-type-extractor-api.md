@@ -1,6 +1,6 @@
 # 007-field-type-extractor — API
 
-## Статус: pending
+## Статус: complete
 
 ## Описание
 
