@@ -1,6 +1,6 @@
 # 008-method-type-extractor — API
 
-## Статус: pending
+## Статус: complete
 
 ## Описание
 
