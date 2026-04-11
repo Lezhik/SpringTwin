@@ -54,13 +54,15 @@ public class ScanBytecodeCommand {
             @ShellOption(value = "--classes", help = "Path to directory with .class files (Windows: quote or use /)") String classes,
             @ShellOption(value = "--output", help = "Path to output JSON file") String output,
             @ShellOption(value = "--include", help = "FQCN include masks separated by ;", defaultValue = "") String include,
-            @ShellOption(value = "--exclude", help = "FQCN exclude masks separated by ;", defaultValue = "") String exclude) {
+            @ShellOption(value = "--exclude", help = "FQCN exclude masks separated by ;", defaultValue = "") String exclude,
+            @ShellOption(value = "--merge-inner-classes", help = "Merge inner classes with outer classes", defaultValue = "true") String mergeInnerClasses) {
         try {
             ScanBytecodeParams params = ScanBytecodeParams.of(
                     Path.of(classes),
                     Path.of(output),
                     include,
-                    exclude
+                    exclude,
+                    Boolean.parseBoolean(mergeInnerClasses)
             );
             scanBytecodeService.execute(params);
             return "Dependencies written to: " + output;

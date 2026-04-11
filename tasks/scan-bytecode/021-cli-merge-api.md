@@ -1,6 +1,6 @@
 # 021-cli-merge — API
 
-## Статус: pending
+## Статус: complete
 
 ## Описание
 
