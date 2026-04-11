@@ -1,6 +1,6 @@
 # 017-inner-class-merger — Реализация
 
-## Статус: pending
+## Статус: complete
 
 ## Описание
 

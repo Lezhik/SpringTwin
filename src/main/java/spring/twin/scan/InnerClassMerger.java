@@ -3,6 +3,8 @@ package spring.twin.scan;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
+import java.util.TreeSet;
 
 /**
  * Utility class for merging inner classes with their parent classes.
@@ -25,7 +27,11 @@ public final class InnerClassMerger {
      * @return true if the FQCN represents an inner class
      */
     public static boolean isInnerClass(String fqcn) {
-        throw new UnsupportedOperationException("Not implemented yet");
+        if (fqcn == null || fqcn.isEmpty()) {
+            return false;
+        }
+        int dollarIndex = fqcn.indexOf('$');
+        return dollarIndex > 0;
     }
 
     /**
@@ -38,7 +44,14 @@ public final class InnerClassMerger {
      * @return the outer class name, or the original FQCN if not an inner class
      */
     public static String getOuterClassName(String fqcn) {
-        throw new UnsupportedOperationException("Not implemented yet");
+        if (fqcn == null) {
+            return null;
+        }
+        if (!isInnerClass(fqcn)) {
+            return fqcn;
+        }
+        int dollarIndex = fqcn.indexOf('$');
+        return fqcn.substring(0, dollarIndex);
     }
 
     /**
@@ -52,7 +65,50 @@ public final class InnerClassMerger {
      * @return a new graph with inner classes merged
      */
     public static Map<String, Set<String>> mergeInnerClasses(Map<String, Set<String>> graph) {
-        throw new UnsupportedOperationException("Not implemented yet");
+        TreeMap<String, TreeSet<String>> result = new TreeMap<>();
+        
+        // Step 1 & 2: Process keys - merge inner classes to outer classes
+        for (Map.Entry<String, Set<String>> entry : graph.entrySet()) {
+            String key = entry.getKey();
+            Set<String> dependencies = entry.getValue();
+            
+            String targetKey;
+            if (isInnerClass(key)) {
+                targetKey = getOuterClassName(key);
+            } else {
+                targetKey = key;
+            }
+            
+            TreeSet<String> targetSet = result.computeIfAbsent(targetKey, k -> new TreeSet<>());
+            if (dependencies != null) {
+                targetSet.addAll(dependencies);
+            }
+        }
+        
+        // Step 3: Replace inner classes in values with outer classes, remove self-references
+        for (Map.Entry<String, TreeSet<String>> entry : result.entrySet()) {
+            String key = entry.getKey();
+            TreeSet<String> dependencies = entry.getValue();
+            TreeSet<String> newDependencies = new TreeSet<>();
+            
+            for (String dep : dependencies) {
+                String mappedDep;
+                if (isInnerClass(dep)) {
+                    mappedDep = getOuterClassName(dep);
+                } else {
+                    mappedDep = dep;
+                }
+                // Remove self-references
+                if (!mappedDep.equals(key)) {
+                    newDependencies.add(mappedDep);
+                }
+            }
+            
+            entry.setValue(newDependencies);
+        }
+        
+        // Step 4: Return LinkedHashMap for deterministic order
+        return new LinkedHashMap<>(result);
     }
 
     /**
@@ -65,6 +121,10 @@ public final class InnerClassMerger {
      * @return the processed graph or the original graph
      */
     public static Map<String, Set<String>> mergeInnerClasses(Map<String, Set<String>> graph, boolean merge) {
-        throw new UnsupportedOperationException("Not implemented yet");
+        if (merge) {
+            return mergeInnerClasses(graph);
+        } else {
+            return graph;
+        }
     }
 }

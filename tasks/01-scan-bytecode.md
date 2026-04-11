@@ -79,7 +79,7 @@ graph TD
 | 014 | +          | scan-bytecode-service     | Главный сервис пайплайна scan-bytecode                              | 001, 012, 013 |
 | 015 | +          | cli-command               | CLI команда scan-bytecode                                           | 001, 014      |
 | 016 | +          | e2e-tests                 | End-to-end тесты полного пайплайна                                  | 015           |
-| 017 | -          | inner-class-merger        | Утилитный класс для объединения вложенных классов с родительскими   | —             |
+| 017 | +          | inner-class-merger        | Утилитный класс для объединения вложенных классов с родительскими   | —             |
 | 018 | -          | scan-params-merge         | Добавление поля mergeInnerClasses в ScanBytecodeParams              | —             |
 | 019 | -          | graph-builder-merge       | Поддержка merge-inner-classes в DependencyGraphBuilder              | 017           |
 | 020 | -          | service-merge             | Передача mergeInnerClasses из ScanBytecodeParams в builder          | 018, 019      |
@@ -181,16 +181,16 @@ graph TD
 - [+] [015-cli-command-fix](scan-bytecode/015-cli-command-fix.md)
 
 ### Фича 016: e2e-tests
-- [ ] [016-e2e-tests-api](scan-bytecode/016-e2e-tests-api.md)
-- [ ] [016-e2e-tests-tests](scan-bytecode/016-e2e-tests-tests.md)
-- [ ] [016-e2e-tests-code](scan-bytecode/016-e2e-tests-code.md)
-- [ ] [016-e2e-tests-fix](scan-bytecode/016-e2e-tests-fix.md)
+- [+] [016-e2e-tests-api](scan-bytecode/016-e2e-tests-api.md)
+- [+] [016-e2e-tests-tests](scan-bytecode/016-e2e-tests-tests.md)
+- [+] [016-e2e-tests-code](scan-bytecode/016-e2e-tests-code.md)
+- [+] [016-e2e-tests-fix](scan-bytecode/016-e2e-tests-fix.md)
 
 ### Фича 017: inner-class-merger
-- [ ] [017-inner-class-merger-api](scan-bytecode/017-inner-class-merger-api.md)
-- [ ] [017-inner-class-merger-tests](scan-bytecode/017-inner-class-merger-tests.md)
-- [ ] [017-inner-class-merger-code](scan-bytecode/017-inner-class-merger-code.md)
-- [ ] [017-inner-class-merger-fix](scan-bytecode/017-inner-class-merger-fix.md)
+- [+] [017-inner-class-merger-api](scan-bytecode/017-inner-class-merger-api.md)
+- [+] [017-inner-class-merger-tests](scan-bytecode/017-inner-class-merger-tests.md)
+- [+] [017-inner-class-merger-code](scan-bytecode/017-inner-class-merger-code.md)
+- [+] [017-inner-class-merger-fix](scan-bytecode/017-inner-class-merger-fix.md)
 
 ### Фича 018: scan-params-merge
 - [ ] [018-scan-params-merge-api](scan-bytecode/018-scan-params-merge-api.md)
