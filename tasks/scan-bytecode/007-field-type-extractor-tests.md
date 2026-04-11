@@ -1,6 +1,6 @@
 # 007-field-type-extractor — Тесты
 
-## Статус: pending
+## Статус: complete
 
 ## Описание
 
