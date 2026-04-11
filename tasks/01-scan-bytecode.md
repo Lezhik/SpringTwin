@@ -84,7 +84,7 @@ graph TD
 | 019 | +          | graph-builder-merge       | Поддержка merge-inner-classes в DependencyGraphBuilder              | 017           |
 | 020 | +          | service-merge             | Передача mergeInnerClasses из ScanBytecodeParams в builder          | 018, 019      |
 | 021 | +          | cli-merge                 | Добавление опции --merge-inner-classes в CLI команду                | 018, 020      |
-| 022 | -          | e2e-merge-tests           | End-to-end тесты для merge-inner-classes                            | 021           |
+| 022 | +          | e2e-merge-tests           | End-to-end тесты для merge-inner-classes                            | 021           |
 
 ## Чек-лист задач
 
@@ -217,7 +217,7 @@ graph TD
 - [+] [021-cli-merge-fix](scan-bytecode/021-cli-merge-fix.md)
 
 ### Фича 022: e2e-merge-tests
-- [ ] [022-e2e-merge-tests-api](scan-bytecode/022-e2e-merge-tests-api.md)
-- [ ] [022-e2e-merge-tests-tests](scan-bytecode/022-e2e-merge-tests-tests.md)
-- [ ] [022-e2e-merge-tests-code](scan-bytecode/022-e2e-merge-tests-code.md)
-- [ ] [022-e2e-merge-tests-fix](scan-bytecode/022-e2e-merge-tests-fix.md)
+- [+] [022-e2e-merge-tests-api](scan-bytecode/022-e2e-merge-tests-api.md)
+- [+] [022-e2e-merge-tests-tests](scan-bytecode/022-e2e-merge-tests-tests.md)
+- [+] [022-e2e-merge-tests-code](scan-bytecode/022-e2e-merge-tests-code.md)
+- [+] [022-e2e-merge-tests-fix](scan-bytecode/022-e2e-merge-tests-fix.md)
