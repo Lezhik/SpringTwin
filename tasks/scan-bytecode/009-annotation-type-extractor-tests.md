@@ -1,6 +1,6 @@
 # 009-annotation-type-extractor — Тесты
 
-## Статус: pending
+## Статус: complete
 
 ## Описание
 
