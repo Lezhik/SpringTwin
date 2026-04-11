@@ -6,6 +6,7 @@ import java.util.Set;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.tree.ClassNode;
 import org.objectweb.asm.tree.FieldNode;
+import org.springframework.stereotype.Component;
 
 /**
  * Extracts field type dependencies from Java bytecode.
@@ -16,6 +17,7 @@ import org.objectweb.asm.tree.FieldNode;
  * <p>Handles regular fields, arrays (references base type), and generic fields.
  * Uses ASM's ClassNode for bytecode parsing.
  */
+@Component
 public class FieldTypeExtractor {
 
     /**
@@ -53,7 +55,7 @@ public class FieldTypeExtractor {
 
                 // Extract generic types from signature
                 if (field.signature != null) {
-                    Set<String> genericTypes = GenericTypeExtractor.extractTypes(field.signature);
+                    Set<String> genericTypes = GenericTypeExtractor.extractTypeNames(field.signature);
                     result.addAll(genericTypes);
                 }
             }

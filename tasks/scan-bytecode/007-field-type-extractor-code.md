@@ -1,6 +1,6 @@
 # 007-field-type-extractor — Реализация
 
-## Статус: pending
+## Статус: complete
 
 ## Описание
 

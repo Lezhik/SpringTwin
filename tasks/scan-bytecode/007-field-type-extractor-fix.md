@@ -1,6 +1,6 @@
 # 007-field-type-extractor — Исправление
 
-## Статус: pending
+## Статус: complete
 
 ## Описание
 

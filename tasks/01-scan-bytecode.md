@@ -66,7 +66,7 @@ graph TD
 | 004 | +          | class-file-scanner        | Рекурсивное сканирование директории для поиска .class файлов        | —             |
 | 005 | +          | generic-type-extractor    | Извлечение типов из generic-сигнатур                                | 002           |
 | 006 | +          | inheritance-extractor     | Извлечение зависимостей наследования и имплементации                | 002, 005      |
-| 007 | -          | field-type-extractor      | Извлечение зависимостей по типам полей                              | 002, 005      |
+| 007 | +          | field-type-extractor      | Извлечение зависимостей по типам полей                              | 002, 005      |
 | 008 | -          | method-type-extractor     | Извлечение зависимостей по типам параметров и возвращаемых значений | 002, 005      |
 | 009 | -          | annotation-type-extractor | Извлечение зависимостей по аннотациям                               | 002, 005      |
 | 010 | -          | code-usage-extractor      | Извлечение зависимостей по использованию в коде методов             | 002           |
@@ -118,10 +118,10 @@ graph TD
 - [+] [006-inheritance-extractor-fix](scan-bytecode/006-inheritance-extractor-fix.md)
 
 ### Фича 007: field-type-extractor
-- [ ] [007-field-type-extractor-api](scan-bytecode/007-field-type-extractor-api.md)
-- [ ] [007-field-type-extractor-tests](scan-bytecode/007-field-type-extractor-tests.md)
-- [ ] [007-field-type-extractor-code](scan-bytecode/007-field-type-extractor-code.md)
-- [ ] [007-field-type-extractor-fix](scan-bytecode/007-field-type-extractor-fix.md)
+- [+] [007-field-type-extractor-api](scan-bytecode/007-field-type-extractor-api.md)
+- [+] [007-field-type-extractor-tests](scan-bytecode/007-field-type-extractor-tests.md)
+- [+] [007-field-type-extractor-code](scan-bytecode/007-field-type-extractor-code.md)
+- [+] [007-field-type-extractor-fix](scan-bytecode/007-field-type-extractor-fix.md)
 
 ### Фича 008: method-type-extractor
 - [ ] [008-method-type-extractor-api](scan-bytecode/008-method-type-extractor-api.md)
