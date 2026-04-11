@@ -1,6 +1,6 @@
 # 022-e2e-merge-tests — API
 
-## Статус: pending
+## Статус: complete
 
 ## Описание
 
