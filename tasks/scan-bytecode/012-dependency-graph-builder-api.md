@@ -1,6 +1,6 @@
 # 012-dependency-graph-builder — API
 
-## Статус: pending
+## Статус: complete
 
 ## Описание
 
