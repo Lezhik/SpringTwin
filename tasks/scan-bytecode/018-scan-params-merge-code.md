@@ -1,6 +1,6 @@
 # 018-scan-params-merge — Реализация
 
-## Статус: pending
+## Статус: complete
 
 ## Описание
 
