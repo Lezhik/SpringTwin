@@ -73,7 +73,7 @@ graph TD
 | 011 | +          | bytecode-class-analyzer   | Оркестрация экстракторов для одного класса                          | 006–010       |
 | 012 | +          | dependency-graph-builder  | Построение полного графа зависимостей                               | 004, 011, 003 |
 | 013 | +          | dependency-json-writer    | Запись графа зависимостей в JSON файл                               | —             |
-| 014 | -          | scan-bytecode-service     | Главный сервис пайплайна scan-bytecode                              | 001, 012, 013 |
+| 014 | +          | scan-bytecode-service     | Главный сервис пайплайна scan-bytecode                              | 001, 012, 013 |
 | 015 | -          | cli-command               | CLI команда scan-bytecode                                           | 001, 014      |
 | 016 | -          | e2e-tests                 | End-to-end тесты полного пайплайна                                  | 015           |
 
@@ -160,10 +160,10 @@ graph TD
 - [+] [013-dependency-json-writer-fix](scan-bytecode/013-dependency-json-writer-fix.md)
 
 ### Фича 014: scan-bytecode-service
-- [ ] [014-scan-bytecode-service-api](scan-bytecode/014-scan-bytecode-service-api.md)
-- [ ] [014-scan-bytecode-service-tests](scan-bytecode/014-scan-bytecode-service-tests.md)
-- [ ] [014-scan-bytecode-service-code](scan-bytecode/014-scan-bytecode-service-code.md)
-- [ ] [014-scan-bytecode-service-fix](scan-bytecode/014-scan-bytecode-service-fix.md)
+- [+] [014-scan-bytecode-service-api](scan-bytecode/014-scan-bytecode-service-api.md)
+- [+] [014-scan-bytecode-service-tests](scan-bytecode/014-scan-bytecode-service-tests.md)
+- [+] [014-scan-bytecode-service-code](scan-bytecode/014-scan-bytecode-service-code.md)
+- [+] [014-scan-bytecode-service-fix](scan-bytecode/014-scan-bytecode-service-fix.md)
 
 ### Фича 015: cli-command
 - [ ] [015-cli-command-api](scan-bytecode/015-cli-command-api.md)

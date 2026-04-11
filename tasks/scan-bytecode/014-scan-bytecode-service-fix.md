@@ -1,6 +1,6 @@
 # 014-scan-bytecode-service — Исправление
 
-## Статус: pending
+## Статус: complete
 
 ## Описание
 

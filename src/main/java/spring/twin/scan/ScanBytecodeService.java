@@ -3,14 +3,14 @@ package spring.twin.scan;
 import java.util.Map;
 import java.util.Set;
 
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 /**
  * Main service for the scan-bytecode pipeline.
  * Orchestrates the entire process: accepts parameters, builds the dependency graph,
  * and writes the result to a JSON file.
  */
-@Component
+@Service
 public class ScanBytecodeService {
 
     private final DependencyGraphBuilder dependencyGraphBuilder;
