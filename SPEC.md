@@ -109,7 +109,7 @@ type определяет тип связи (базовый класс, поле
 	  {"type": "FIELD", "details": "paymentClient"}.
 	], 
 	"com.example.repository.OrderRepository": [
-	  {"type": "FIELD", "details": "paymentClient"}.
+	  {"type": "FIELD", "details": "orderRepository"}.
 	]
   ],
   "com.example.repository.OrderRepository": [
