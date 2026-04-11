@@ -1,6 +1,6 @@
 # 014-scan-bytecode-service — API
 
-## Статус: pending
+## Статус: complete
 
 ## Описание
 

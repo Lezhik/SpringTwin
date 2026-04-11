@@ -1,0 +1,65 @@
+package spring.twin.scan;
+
+import java.util.Map;
+import java.util.Set;
+
+import org.springframework.stereotype.Component;
+
+/**
+ * Main service for the scan-bytecode pipeline.
+ * Orchestrates the entire process: accepts parameters, builds the dependency graph,
+ * and writes the result to a JSON file.
+ */
+@Component
+public class ScanBytecodeService {
+
+    private final DependencyGraphBuilder dependencyGraphBuilder;
+    private final DependencyJsonWriter dependencyJsonWriter;
+
+    /**
+     * Constructs a new ScanBytecodeService with the required dependencies.
+     *
+     * @param dependencyGraphBuilder the builder for constructing the dependency graph
+     * @param dependencyJsonWriter   the writer for serializing the graph to JSON
+     */
+    public ScanBytecodeService(DependencyGraphBuilder dependencyGraphBuilder, DependencyJsonWriter dependencyJsonWriter) {
+        this.dependencyGraphBuilder = dependencyGraphBuilder;
+        this.dependencyJsonWriter = dependencyJsonWriter;
+    }
+
+    /**
+     * Executes the scan-bytecode pipeline.
+     * Builds the dependency graph from .class files and writes it to a JSON file.
+     *
+     * <p>This method:
+     * <ul>
+     *   <li>Calls {@code dependencyGraphBuilder.build()} with the classes directory and masks from params</li>
+     *   <li>Calls {@code dependencyJsonWriter.write()} to serialize the graph to the output file</li>
+     * </ul>
+     *
+     * @param params the parameters for the scan-bytecode command
+     */
+    public void execute(ScanBytecodeParams params) {
+        Map<String, Set<String>> graph = dependencyGraphBuilder.build(
+                params.classesDir(),
+                params.includeMasks(),
+                params.excludeMasks()
+        );
+        dependencyJsonWriter.write(graph, params.outputFile());
+    }
+
+    /**
+     * Analyzes bytecode and returns the dependency graph without writing to a file.
+     * Useful for programmatic usage when the graph is needed in memory.
+     *
+     * @param params the parameters for the scan-bytecode command
+     * @return a map from FQCN to set of dependency FQCNs
+     */
+    public Map<String, Set<String>> analyze(ScanBytecodeParams params) {
+        return dependencyGraphBuilder.build(
+                params.classesDir(),
+                params.includeMasks(),
+                params.excludeMasks()
+        );
+    }
+}
