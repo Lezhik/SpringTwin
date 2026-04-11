@@ -1,6 +1,6 @@
 # 011-bytecode-class-analyzer — Исправление
 
-## Статус: pending
+## Статус: complete
 
 ## Описание
 

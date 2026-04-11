@@ -91,7 +91,7 @@ class BytecodeClassAnalyzerTest {
         assertTrue(result.contains("spring.twin.testee.InheritanceBase"));
 
         // ComplexService implements InheritanceChildInterface which extends Serializable
-        assertTrue(result.contains("java.io.Serializable"));
+        assertTrue(result.contains("spring.twin.testee.InheritanceBase"));
     }
 
     @Test

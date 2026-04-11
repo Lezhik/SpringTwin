@@ -1,6 +1,6 @@
 # 011-bytecode-class-analyzer — Реализация
 
-## Статус: pending
+## Статус: complete
 
 ## Описание
 

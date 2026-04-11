@@ -70,7 +70,7 @@ graph TD
 | 008 | +          | method-type-extractor     | Извлечение зависимостей по типам параметров и возвращаемых значений | 002, 005      |
 | 009 | +          | annotation-type-extractor | Извлечение зависимостей по аннотациям                               | 002, 005      |
 | 010 | +          | code-usage-extractor      | Извлечение зависимостей по использованию в коде методов             | 002           |
-| 011 | -          | bytecode-class-analyzer   | Оркестрация экстракторов для одного класса                          | 006–010       |
+| 011 | +          | bytecode-class-analyzer   | Оркестрация экстракторов для одного класса                          | 006–010       |
 | 012 | -          | dependency-graph-builder  | Построение полного графа зависимостей                               | 004, 011, 003 |
 | 013 | -          | dependency-json-writer    | Запись графа зависимостей в JSON файл                               | —             |
 | 014 | -          | scan-bytecode-service     | Главный сервис пайплайна scan-bytecode                              | 001, 012, 013 |
@@ -142,10 +142,10 @@ graph TD
 - [+] [010-code-usage-extractor-fix](scan-bytecode/010-code-usage-extractor-fix.md)
 
 ### Фича 011: bytecode-class-analyzer
-- [ ] [011-bytecode-class-analyzer-api](scan-bytecode/011-bytecode-class-analyzer-api.md)
-- [ ] [011-bytecode-class-analyzer-tests](scan-bytecode/011-bytecode-class-analyzer-tests.md)
-- [ ] [011-bytecode-class-analyzer-code](scan-bytecode/011-bytecode-class-analyzer-code.md)
-- [ ] [011-bytecode-class-analyzer-fix](scan-bytecode/011-bytecode-class-analyzer-fix.md)
+- [+] [011-bytecode-class-analyzer-api](scan-bytecode/011-bytecode-class-analyzer-api.md)
+- [+] [011-bytecode-class-analyzer-tests](scan-bytecode/011-bytecode-class-analyzer-tests.md)
+- [+] [011-bytecode-class-analyzer-code](scan-bytecode/011-bytecode-class-analyzer-code.md)
+- [+] [011-bytecode-class-analyzer-fix](scan-bytecode/011-bytecode-class-analyzer-fix.md)
 
 ### Фича 012: dependency-graph-builder
 - [ ] [012-dependency-graph-builder-api](scan-bytecode/012-dependency-graph-builder-api.md)

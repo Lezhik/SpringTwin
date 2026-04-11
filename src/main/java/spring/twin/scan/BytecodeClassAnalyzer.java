@@ -41,11 +41,17 @@ public class BytecodeClassAnalyzer {
      * <p>All extracted types are returned as Fully Qualified Class Names (FQCN).
      *
      * @param classBytes the bytecode of the class to analyze
-     * @return a set of FQCN strings representing all dependencies of the class;
-     *         empty set if classBytes is null
+     * @return a set of FQCN strings representing all dependencies of the class
+     * @throws IllegalArgumentException if classBytes is null
      */
     public Set<String> extractDependencies(byte[] classBytes) {
-        return new HashSet<>();
+        Set<String> dependencies = new HashSet<>();
+        dependencies.addAll(inheritanceExtractor.extract(classBytes));
+        dependencies.addAll(fieldTypeExtractor.extract(classBytes));
+        dependencies.addAll(methodTypeExtractor.extract(classBytes));
+        dependencies.addAll(annotationTypeExtractor.extract(classBytes));
+        dependencies.addAll(codeUsageExtractor.extract(classBytes));
+        return Set.copyOf(dependencies);
     }
 
     /**
@@ -55,9 +61,16 @@ public class BytecodeClassAnalyzer {
      * then converts it to FQCN using {@link FqcnNormalizer#fromInternalName(String)}.
      *
      * @param classBytes the bytecode of the class to analyze
-     * @return the FQCN of the class, or null if classBytes is null or class name cannot be determined
+     * @return the FQCN of the class
+     * @throws IllegalArgumentException if classBytes is null or class name cannot be extracted
      */
     public String extractClassName(byte[] classBytes) {
-        return null;
+        if (classBytes == null) {
+            throw new IllegalArgumentException("classBytes must not be null");
+        }
+        ClassReader classReader = new ClassReader(classBytes);
+        String internalName = classReader.getClassName();
+        return FqcnNormalizer.fromInternalName(internalName)
+                .orElseThrow(() -> new IllegalArgumentException("Cannot extract class name from bytecode"));
     }
 }
