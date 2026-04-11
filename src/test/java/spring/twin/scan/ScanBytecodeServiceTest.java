@@ -16,8 +16,7 @@ import java.util.Set;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -55,11 +54,11 @@ class ScanBytecodeServiceTest {
 
         Map<String, Set<String>> graph = new HashMap<>();
         graph.put("com.example.Service", Set.of("com.example.Dependency"));
-        when(dependencyGraphBuilder.build(any(), any(), any())).thenReturn(graph);
+        when(dependencyGraphBuilder.build(any(), any(), any(), anyBoolean())).thenReturn(graph);
 
         service.execute(params);
 
-        verify(dependencyGraphBuilder).build(classesDir, includeMasks, excludeMasks);
+        verify(dependencyGraphBuilder).build(classesDir, includeMasks, excludeMasks, true);
         verify(dependencyJsonWriter).write(graph, outputFile);
     }
 
@@ -77,7 +76,7 @@ class ScanBytecodeServiceTest {
         Map<String, Set<String>> expectedGraph = new LinkedHashMap<>();
         expectedGraph.put("com.example.OrderService", Set.of("com.example.PaymentClient", "com.example.OrderRepository"));
         expectedGraph.put("com.example.OrderRepository", Set.of("com.example.OrderModel"));
-        when(dependencyGraphBuilder.build(any(), any(), any())).thenReturn(expectedGraph);
+        when(dependencyGraphBuilder.build(any(), any(), any(), anyBoolean())).thenReturn(expectedGraph);
 
         service.execute(params);
 
@@ -102,11 +101,11 @@ class ScanBytecodeServiceTest {
 
         Map<String, Set<String>> expectedGraph = new HashMap<>();
         expectedGraph.put("com.example.Service", Set.of("com.example.Dependency"));
-        when(dependencyGraphBuilder.build(any(), any(), any())).thenReturn(expectedGraph);
+        when(dependencyGraphBuilder.build(any(), any(), any(), anyBoolean())).thenReturn(expectedGraph);
 
         Map<String, Set<String>> result = service.analyze(params);
 
-        verify(dependencyGraphBuilder).build(classesDir, includeMasks, excludeMasks);
+        verify(dependencyGraphBuilder).build(classesDir, includeMasks, excludeMasks, true);
         verify(dependencyJsonWriter, never()).write(any(), any());
         assertEquals(expectedGraph, result);
     }
@@ -124,11 +123,11 @@ class ScanBytecodeServiceTest {
 
         Map<String, Set<String>> graph = new HashMap<>();
         graph.put("com.example.Service", Set.of("com.example.Dependency"));
-        when(dependencyGraphBuilder.build(any(), any(), any())).thenReturn(graph);
+        when(dependencyGraphBuilder.build(any(), any(), any(), anyBoolean())).thenReturn(graph);
 
         service.execute(params);
 
-        verify(dependencyGraphBuilder).build(classesDir, includeMasks, excludeMasks);
+        verify(dependencyGraphBuilder).build(classesDir, includeMasks, excludeMasks, true);
         verify(dependencyJsonWriter).write(graph, outputFile);
     }
 
@@ -144,11 +143,11 @@ class ScanBytecodeServiceTest {
         ScanBytecodeParams params = new ScanBytecodeParams(classesDir, outputFile, includeMasks, excludeMasks);
 
         Map<String, Set<String>> emptyGraph = new HashMap<>();
-        when(dependencyGraphBuilder.build(any(), any(), any())).thenReturn(emptyGraph);
+        when(dependencyGraphBuilder.build(any(), any(), any(), anyBoolean())).thenReturn(emptyGraph);
 
         service.execute(params);
 
-        verify(dependencyGraphBuilder).build(classesDir, includeMasks, excludeMasks);
+        verify(dependencyGraphBuilder).build(classesDir, includeMasks, excludeMasks, true);
         verify(dependencyJsonWriter).write(emptyGraph, outputFile);
     }
 
@@ -164,12 +163,96 @@ class ScanBytecodeServiceTest {
         ScanBytecodeParams params = new ScanBytecodeParams(classesDir, outputFile, includeMasks, excludeMasks);
 
         Map<String, Set<String>> emptyGraph = new HashMap<>();
-        when(dependencyGraphBuilder.build(any(), any(), any())).thenReturn(emptyGraph);
+        when(dependencyGraphBuilder.build(any(), any(), any(), anyBoolean())).thenReturn(emptyGraph);
 
         Map<String, Set<String>> result = service.analyze(params);
 
         assertTrue(result.isEmpty());
         assertEquals(emptyGraph, result);
         verify(dependencyJsonWriter, never()).write(any(), any());
+    }
+
+    /**
+     * Test: execute() с mergeInnerClasses=true передаёт флаг в builder
+     */
+    @Test
+    void testExecute_withMergeInnerClassesTrue_passesFlagToBuilder() {
+        Path classesDir = tempDir.resolve("classes");
+        Path outputFile = tempDir.resolve("output.json");
+        List<String> includeMasks = List.of();
+        List<String> excludeMasks = List.of();
+        ScanBytecodeParams params = new ScanBytecodeParams(classesDir, outputFile, includeMasks, excludeMasks, true);
+
+        Map<String, Set<String>> graph = new HashMap<>();
+        when(dependencyGraphBuilder.build(any(), any(), any(), anyBoolean())).thenReturn(graph);
+
+        service.execute(params);
+
+        ArgumentCaptor<Boolean> mergeFlagCaptor = ArgumentCaptor.forClass(Boolean.class);
+        verify(dependencyGraphBuilder).build(eq(classesDir), eq(includeMasks), eq(excludeMasks), mergeFlagCaptor.capture());
+        assertTrue(mergeFlagCaptor.getValue());
+    }
+
+    /**
+     * Test: execute() с mergeInnerClasses=false передаёт флаг в builder
+     */
+    @Test
+    void testExecute_withMergeInnerClassesFalse_passesFlagToBuilder() {
+        Path classesDir = tempDir.resolve("classes");
+        Path outputFile = tempDir.resolve("output.json");
+        List<String> includeMasks = List.of();
+        List<String> excludeMasks = List.of();
+        ScanBytecodeParams params = new ScanBytecodeParams(classesDir, outputFile, includeMasks, excludeMasks, false);
+
+        Map<String, Set<String>> graph = new HashMap<>();
+        when(dependencyGraphBuilder.build(any(), any(), any(), anyBoolean())).thenReturn(graph);
+
+        service.execute(params);
+
+        ArgumentCaptor<Boolean> mergeFlagCaptor = ArgumentCaptor.forClass(Boolean.class);
+        verify(dependencyGraphBuilder).build(eq(classesDir), eq(includeMasks), eq(excludeMasks), mergeFlagCaptor.capture());
+        assertFalse(mergeFlagCaptor.getValue());
+    }
+
+    /**
+     * Test: analyze() с mergeInnerClasses=true передаёт флаг в builder
+     */
+    @Test
+    void testAnalyze_withMergeInnerClassesTrue_passesFlagToBuilder() {
+        Path classesDir = tempDir.resolve("classes");
+        Path outputFile = tempDir.resolve("output.json");
+        List<String> includeMasks = List.of();
+        List<String> excludeMasks = List.of();
+        ScanBytecodeParams params = new ScanBytecodeParams(classesDir, outputFile, includeMasks, excludeMasks, true);
+
+        Map<String, Set<String>> graph = new HashMap<>();
+        when(dependencyGraphBuilder.build(any(), any(), any(), anyBoolean())).thenReturn(graph);
+
+        service.analyze(params);
+
+        ArgumentCaptor<Boolean> mergeFlagCaptor = ArgumentCaptor.forClass(Boolean.class);
+        verify(dependencyGraphBuilder).build(eq(classesDir), eq(includeMasks), eq(excludeMasks), mergeFlagCaptor.capture());
+        assertTrue(mergeFlagCaptor.getValue());
+    }
+
+    /**
+     * Test: analyze() с mergeInnerClasses=false передаёт флаг в builder
+     */
+    @Test
+    void testAnalyze_withMergeInnerClassesFalse_passesFlagToBuilder() {
+        Path classesDir = tempDir.resolve("classes");
+        Path outputFile = tempDir.resolve("output.json");
+        List<String> includeMasks = List.of();
+        List<String> excludeMasks = List.of();
+        ScanBytecodeParams params = new ScanBytecodeParams(classesDir, outputFile, includeMasks, excludeMasks, false);
+
+        Map<String, Set<String>> graph = new HashMap<>();
+        when(dependencyGraphBuilder.build(any(), any(), any(), anyBoolean())).thenReturn(graph);
+
+        service.analyze(params);
+
+        ArgumentCaptor<Boolean> mergeFlagCaptor = ArgumentCaptor.forClass(Boolean.class);
+        verify(dependencyGraphBuilder).build(eq(classesDir), eq(includeMasks), eq(excludeMasks), mergeFlagCaptor.capture());
+        assertFalse(mergeFlagCaptor.getValue());
     }
 }
