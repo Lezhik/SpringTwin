@@ -1,6 +1,6 @@
 # 012-dependency-graph-builder — Тесты
 
-## Статус: pending
+## Статус: complete
 
 ## Описание
 
