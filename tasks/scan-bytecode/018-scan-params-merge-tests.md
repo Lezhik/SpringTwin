@@ -1,6 +1,6 @@
 # 018-scan-params-merge — Тесты
 
-## Статус: pending
+## Статус: complete
 
 ## Описание
 

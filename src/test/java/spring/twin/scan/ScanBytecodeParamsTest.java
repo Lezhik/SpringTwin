@@ -120,4 +120,70 @@ class ScanBytecodeParamsTest {
         assertEquals(List.of("com.example.*", "*.service.*"), params.includeMasks());
         assertEquals(List.of("*.internal.*"), params.excludeMasks());
     }
+
+    @Test
+    void testOf_withMergeInnerClassesTrue_storesTrue() {
+        ScanBytecodeParams params = ScanBytecodeParams.of(
+                CLASSES_DIR,
+                OUTPUT_FILE,
+                "com.example.*",
+                "*.internal.*",
+                true
+        );
+
+        assertTrue(params.mergeInnerClasses());
+    }
+
+    @Test
+    void testOf_withMergeInnerClassesFalse_storesFalse() {
+        ScanBytecodeParams params = ScanBytecodeParams.of(
+                CLASSES_DIR,
+                OUTPUT_FILE,
+                "com.example.*",
+                "*.internal.*",
+                false
+        );
+
+        assertFalse(params.mergeInnerClasses());
+    }
+
+    @Test
+    void testConstructor_withMergeInnerClasses_storesValue() {
+        List<String> includeMasks = List.of("com.example.*");
+        List<String> excludeMasks = List.of("*.internal.*");
+
+        ScanBytecodeParams paramsTrue = new ScanBytecodeParams(
+                CLASSES_DIR, OUTPUT_FILE, includeMasks, excludeMasks, true
+        );
+        ScanBytecodeParams paramsFalse = new ScanBytecodeParams(
+                CLASSES_DIR, OUTPUT_FILE, includeMasks, excludeMasks, false
+        );
+
+        assertTrue(paramsTrue.mergeInnerClasses());
+        assertFalse(paramsFalse.mergeInnerClasses());
+    }
+
+    @Test
+    void testBackwardCompatibleConstructor_defaultMergeIsTrue() {
+        List<String> includeMasks = List.of("com.example.*");
+        List<String> excludeMasks = List.of("*.internal.*");
+
+        ScanBytecodeParams params = new ScanBytecodeParams(
+                CLASSES_DIR, OUTPUT_FILE, includeMasks, excludeMasks
+        );
+
+        assertTrue(params.mergeInnerClasses());
+    }
+
+    @Test
+    void testBackwardCompatibleOf_defaultMergeIsTrue() {
+        ScanBytecodeParams params = ScanBytecodeParams.of(
+                CLASSES_DIR,
+                OUTPUT_FILE,
+                "com.example.*",
+                "*.internal.*"
+        );
+
+        assertTrue(params.mergeInnerClasses());
+    }
 }
