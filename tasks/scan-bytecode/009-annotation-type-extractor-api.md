@@ -1,6 +1,6 @@
 # 009-annotation-type-extractor — API
 
-## Статус: pending
+## Статус: complete
 
 ## Описание
 
