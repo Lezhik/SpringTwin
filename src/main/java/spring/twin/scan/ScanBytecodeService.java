@@ -43,7 +43,8 @@ public class ScanBytecodeService {
         Map<String, Set<String>> graph = dependencyGraphBuilder.build(
                 params.classesDir(),
                 params.includeMasks(),
-                params.excludeMasks()
+                params.excludeMasks(),
+                params.mergeInnerClasses()
         );
         dependencyJsonWriter.write(graph, params.outputFile());
     }
@@ -59,7 +60,8 @@ public class ScanBytecodeService {
         return dependencyGraphBuilder.build(
                 params.classesDir(),
                 params.includeMasks(),
-                params.excludeMasks()
+                params.excludeMasks(),
+                params.mergeInnerClasses()
         );
     }
 }

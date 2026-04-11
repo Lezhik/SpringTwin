@@ -1,6 +1,6 @@
 # 020-service-merge — API
 
-## Статус: pending
+## Статус: complete
 
 ## Описание
 
