@@ -1,6 +1,6 @@
 # 008-method-type-extractor — Исправление
 
-## Статус: pending
+## Статус: complete
 
 ## Описание
 

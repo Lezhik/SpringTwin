@@ -1,6 +1,6 @@
 # 008-method-type-extractor — Реализация
 
-## Статус: pending
+## Статус: complete
 
 ## Описание
 

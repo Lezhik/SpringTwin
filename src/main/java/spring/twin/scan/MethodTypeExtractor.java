@@ -1,7 +1,12 @@
 package spring.twin.scan;
 
+import java.util.HashSet;
 import java.util.Set;
 
+import org.objectweb.asm.ClassReader;
+import org.objectweb.asm.Type;
+import org.objectweb.asm.tree.ClassNode;
+import org.objectweb.asm.tree.MethodNode;
 import org.springframework.stereotype.Component;
 
 /**
@@ -35,6 +40,35 @@ public class MethodTypeExtractor {
      * @throws IllegalArgumentException if classBytes is null
      */
     public Set<String> extract(byte[] classBytes) {
-        throw new UnsupportedOperationException("Not implemented yet");
+        if (classBytes == null) {
+            throw new IllegalArgumentException("classBytes cannot be null");
+        }
+
+        ClassReader classReader = new ClassReader(classBytes);
+        ClassNode classNode = new ClassNode();
+        classReader.accept(classNode, 0);
+
+        Set<String> types = new HashSet<>();
+
+        for (MethodNode method : classNode.methods) {
+            // Extract types from method descriptor
+            Type[] argumentTypes = Type.getArgumentTypes(method.desc);
+            for (Type argType : argumentTypes) {
+                FqcnNormalizer.fromDescriptor(argType.getDescriptor())
+                        .ifPresent(types::add);
+            }
+
+            // Extract return type from method descriptor
+            Type returnType = Type.getReturnType(method.desc);
+            FqcnNormalizer.fromDescriptor(returnType.getDescriptor())
+                    .ifPresent(types::add);
+
+            // Extract types from generic signature if present
+            if (method.signature != null) {
+                types.addAll(GenericTypeExtractor.extractTypes(method.signature));
+            }
+        }
+
+        return types;
     }
 }

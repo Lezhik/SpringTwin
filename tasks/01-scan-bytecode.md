@@ -124,10 +124,10 @@ graph TD
 - [+] [007-field-type-extractor-fix](scan-bytecode/007-field-type-extractor-fix.md)
 
 ### Фича 008: method-type-extractor
-- [ ] [008-method-type-extractor-api](scan-bytecode/008-method-type-extractor-api.md)
-- [ ] [008-method-type-extractor-tests](scan-bytecode/008-method-type-extractor-tests.md)
-- [ ] [008-method-type-extractor-code](scan-bytecode/008-method-type-extractor-code.md)
-- [ ] [008-method-type-extractor-fix](scan-bytecode/008-method-type-extractor-fix.md)
+- [+] [008-method-type-extractor-api](scan-bytecode/008-method-type-extractor-api.md)
+- [+] [008-method-type-extractor-tests](scan-bytecode/008-method-type-extractor-tests.md)
+- [+] [008-method-type-extractor-code](scan-bytecode/008-method-type-extractor-code.md)
+- [+] [008-method-type-extractor-fix](scan-bytecode/008-method-type-extractor-fix.md)
 
 ### Фича 009: annotation-type-extractor
 - [ ] [009-annotation-type-extractor-api](scan-bytecode/009-annotation-type-extractor-api.md)
