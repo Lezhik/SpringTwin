@@ -1,6 +1,6 @@
 # 010-code-usage-extractor — Реализация
 
-## Статус: pending
+## Статус: complete
 
 ## Описание
 

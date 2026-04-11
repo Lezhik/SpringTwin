@@ -1,6 +1,6 @@
 # 010-code-usage-extractor — Исправление
 
-## Статус: pending
+## Статус: complete
 
 ## Описание
 

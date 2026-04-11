@@ -1,7 +1,14 @@
 package spring.twin.scan;
 
+import java.util.HashSet;
 import java.util.Set;
 
+import org.objectweb.asm.ClassReader;
+import org.objectweb.asm.ClassVisitor;
+import org.objectweb.asm.Label;
+import org.objectweb.asm.MethodVisitor;
+import org.objectweb.asm.Opcodes;
+import org.objectweb.asm.Type;
 import org.springframework.stereotype.Component;
 
 /**
@@ -40,7 +47,53 @@ public class CodeUsageExtractor {
      * @throws IllegalArgumentException if classBytes is null
      */
     public Set<String> extract(byte[] classBytes) {
-        throw new UnsupportedOperationException("Not implemented yet");
+        if (classBytes == null) {
+            throw new IllegalArgumentException("classBytes must not be null");
+        }
+
+        Set<String> types = new HashSet<>();
+
+        ClassReader classReader = new ClassReader(classBytes);
+        ClassVisitor classVisitor = new ClassVisitor(Opcodes.ASM9) {
+            @Override
+            public MethodVisitor visitMethod(int access, String name, String descriptor,
+                                             String signature, String[] exceptions) {
+                return new MethodVisitor(Opcodes.ASM9) {
+                    @Override
+                    public void visitTypeInsn(int opcode, String type) {
+                        // NEW, ANEWARRAY, CHECKCAST, INSTANCEOF - type is internal name
+                        FqcnNormalizer.fromInternalName(type).ifPresent(types::add);
+                    }
+
+                    @Override
+                    public void visitFieldInsn(int opcode, String owner, String name, String descriptor) {
+                        // GETSTATIC, PUTSTATIC, GETFIELD, PUTFIELD - owner is the class containing the field
+                        FqcnNormalizer.fromInternalName(owner).ifPresent(types::add);
+                    }
+
+                    @Override
+                    public void visitMethodInsn(int opcode, String owner, String name,
+                                                String descriptor, boolean isInterface) {
+                        // INVOKEVIRTUAL, INVOKESTATIC, INVOKESPECIAL, INVOKEINTERFACE
+                        // owner is the class/interface containing the method
+                        FqcnNormalizer.fromInternalName(owner).ifPresent(types::add);
+                    }
+
+                    @Override
+                    public void visitLdcInsn(Object value) {
+                        // LDC with Type value - class literal loading
+                        if (value instanceof Type) {
+                            Type type = (Type) value;
+                            FqcnNormalizer.fromDescriptor(type.getDescriptor())
+                                    .ifPresent(types::add);
+                        }
+                    }
+                };
+            }
+        };
+
+        classReader.accept(classVisitor, 0);
+        return types;
     }
 
 }

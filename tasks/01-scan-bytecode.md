@@ -69,7 +69,7 @@ graph TD
 | 007 | +          | field-type-extractor      | Извлечение зависимостей по типам полей                              | 002, 005      |
 | 008 | +          | method-type-extractor     | Извлечение зависимостей по типам параметров и возвращаемых значений | 002, 005      |
 | 009 | +          | annotation-type-extractor | Извлечение зависимостей по аннотациям                               | 002, 005      |
-| 010 | -          | code-usage-extractor      | Извлечение зависимостей по использованию в коде методов             | 002           |
+| 010 | +          | code-usage-extractor      | Извлечение зависимостей по использованию в коде методов             | 002           |
 | 011 | -          | bytecode-class-analyzer   | Оркестрация экстракторов для одного класса                          | 006–010       |
 | 012 | -          | dependency-graph-builder  | Построение полного графа зависимостей                               | 004, 011, 003 |
 | 013 | -          | dependency-json-writer    | Запись графа зависимостей в JSON файл                               | —             |
@@ -136,10 +136,10 @@ graph TD
 - [+] [009-annotation-type-extractor-fix](scan-bytecode/009-annotation-type-extractor-fix.md)
 
 ### Фича 010: code-usage-extractor
-- [ ] [010-code-usage-extractor-api](scan-bytecode/010-code-usage-extractor-api.md)
-- [ ] [010-code-usage-extractor-tests](scan-bytecode/010-code-usage-extractor-tests.md)
-- [ ] [010-code-usage-extractor-code](scan-bytecode/010-code-usage-extractor-code.md)
-- [ ] [010-code-usage-extractor-fix](scan-bytecode/010-code-usage-extractor-fix.md)
+- [+] [010-code-usage-extractor-api](scan-bytecode/010-code-usage-extractor-api.md)
+- [+] [010-code-usage-extractor-tests](scan-bytecode/010-code-usage-extractor-tests.md)
+- [+] [010-code-usage-extractor-code](scan-bytecode/010-code-usage-extractor-code.md)
+- [+] [010-code-usage-extractor-fix](scan-bytecode/010-code-usage-extractor-fix.md)
 
 ### Фича 011: bytecode-class-analyzer
 - [ ] [011-bytecode-class-analyzer-api](scan-bytecode/011-bytecode-class-analyzer-api.md)
