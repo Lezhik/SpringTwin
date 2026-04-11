@@ -52,7 +52,7 @@ class ScanBytecodeCommandTest {
         String include = "com.example.*";
         String exclude = "*.internal.*";
 
-        String result = command.scanBytecode(classesDir.toString(), outputFile.toString(), include, exclude);
+        String result = command.scanBytecode(classesDir.toString(), outputFile.toString(), include, exclude, "true");
 
         assertTrue(result.contains("Dependencies written to"));
         assertTrue(result.contains(outputFile.toString()));
@@ -68,7 +68,7 @@ class ScanBytecodeCommandTest {
         String include = "com.example.*;com.demo.*";
         String exclude = "*.internal.*";
 
-        command.scanBytecode(classesDir.toString(), outputFile.toString(), include, exclude);
+        command.scanBytecode(classesDir.toString(), outputFile.toString(), include, exclude, "true");
 
         ArgumentCaptor<ScanBytecodeParams> paramsCaptor = ArgumentCaptor.forClass(ScanBytecodeParams.class);
         verify(scanBytecodeService).execute(paramsCaptor.capture());
@@ -88,7 +88,7 @@ class ScanBytecodeCommandTest {
         String include = "";
         String exclude = "";
 
-        command.scanBytecode(classesDir.toString(), outputFile.toString(), include, exclude);
+        command.scanBytecode(classesDir.toString(), outputFile.toString(), include, exclude, "true");
 
         ArgumentCaptor<ScanBytecodeParams> paramsCaptor = ArgumentCaptor.forClass(ScanBytecodeParams.class);
         verify(scanBytecodeService).execute(paramsCaptor.capture());
@@ -126,7 +126,7 @@ class ScanBytecodeCommandTest {
         String nonExistingPath = "non_existing_directory";
         Path outputFile = tempDir.resolve("output.json");
 
-        String result = realCommand.scanBytecode(nonExistingPath, outputFile.toString(), "", "");
+        String result = realCommand.scanBytecode(nonExistingPath, outputFile.toString(), "", "", "true");
 
         assertTrue(result.startsWith("Error:"));
     }
@@ -141,7 +141,7 @@ class ScanBytecodeCommandTest {
         String include = "com.example.*;org.test.*";
         String exclude = "*.internal.*;*.temp.*";
 
-        command.scanBytecode(classesDir.toString(), outputFile.toString(), include, exclude);
+        command.scanBytecode(classesDir.toString(), outputFile.toString(), include, exclude, "true");
 
         ArgumentCaptor<ScanBytecodeParams> paramsCaptor = ArgumentCaptor.forClass(ScanBytecodeParams.class);
         verify(scanBytecodeService).execute(paramsCaptor.capture());
@@ -151,5 +151,83 @@ class ScanBytecodeCommandTest {
         assertEquals(outputFile, capturedParams.outputFile());
         assertEquals(List.of("com.example.*", "org.test.*"), capturedParams.includeMasks());
         assertEquals(List.of("*.internal.*", "*.temp.*"), capturedParams.excludeMasks());
+    }
+
+    /**
+     * Test: --merge-inner-classes true → params.mergeInnerClasses() == true
+     */
+    @Test
+    void testScanBytecode_withMergeInnerClassesTrue_passesTrueToParams() {
+        Path classesDir = tempDir.resolve("classes");
+        Path outputFile = tempDir.resolve("output.json");
+        String include = "com.example.*";
+        String exclude = "*.internal.*";
+
+        command.scanBytecode(classesDir.toString(), outputFile.toString(), include, exclude, "true");
+
+        ArgumentCaptor<ScanBytecodeParams> paramsCaptor = ArgumentCaptor.forClass(ScanBytecodeParams.class);
+        verify(scanBytecodeService).execute(paramsCaptor.capture());
+        ScanBytecodeParams capturedParams = paramsCaptor.getValue();
+
+        assertEquals(true, capturedParams.mergeInnerClasses());
+    }
+
+    /**
+     * Test: --merge-inner-classes false → params.mergeInnerClasses() == false
+     */
+    @Test
+    void testScanBytecode_withMergeInnerClassesFalse_passesFalseToParams() {
+        Path classesDir = tempDir.resolve("classes");
+        Path outputFile = tempDir.resolve("output.json");
+        String include = "com.example.*";
+        String exclude = "*.internal.*";
+
+        command.scanBytecode(classesDir.toString(), outputFile.toString(), include, exclude, "false");
+
+        ArgumentCaptor<ScanBytecodeParams> paramsCaptor = ArgumentCaptor.forClass(ScanBytecodeParams.class);
+        verify(scanBytecodeService).execute(paramsCaptor.capture());
+        ScanBytecodeParams capturedParams = paramsCaptor.getValue();
+
+        assertEquals(false, capturedParams.mergeInnerClasses());
+    }
+
+    /**
+     * Test: default value for --merge-inner-classes → mergeInnerClasses() == true
+     */
+    @Test
+    void testScanBytecode_defaultMergeInnerClasses_isTrue() {
+        Path classesDir = tempDir.resolve("classes");
+        Path outputFile = tempDir.resolve("output.json");
+        String include = "com.example.*";
+        String exclude = "*.internal.*";
+
+        // Pass "true" as default value (as specified in ShellOption defaultValue)
+        command.scanBytecode(classesDir.toString(), outputFile.toString(), include, exclude, "true");
+
+        ArgumentCaptor<ScanBytecodeParams> paramsCaptor = ArgumentCaptor.forClass(ScanBytecodeParams.class);
+        verify(scanBytecodeService).execute(paramsCaptor.capture());
+        ScanBytecodeParams capturedParams = paramsCaptor.getValue();
+
+        assertEquals(true, capturedParams.mergeInnerClasses());
+    }
+
+    /**
+     * Test: invalid merge value → Boolean.parseBoolean("invalid") == false, mergeInnerClasses() == false
+     */
+    @Test
+    void testScanBytecode_invalidMergeValue_treatedAsFalse() {
+        Path classesDir = tempDir.resolve("classes");
+        Path outputFile = tempDir.resolve("output.json");
+        String include = "com.example.*";
+        String exclude = "*.internal.*";
+
+        command.scanBytecode(classesDir.toString(), outputFile.toString(), include, exclude, "invalid");
+
+        ArgumentCaptor<ScanBytecodeParams> paramsCaptor = ArgumentCaptor.forClass(ScanBytecodeParams.class);
+        verify(scanBytecodeService).execute(paramsCaptor.capture());
+        ScanBytecodeParams capturedParams = paramsCaptor.getValue();
+
+        // Boolean.parseBoolean("invalid") returns false
+        assertEquals(false, capturedParams.mergeInnerClasses());
     }
 }
