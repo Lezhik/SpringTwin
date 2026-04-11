@@ -72,7 +72,7 @@ graph TD
 | 010 | +          | code-usage-extractor      | Извлечение зависимостей по использованию в коде методов             | 002           |
 | 011 | +          | bytecode-class-analyzer   | Оркестрация экстракторов для одного класса                          | 006–010       |
 | 012 | +          | dependency-graph-builder  | Построение полного графа зависимостей                               | 004, 011, 003 |
-| 013 | -          | dependency-json-writer    | Запись графа зависимостей в JSON файл                               | —             |
+| 013 | +          | dependency-json-writer    | Запись графа зависимостей в JSON файл                               | —             |
 | 014 | -          | scan-bytecode-service     | Главный сервис пайплайна scan-bytecode                              | 001, 012, 013 |
 | 015 | -          | cli-command               | CLI команда scan-bytecode                                           | 001, 014      |
 | 016 | -          | e2e-tests                 | End-to-end тесты полного пайплайна                                  | 015           |
@@ -154,10 +154,10 @@ graph TD
 - [+] [012-dependency-graph-builder-fix](scan-bytecode/012-dependency-graph-builder-fix.md)
 
 ### Фича 013: dependency-json-writer
-- [ ] [013-dependency-json-writer-api](scan-bytecode/013-dependency-json-writer-api.md)
-- [ ] [013-dependency-json-writer-tests](scan-bytecode/013-dependency-json-writer-tests.md)
-- [ ] [013-dependency-json-writer-code](scan-bytecode/013-dependency-json-writer-code.md)
-- [ ] [013-dependency-json-writer-fix](scan-bytecode/013-dependency-json-writer-fix.md)
+- [+] [013-dependency-json-writer-api](scan-bytecode/013-dependency-json-writer-api.md)
+- [+] [013-dependency-json-writer-tests](scan-bytecode/013-dependency-json-writer-tests.md)
+- [+] [013-dependency-json-writer-code](scan-bytecode/013-dependency-json-writer-code.md)
+- [+] [013-dependency-json-writer-fix](scan-bytecode/013-dependency-json-writer-fix.md)
 
 ### Фича 014: scan-bytecode-service
 - [ ] [014-scan-bytecode-service-api](scan-bytecode/014-scan-bytecode-service-api.md)
