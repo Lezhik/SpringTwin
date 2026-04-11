@@ -2,6 +2,7 @@ package spring.twin.command;
 
 import java.nio.file.Path;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.shell.standard.ShellComponent;
 import org.springframework.shell.standard.ShellMethod;
 import org.springframework.shell.standard.ShellOption;
@@ -16,6 +17,7 @@ import spring.twin.scan.ScanBytecodeService;
  * and optional include/exclude masks for filtering classes by their fully qualified names.
  */
 @ShellComponent
+@Slf4j
 public class ScanBytecodeCommand {
 
     private final ScanBytecodeService scanBytecodeService;
@@ -37,6 +39,9 @@ public class ScanBytecodeCommand {
      * <p>
      * Include and exclude masks can be used to filter classes by their fully qualified
      * class names (FQCN). Multiple masks can be specified separated by semicolons.
+     * <p>
+     * NOTE: On Windows, paths with backslashes must be quoted, e.g.: "d:\\devel\\pik\\MIK"
+     * or use forward slashes: d:/devel/pik/MIK
      *
      * @param classes path to directory containing .class files
      * @param output  path to output JSON file
@@ -46,7 +51,7 @@ public class ScanBytecodeCommand {
      */
     @ShellMethod(key = "scan-bytecode", value = "Scan bytecode and extract dependencies")
     public String scanBytecode(
-            @ShellOption(value = "--classes", help = "Path to directory with .class files") String classes,
+            @ShellOption(value = "--classes", help = "Path to directory with .class files (Windows: quote or use /)") String classes,
             @ShellOption(value = "--output", help = "Path to output JSON file") String output,
             @ShellOption(value = "--include", help = "FQCN include masks separated by ;", defaultValue = "") String include,
             @ShellOption(value = "--exclude", help = "FQCN exclude masks separated by ;", defaultValue = "") String exclude) {
@@ -59,8 +64,9 @@ public class ScanBytecodeCommand {
             );
             scanBytecodeService.execute(params);
             return "Dependencies written to: " + output;
-        } catch (Exception e) {
-            return "Error: " + e.getMessage();
+        } catch (Throwable t) {
+            log.error("Error: ", t);
+            return "Error: " + t.getMessage();
         }
     }
 }

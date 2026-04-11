@@ -54,6 +54,9 @@ AI агентов (Cursor AI, Kilo Code) для архитектурного р�
 
     spring-twin scan-bytecode   --classes <path>   --output <bytecode.json>   --include <classMasks>   --exclude <classMasks>
 
+Параметры `--classes`: для windows символы '\\' должны быть экранированы.
+например: c:\\\\myproject\\\\build\\\\classes
+ 
 Параметры `--include` и `--exclude`:
 - маски полных имён классов (FQCN), например: `com.example.*`, `*.service.*`
 - упрощённый синтаксис: `*` (любые символы), `?` (один символ)
