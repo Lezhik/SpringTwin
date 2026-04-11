@@ -1,6 +1,6 @@
 # 012-dependency-graph-builder — Реализация
 
-## Статус: pending
+## Статус: complete
 
 ## Описание
 

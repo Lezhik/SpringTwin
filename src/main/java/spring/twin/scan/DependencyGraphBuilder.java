@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
-import java.util.stream.Collectors;
+import java.util.TreeSet;
 
 import org.springframework.stereotype.Component;
 
@@ -62,39 +62,41 @@ public class DependencyGraphBuilder {
      * @param classesDir   the directory containing .class files
      * @param includeMasks list of masks for including classes (empty = include all)
      * @param excludeMasks list of masks for excluding classes (empty = exclude none)
-     * @return a map from FQCN to set of dependency FQCNs, sorted by key
+     * @return a map from FQCN to set of dependency FQCNs, sorted by key and values
      * @throws UncheckedIOException if class files cannot be read
      */
     public Map<String, Set<String>> build(Path classesDir, List<String> includeMasks, List<String> excludeMasks) {
-        // 1. Get list of .class files
+        // 1. Scan the directory to get a list of .class files
         List<Path> classFiles = classFileScanner.scan(classesDir);
 
-        // Build the graph
-        Map<String, Set<String>> graph = new LinkedHashMap<>();
+        // 7. Use TreeMap for sorted keys and TreeSet for sorted values
+        TreeMap<String, TreeSet<String>> graph = new TreeMap<>();
 
         for (Path classFile : classFiles) {
             try {
-                // 2. Read bytecode
+                // 2. Read bytecode via Files.readAllBytes()
                 byte[] classBytes = Files.readAllBytes(classFile);
 
-                // 3. Extract FQCN
+                // 3. Extract FQCN via bytecodeClassAnalyzer.extractClassName(bytes)
                 String fqcn = bytecodeClassAnalyzer.extractClassName(classBytes);
 
-                // 4. Check if class passes include/exclude filters
+                // 4. Check FQCN via MaskMatcher.shouldInclude(fqcn, includeMasks, excludeMasks)
                 if (!MaskMatcher.shouldInclude(fqcn, includeMasks, excludeMasks)) {
                     continue;
                 }
 
-                // 5. Extract dependencies
+                // 5. Extract dependencies via bytecodeClassAnalyzer.extractDependencies(bytes)
                 Set<String> dependencies = bytecodeClassAnalyzer.extractDependencies(classBytes);
 
-                // 6. Filter dependencies: remove primitives and apply masks
-                Set<String> filteredDependencies = dependencies.stream()
-                    .filter(dep -> !PRIMITIVE_TYPES.contains(dep))
-                    .filter(dep -> MaskMatcher.shouldInclude(dep, includeMasks, excludeMasks))
-                    .collect(Collectors.toSet());
+                // 6. Filter dependencies via MaskMatcher.shouldInclude()
+                TreeSet<String> filteredDependencies = new TreeSet<>();
+                for (String dep : dependencies) {
+                    if (!PRIMITIVE_TYPES.contains(dep) && MaskMatcher.shouldInclude(dep, includeMasks, excludeMasks)) {
+                        filteredDependencies.add(dep);
+                    }
+                }
 
-                // 7. Add to graph
+                // 7. Add entry to TreeMap for sorting
                 graph.put(fqcn, filteredDependencies);
 
             } catch (IOException e) {
@@ -102,18 +104,7 @@ public class DependencyGraphBuilder {
             }
         }
 
-        // 8. Return sorted graph (LinkedHashMap with sorted keys for determinism)
-        return sortByKey(graph);
-    }
-
-    /**
-     * Returns a new LinkedHashMap with entries sorted by key (FQCN).
-     *
-     * @param graph the unsorted graph
-     * @return a new LinkedHashMap with entries sorted by key
-     */
-    private Map<String, Set<String>> sortByKey(Map<String, Set<String>> graph) {
-        TreeMap<String, Set<String>> sorted = new TreeMap<>(graph);
-        return new LinkedHashMap<>(sorted);
+        // 8. Return LinkedHashMap with sorted keys and values
+        return new LinkedHashMap<>(graph);
     }
 }
