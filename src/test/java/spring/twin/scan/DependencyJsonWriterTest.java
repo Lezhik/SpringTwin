@@ -184,7 +184,11 @@ class DependencyJsonWriterTest {
 
         writer.write(graph, outputFile);
 
-        String content = Files.readString(outputFile);
+        String content = Files.readString(outputFile)
+                                .replaceAll(" ", "")
+                                .replaceAll("\t", "")
+                                .replaceAll("\r", "")
+                                .replaceAll("\n", "");
         assertTrue(content.contains("\"com.example.Service\""), "JSON should contain the service key");
         assertTrue(content.contains("[]"), "Empty dependency set should produce empty array");
     }
