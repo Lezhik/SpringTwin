@@ -1,6 +1,6 @@
 # 020-service-merge — Исправление
 
-## Статус: pending
+## Статус: complete
 
 ## Описание
 

@@ -82,7 +82,7 @@ graph TD
 | 017 | +          | inner-class-merger        | Утилитный класс для объединения вложенных классов с родительскими   | —             |
 | 018 | +          | scan-params-merge         | Добавление поля mergeInnerClasses в ScanBytecodeParams              | —             |
 | 019 | +          | graph-builder-merge       | Поддержка merge-inner-classes в DependencyGraphBuilder              | 017           |
-| 020 | -          | service-merge             | Передача mergeInnerClasses из ScanBytecodeParams в builder          | 018, 019      |
+| 020 | +          | service-merge             | Передача mergeInnerClasses из ScanBytecodeParams в builder          | 018, 019      |
 | 021 | -          | cli-merge                 | Добавление опции --merge-inner-classes в CLI команду                | 018, 020      |
 | 022 | -          | e2e-merge-tests           | End-to-end тесты для merge-inner-classes                            | 021           |
 
@@ -205,10 +205,10 @@ graph TD
 - [+] [019-graph-builder-merge-fix](scan-bytecode/019-graph-builder-merge-fix.md)
 
 ### Фича 020: service-merge
-- [ ] [020-service-merge-api](scan-bytecode/020-service-merge-api.md)
-- [ ] [020-service-merge-tests](scan-bytecode/020-service-merge-tests.md)
-- [ ] [020-service-merge-code](scan-bytecode/020-service-merge-code.md)
-- [ ] [020-service-merge-fix](scan-bytecode/020-service-merge-fix.md)
+- [+] [020-service-merge-api](scan-bytecode/020-service-merge-api.md)
+- [+] [020-service-merge-tests](scan-bytecode/020-service-merge-tests.md)
+- [+] [020-service-merge-code](scan-bytecode/020-service-merge-code.md)
+- [+] [020-service-merge-fix](scan-bytecode/020-service-merge-fix.md)
 
 ### Фича 021: cli-merge
 - [ ] [021-cli-merge-api](scan-bytecode/021-cli-merge-api.md)

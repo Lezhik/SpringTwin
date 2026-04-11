@@ -1,6 +1,6 @@
 # 020-service-merge — Реализация
 
-## Статус: pending
+## Статус: complete
 
 ## Описание
 
