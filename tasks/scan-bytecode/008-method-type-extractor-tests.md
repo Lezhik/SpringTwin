@@ -1,6 +1,6 @@
 # 008-method-type-extractor — Тесты
 
-## Статус: pending
+## Статус: complete
 
 ## Описание
 
