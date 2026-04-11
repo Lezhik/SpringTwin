@@ -66,31 +66,6 @@ public class DependencyGraphBuilder {
      * @throws UncheckedIOException if class files cannot be read
      */
     public Map<String, Set<String>> build(Path classesDir, List<String> includeMasks, List<String> excludeMasks) {
-        return build(classesDir, includeMasks, excludeMasks, false);
-    }
-
-    /**
-     * Builds a dependency graph from .class files in the specified directory.
-     *
-     * <p>This method:
-     * <ul>
-     *   <li>Scans the directory for all .class files</li>
-     *   <li>Extracts the FQCN from each class file</li>
-     *   <li>Filters classes based on include/exclude masks</li>
-     *   <li>Extracts dependencies for each included class</li>
-     *   <li>Filters out primitive types and excluded dependencies</li>
-     *   <li>If mergeInnerClasses is true, merges inner classes with their outer classes</li>
-     *   <li>Returns a sorted map for deterministic ordering</li>
-     * </ul>
-     *
-     * @param classesDir        the directory containing .class files
-     * @param includeMasks      list of masks for including classes (empty = include all)
-     * @param excludeMasks      list of masks for excluding classes (empty = exclude none)
-     * @param mergeInnerClasses whether to merge inner classes with their outer classes
-     * @return a map from FQCN to set of dependency FQCNs, sorted by key and values
-     * @throws UncheckedIOException if class files cannot be read
-     */
-    public Map<String, Set<String>> build(Path classesDir, List<String> includeMasks, List<String> excludeMasks, boolean mergeInnerClasses) {
         // 1. Scan the directory to get a list of .class files
         List<Path> classFiles = classFileScanner.scan(classesDir);
 
@@ -130,9 +105,32 @@ public class DependencyGraphBuilder {
         }
 
         // 8. Return LinkedHashMap with sorted keys and values
-        Map<String, Set<String>> result = new LinkedHashMap<>(graph);
+        return new LinkedHashMap<>(graph);
+    }
 
-        // 9. Merge inner classes if requested
-        return InnerClassMerger.mergeInnerClasses(result, mergeInnerClasses);
+    /**
+     * Builds a dependency graph from .class files in the specified directory
+     * with optional merging of inner classes.
+     *
+     * <p>This method:
+     * <ul>
+     *   <li>Calls the existing build method to construct the initial graph</li>
+     *   <li>Conditionally merges inner classes with their outer classes based on the flag</li>
+     *   <li>Returns the resulting graph</li>
+     * </ul>
+     *
+     * @param classesDir        the directory containing .class files
+     * @param includeMasks      list of masks for including classes (empty = include all)
+     * @param excludeMasks      list of masks for excluding classes (empty = exclude none)
+     * @param mergeInnerClasses whether to merge inner classes with their outer classes
+     * @return a map from FQCN to set of dependency FQCNs, sorted by key and values
+     * @throws UncheckedIOException if class files cannot be read
+     */
+    public Map<String, Set<String>> build(Path classesDir, List<String> includeMasks, List<String> excludeMasks, boolean mergeInnerClasses) {
+        // 1. Call existing build method to build the original graph
+        Map<String, Set<String>> graph = build(classesDir, includeMasks, excludeMasks);
+
+        // 2. Apply inner class merge based on the flag
+        return InnerClassMerger.mergeInnerClasses(graph, mergeInnerClasses);
     }
 }

@@ -1,6 +1,6 @@
 # 019-graph-builder-merge — Исправление
 
-## Статус: pending
+## Статус: complete
 
 ## Описание
 
