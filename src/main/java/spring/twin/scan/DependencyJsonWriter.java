@@ -83,16 +83,9 @@ public class DependencyJsonWriter {
                 Files.createDirectories(path);
             }
 
-            // Check if any list is empty (to handle empty array formatting)
-            boolean hasEmptyLists = sortedMap.values().stream().anyMatch(List::isEmpty);
-
             // Write JSON - for empty graph, write compact form to match test expectations
             if (sortedMap.isEmpty()) {
                 Files.writeString(outputFile, "{}");
-            } else if (hasEmptyLists) {
-                // Use compact output to avoid [ ] formatting with spaces
-                ObjectMapper compactMapper = new ObjectMapper();
-                compactMapper.writeValue(outputFile.toFile(), sortedMap);
             } else {
                 objectMapper.writeValue(outputFile.toFile(), sortedMap);
             }
