@@ -47,6 +47,7 @@ public class ScanBytecodeCommand {
      * @param output  path to output JSON file
      * @param include FQCN include masks separated by semicolon (optional)
      * @param exclude FQCN exclude masks separated by semicolon (optional)
+     * @param mergeInnerClasses flag to merge inner classes with outer classes (default "true")
      * @return a message indicating success (output file path) or error
      */
     @ShellMethod(key = "scan-bytecode", value = "Scan bytecode and extract dependencies")
