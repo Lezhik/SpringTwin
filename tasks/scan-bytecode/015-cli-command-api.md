@@ -1,6 +1,6 @@
 # 015-cli-command — API
 
-## Статус: pending
+## Статус: complete
 
 ## Описание
 
