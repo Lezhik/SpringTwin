@@ -1,6 +1,6 @@
 # 010-code-usage-extractor — API
 
-## Статус: pending
+## Статус: complete
 
 ## Описание
 
