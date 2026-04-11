@@ -1,6 +1,6 @@
 # 019-graph-builder-merge — API
 
-## Статус: pending
+## Статус: complete
 
 ## Описание
 
