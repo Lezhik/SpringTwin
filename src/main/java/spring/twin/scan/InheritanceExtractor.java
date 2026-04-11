@@ -1,6 +1,10 @@
 package spring.twin.scan;
 
+import java.util.HashSet;
 import java.util.Set;
+
+import org.objectweb.asm.ClassReader;
+import org.objectweb.asm.tree.ClassNode;
 
 /**
  * Extracts inheritance and interface implementation dependencies from Java bytecode.
@@ -30,6 +34,34 @@ public class InheritanceExtractor {
      * @throws IllegalArgumentException if classBytes is not a valid class file
      */
     public Set<String> extract(byte[] classBytes) {
-        throw new UnsupportedOperationException("Not implemented yet");
+        if (classBytes == null) {
+            throw new IllegalArgumentException("classBytes must not be null");
+        }
+
+        ClassNode classNode = new ClassNode();
+        ClassReader classReader = new ClassReader(classBytes);
+        classReader.accept(classNode, 0);
+
+        Set<String> result = new HashSet<>();
+
+        // Extract superclass (excluding java/lang/Object)
+        if (classNode.superName != null && !"java/lang/Object".equals(classNode.superName)) {
+            FqcnNormalizer.fromInternalName(classNode.superName).ifPresent(result::add);
+        }
+
+        // Extract implemented interfaces
+        if (classNode.interfaces != null) {
+            for (String iface : classNode.interfaces) {
+                FqcnNormalizer.fromInternalName(iface).ifPresent(result::add);
+            }
+        }
+
+        // Extract generic types from signature
+        if (classNode.signature != null) {
+            Set<String> genericTypes = GenericTypeExtractor.extractTypes(classNode.signature);
+            result.addAll(genericTypes);
+        }
+
+        return result;
     }
 }

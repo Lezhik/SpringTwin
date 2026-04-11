@@ -1,6 +1,6 @@
 # 006-inheritance-extractor — Исправление
 
-## Статус: pending
+## Статус: complete
 
 ## Описание
 
