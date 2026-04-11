@@ -6,11 +6,14 @@ package spring.twin.testee;
 @Deprecated
 public class AnnotatedClass {
 
-    @SuppressWarnings("unchecked")
+    @CustomAnnotation
     private String annotatedField;
 
-    @Override
-    public int hashCode() {
-        return super.hashCode();
+    @CustomAnnotation
+    public int annotatedMethod() {
+        return 0;
+    }
+
+    public void methodWithAnnotatedParameter(@CustomAnnotation String param) {
     }
 }

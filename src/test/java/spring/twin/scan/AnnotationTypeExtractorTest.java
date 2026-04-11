@@ -46,16 +46,23 @@ class AnnotationTypeExtractorTest {
 
     @Test
     void testExtract_fieldAnnotation_returnsAnnotationType() throws IOException {
-        byte[] classBytes = loadClassBytes("AnnotatedClass");
+        byte[] classBytes = loadClassBytes("FieldAnnotatedClass");
         Set<String> result = extractor.extract(classBytes);
-        assertTrue(result.contains("java.lang.SuppressWarnings"));
+        assertTrue(result.contains("spring.twin.testee.CustomAnnotation"));
     }
 
     @Test
     void testExtract_methodAnnotation_returnsAnnotationType() throws IOException {
-        byte[] classBytes = loadClassBytes("AnnotatedClass");
+        byte[] classBytes = loadClassBytes("MethodAnnotatedClass");
         Set<String> result = extractor.extract(classBytes);
-        assertTrue(result.contains("java.lang.Override"));
+        assertTrue(result.contains("spring.twin.testee.CustomAnnotation"));
+    }
+
+    @Test
+    void testExtract_parameterAnnotation_returnsAnnotationType() throws IOException {
+        byte[] classBytes = loadClassBytes("ParameterAnnotatedClass");
+        Set<String> result = extractor.extract(classBytes);
+        assertTrue(result.contains("spring.twin.testee.CustomAnnotation"));
     }
 
     @Test

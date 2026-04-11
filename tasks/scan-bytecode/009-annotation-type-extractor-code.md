@@ -1,6 +1,6 @@
 # 009-annotation-type-extractor — Реализация
 
-## Статус: pending
+## Статус: complete
 
 ## Описание
 

@@ -9,6 +9,6 @@ import java.lang.annotation.Target;
  * Custom annotation for testing annotation extraction.
  */
 @Retention(RetentionPolicy.RUNTIME)
-@Target({ElementType.TYPE, ElementType.FIELD, ElementType.METHOD})
+@Target({ElementType.TYPE, ElementType.FIELD, ElementType.METHOD, ElementType.PARAMETER})
 public @interface CustomAnnotation {
 }

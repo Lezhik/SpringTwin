@@ -67,8 +67,8 @@ graph TD
 | 005 | +          | generic-type-extractor    | Извлечение типов из generic-сигнатур                                | 002           |
 | 006 | +          | inheritance-extractor     | Извлечение зависимостей наследования и имплементации                | 002, 005      |
 | 007 | +          | field-type-extractor      | Извлечение зависимостей по типам полей                              | 002, 005      |
-| 008 | -          | method-type-extractor     | Извлечение зависимостей по типам параметров и возвращаемых значений | 002, 005      |
-| 009 | -          | annotation-type-extractor | Извлечение зависимостей по аннотациям                               | 002, 005      |
+| 008 | +          | method-type-extractor     | Извлечение зависимостей по типам параметров и возвращаемых значений | 002, 005      |
+| 009 | +          | annotation-type-extractor | Извлечение зависимостей по аннотациям                               | 002, 005      |
 | 010 | -          | code-usage-extractor      | Извлечение зависимостей по использованию в коде методов             | 002           |
 | 011 | -          | bytecode-class-analyzer   | Оркестрация экстракторов для одного класса                          | 006–010       |
 | 012 | -          | dependency-graph-builder  | Построение полного графа зависимостей                               | 004, 011, 003 |
@@ -130,10 +130,10 @@ graph TD
 - [+] [008-method-type-extractor-fix](scan-bytecode/008-method-type-extractor-fix.md)
 
 ### Фича 009: annotation-type-extractor
-- [ ] [009-annotation-type-extractor-api](scan-bytecode/009-annotation-type-extractor-api.md)
-- [ ] [009-annotation-type-extractor-tests](scan-bytecode/009-annotation-type-extractor-tests.md)
-- [ ] [009-annotation-type-extractor-code](scan-bytecode/009-annotation-type-extractor-code.md)
-- [ ] [009-annotation-type-extractor-fix](scan-bytecode/009-annotation-type-extractor-fix.md)
+- [+] [009-annotation-type-extractor-api](scan-bytecode/009-annotation-type-extractor-api.md)
+- [+] [009-annotation-type-extractor-tests](scan-bytecode/009-annotation-type-extractor-tests.md)
+- [+] [009-annotation-type-extractor-code](scan-bytecode/009-annotation-type-extractor-code.md)
+- [+] [009-annotation-type-extractor-fix](scan-bytecode/009-annotation-type-extractor-fix.md)
 
 ### Фича 010: code-usage-extractor
 - [ ] [010-code-usage-extractor-api](scan-bytecode/010-code-usage-extractor-api.md)
