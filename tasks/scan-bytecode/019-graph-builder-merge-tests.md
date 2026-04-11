@@ -1,6 +1,6 @@
 # 019-graph-builder-merge — Тесты
 
-## Статус: pending
+## Статус: complete
 
 ## Описание
 

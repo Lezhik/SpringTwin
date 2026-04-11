@@ -171,4 +171,75 @@ class DependencyGraphBuilderTest {
 
         assertThrows(UncheckedIOException.class, () -> builder.build(nonExistent, includeMasks, excludeMasks));
     }
+
+    @Test
+    void testBuild_withMergeInnerClassesTrue_innerClassesMerged() {
+        Path dir = testClassesDir.resolve("spring/twin/testee");
+        List<String> includeMasks = List.of("*.testee.Outer*");
+        List<String> excludeMasks = List.of();
+
+        Map<String, Set<String>> result = builder.build(dir, includeMasks, excludeMasks, true);
+
+        // Outer$Inner key should be absent after merge
+        assertFalse(result.containsKey("spring.twin.testee.Outer$Inner"));
+
+        // Outer should be present
+        assertTrue(result.containsKey("spring.twin.testee.Outer"));
+    }
+
+    @Test
+    void testBuild_withMergeInnerClassesFalse_innerClassesSeparate() {
+        Path dir = testClassesDir.resolve("spring/twin/testee");
+        List<String> includeMasks = List.of("*.testee.Outer*");
+        List<String> excludeMasks = List.of();
+
+        Map<String, Set<String>> result = builder.build(dir, includeMasks, excludeMasks, false);
+
+        // Both Outer and Outer$Inner should be present as separate keys
+        assertTrue(result.containsKey("spring.twin.testee.Outer"));
+        assertTrue(result.containsKey("spring.twin.testee.Outer$Inner"));
+    }
+
+    @Test
+    void testBuild_withMergeInnerClassesTrue_noInnerClasses_unchanged() {
+        Path dir = testClassesDir.resolve("spring/twin/testee");
+        List<String> includeMasks = List.of("*.testee.ComplexService");
+        List<String> excludeMasks = List.of();
+
+        Map<String, Set<String>> result = builder.build(dir, includeMasks, excludeMasks, true);
+
+        // Should contain only ComplexService, no inner classes
+        assertTrue(result.containsKey("spring.twin.testee.ComplexService"));
+        assertEquals(1, result.size());
+    }
+
+    @Test
+    void testBuild_withMergeInnerClassesTrue_outerNotInGraph_outerCreated() {
+        Path dir = testClassesDir.resolve("spring/twin/testee");
+        // Include only inner class, not outer
+        List<String> includeMasks = List.of("*.testee.Outer$Inner");
+        List<String> excludeMasks = List.of();
+
+        Map<String, Set<String>> result = builder.build(dir, includeMasks, excludeMasks, true);
+
+        // Inner class key should not exist
+        assertFalse(result.containsKey("spring.twin.testee.Outer$Inner"));
+
+        // Outer class should be created even though it wasn't in the original graph
+        assertTrue(result.containsKey("spring.twin.testee.Outer"));
+    }
+
+    @Test
+    void testBuild_oldMethodWithoutMerge_backwardCompatible() {
+        Path dir = testClassesDir.resolve("spring/twin/testee");
+        List<String> includeMasks = List.of("*.testee.Outer*");
+        List<String> excludeMasks = List.of();
+
+        // Call old method without merge parameter
+        Map<String, Set<String>> result = builder.build(dir, includeMasks, excludeMasks);
+
+        // Inner classes should remain as separate keys (backward compatible behavior)
+        assertTrue(result.containsKey("spring.twin.testee.Outer"));
+        assertTrue(result.containsKey("spring.twin.testee.Outer$Inner"));
+    }
 }
