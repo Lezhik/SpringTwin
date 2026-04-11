@@ -78,7 +78,10 @@ public class DependencyJsonWriter {
 
         try {
             // Create parent directories if they don't exist
-            Files.createDirectories(outputFile.getParent());
+            var path = outputFile.getParent();
+            if (path != null) {
+                Files.createDirectories(path);
+            }
 
             // Check if any list is empty (to handle empty array formatting)
             boolean hasEmptyLists = sortedMap.values().stream().anyMatch(List::isEmpty);
