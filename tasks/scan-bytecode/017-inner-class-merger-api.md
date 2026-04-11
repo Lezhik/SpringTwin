@@ -1,6 +1,6 @@
 # 017-inner-class-merger — API
 
-## Статус: pending
+## Статус: complete
 
 ## Описание
 
