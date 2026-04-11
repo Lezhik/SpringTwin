@@ -19,6 +19,8 @@ repositories {
 
 dependencies {
 	implementation("org.springframework.boot:spring-boot-starter")
+	implementation("org.springframework.boot:spring-boot-starter-json")
+	implementation("com.fasterxml.jackson.core:jackson-databind")
 	implementation("org.ow2.asm:asm:9.7.1")
 	implementation("org.ow2.asm:asm-tree:9.7.1")
 	compileOnly("org.projectlombok:lombok")

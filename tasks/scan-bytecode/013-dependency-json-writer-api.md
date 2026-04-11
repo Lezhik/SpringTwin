@@ -1,6 +1,6 @@
 # 013-dependency-json-writer — API
 
-## Статус: pending
+## Статус: complete
 
 ## Описание
 
