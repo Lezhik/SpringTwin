@@ -52,9 +52,9 @@ AI агентов (Cursor AI, Kilo Code) для архитектурного р�
 
 ### 1. Анализ байткода
 
-    spring-twin scan-bytecode   --classes <path>   --output <bytecode.json>   --include <classMasks>   --exclude <classMasks>
+    spring-twin scan-bytecode   --classes <path>   --output <bytecode.json>   --include <classMasks>   --exclude <classMasks> --merge-inner-classes <true|false>
 
-Параметры `--classes`: для windows символы '\\' должны быть экранированы.
+Параметр `--classes`: для windows символы '\\' должны быть экранированы.
 например: c:\\\\myproject\\\\build\\\\classes
  
 Параметры `--include` и `--exclude`:
@@ -62,6 +62,8 @@ AI агентов (Cursor AI, Kilo Code) для архитектурного р�
 - упрощённый синтаксис: `*` (любые символы), `?` (один символ)
 - проверка по вхождению: достаточно указать часть пакета, например: `order`
 - несколько масок перечисляются через `;`, например: `com.example.*;com.demo.*`
+
+Параметр `--merge-inner-classes`: объединять вложенные классы с родительскими, по умолчанию true.
 
 Результат: JSON граф зависимостей из байткода.
 

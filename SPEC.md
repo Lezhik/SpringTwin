@@ -34,6 +34,7 @@ generate-refactoring → tasks.json
       --output <file>
       --include <mask>
       --exclude <mask>
+      --merge-inner-classes <true|false>
 
 ## Параметры
 
@@ -44,6 +45,7 @@ generate-refactoring → tasks.json
   `--output`    путь к JSON результату
   `--include`   маски полных имён классов (FQCN), несколько через `;`
   `--exclude`   маски полных имён классов (FQCN), несколько через `;`
+  `--merge-inner-classes` объединять вложенные классы с родительскими, по умолчанию true.
 
 **Формат масок:**
 - маски применяются к полным именам классов (FQCN), например: `com.example.*`, `*.service.*`
