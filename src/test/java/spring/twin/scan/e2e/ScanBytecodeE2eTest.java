@@ -2,6 +2,7 @@ package spring.twin.scan.e2e;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,7 +14,6 @@ import spring.twin.scan.ScanBytecodeService;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
 
@@ -36,16 +36,28 @@ class ScanBytecodeE2eTest {
     @Autowired
     ScanBytecodeService scanBytecodeService;
 
+    Path classesDir;
+
+    @BeforeEach
+    void setUp() {
+        classesDir = getTesteeClassesDir();
+    }
+
     /**
      * Returns the path to compiled testee classes directory.
+     *
+     * @return path to build/classes/java/test/spring/twin/testee/
      */
     Path getTesteeClassesDir() {
-        // Path to compiled test classes: build/classes/java/test/
-        return Paths.get("build", "classes", "java", "test");
+        return Path.of("build/classes/java/test/spring/twin/testee/");
     }
 
     /**
      * Reads and parses the output JSON file.
+     *
+     * @param outputFile path to the JSON output file
+     * @return map from class FQCN to list of dependency FQCNs
+     * @throws IOException if the file cannot be read
      */
     Map<String, List<String>> readOutputJson(Path outputFile) throws IOException {
         ObjectMapper objectMapper = new ObjectMapper();
@@ -55,7 +67,6 @@ class ScanBytecodeE2eTest {
     @Test
     void e2e_scanBytecode_noMasks_producesDependenciesJson() throws IOException {
         Path outputFile = tempDir.resolve("dependencies.json");
-        Path classesDir = getTesteeClassesDir();
 
         ScanBytecodeParams params = new ScanBytecodeParams(
                 classesDir,
@@ -78,7 +89,6 @@ class ScanBytecodeE2eTest {
     @Test
     void e2e_scanBytecode_withIncludeMask_filtersClasses() throws IOException {
         Path outputFile = tempDir.resolve("dependencies.json");
-        Path classesDir = getTesteeClassesDir();
 
         ScanBytecodeParams params = new ScanBytecodeParams(
                 classesDir,
@@ -103,7 +113,6 @@ class ScanBytecodeE2eTest {
     @Test
     void e2e_scanBytecode_withExcludeMask_excludesClasses() throws IOException {
         Path outputFile = tempDir.resolve("dependencies.json");
-        Path classesDir = getTesteeClassesDir();
 
         ScanBytecodeParams params = new ScanBytecodeParams(
                 classesDir,
@@ -143,7 +152,6 @@ class ScanBytecodeE2eTest {
     @Test
     void e2e_scanBytecode_outputFile_hasSortedKeys() throws IOException {
         Path outputFile = tempDir.resolve("dependencies.json");
-        Path classesDir = getTesteeClassesDir();
 
         ScanBytecodeParams params = new ScanBytecodeParams(
                 classesDir,
@@ -167,7 +175,6 @@ class ScanBytecodeE2eTest {
     @Test
     void e2e_scanBytecode_outputFile_hasSortedValues() throws IOException {
         Path outputFile = tempDir.resolve("dependencies.json");
-        Path classesDir = getTesteeClassesDir();
 
         ScanBytecodeParams params = new ScanBytecodeParams(
                 classesDir,
@@ -192,7 +199,6 @@ class ScanBytecodeE2eTest {
     @Test
     void e2e_scanBytecode_inheritanceDependency_detected() throws IOException {
         Path outputFile = tempDir.resolve("dependencies.json");
-        Path classesDir = getTesteeClassesDir();
 
         // Use mask that includes both InheritanceChild and InheritanceBase
         ScanBytecodeParams params = new ScanBytecodeParams(
@@ -217,7 +223,6 @@ class ScanBytecodeE2eTest {
     @Test
     void e2e_scanBytecode_fieldDependency_detected() throws IOException {
         Path outputFile = tempDir.resolve("dependencies.json");
-        Path classesDir = getTesteeClassesDir();
 
         // Use empty masks to include all classes and their dependencies
         ScanBytecodeParams params = new ScanBytecodeParams(
@@ -244,7 +249,6 @@ class ScanBytecodeE2eTest {
     @Test
     void e2e_scanBytecode_methodDependency_detected() throws IOException {
         Path outputFile = tempDir.resolve("dependencies.json");
-        Path classesDir = getTesteeClassesDir();
 
         // Use empty masks to include all classes and their dependencies
         ScanBytecodeParams params = new ScanBytecodeParams(
@@ -271,7 +275,6 @@ class ScanBytecodeE2eTest {
     @Test
     void e2e_scanBytecode_annotationDependency_detected() throws IOException {
         Path outputFile = tempDir.resolve("dependencies.json");
-        Path classesDir = getTesteeClassesDir();
 
         // Use empty masks to include all classes and their dependencies
         ScanBytecodeParams params = new ScanBytecodeParams(
@@ -296,7 +299,6 @@ class ScanBytecodeE2eTest {
     @Test
     void e2e_scanBytecode_genericDependency_detected() throws IOException {
         Path outputFile = tempDir.resolve("dependencies.json");
-        Path classesDir = getTesteeClassesDir();
 
         // Use empty masks to include all classes and their dependencies
         ScanBytecodeParams params = new ScanBytecodeParams(
@@ -323,7 +325,6 @@ class ScanBytecodeE2eTest {
     @Test
     void e2e_scanBytecode_arrayDependency_baseTypeExtracted() throws IOException {
         Path outputFile = tempDir.resolve("dependencies.json");
-        Path classesDir = getTesteeClassesDir();
 
         // Use empty masks to include all classes and their dependencies
         ScanBytecodeParams params = new ScanBytecodeParams(
