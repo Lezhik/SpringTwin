@@ -1,6 +1,6 @@
 # 017-inner-class-merger — Тесты
 
-## Статус: pending
+## Статус: complete
 
 ## Описание
 
