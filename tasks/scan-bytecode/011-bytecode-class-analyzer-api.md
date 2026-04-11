@@ -1,6 +1,6 @@
 # 011-bytecode-class-analyzer — API
 
-## Статус: pending
+## Статус: complete
 
 ## Описание
 

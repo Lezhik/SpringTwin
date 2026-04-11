@@ -5,6 +5,7 @@ import java.util.Set;
 
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.tree.ClassNode;
+import org.springframework.stereotype.Component;
 
 /**
  * Extracts inheritance and interface implementation dependencies from Java bytecode.
@@ -14,6 +15,7 @@ import org.objectweb.asm.tree.ClassNode;
  *
  * <p>Uses ASM's ClassNode for bytecode parsing.
  */
+@Component
 public class InheritanceExtractor {
 
     /**
