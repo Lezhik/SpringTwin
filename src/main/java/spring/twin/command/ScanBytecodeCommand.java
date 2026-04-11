@@ -2,9 +2,9 @@ package spring.twin.command;
 
 import java.nio.file.Path;
 
-import org.springframework.shell.command.annotation.Command;
-import org.springframework.shell.command.annotation.Option;
-import org.springframework.stereotype.Component;
+import org.springframework.shell.standard.ShellComponent;
+import org.springframework.shell.standard.ShellMethod;
+import org.springframework.shell.standard.ShellOption;
 
 import spring.twin.scan.ScanBytecodeParams;
 import spring.twin.scan.ScanBytecodeService;
@@ -15,8 +15,7 @@ import spring.twin.scan.ScanBytecodeService;
  * This command accepts parameters for the classes directory, output file path,
  * and optional include/exclude masks for filtering classes by their fully qualified names.
  */
-@Component
-@Command
+@ShellComponent
 public class ScanBytecodeCommand {
 
     private final ScanBytecodeService scanBytecodeService;
@@ -45,12 +44,12 @@ public class ScanBytecodeCommand {
      * @param exclude FQCN exclude masks separated by semicolon (optional)
      * @return a message indicating success (output file path) or error
      */
-    @Command(command = "scan-bytecode", description = "Scan bytecode and extract dependencies")
+    @ShellMethod(key = "scan-bytecode", value = "Scan bytecode and extract dependencies")
     public String scanBytecode(
-            @Option(required = true, description = "Path to directory with .class files") String classes,
-            @Option(required = true, description = "Path to output JSON file") String output,
-            @Option(defaultValue = "", description = "FQCN include masks separated by ;") String include,
-            @Option(defaultValue = "", description = "FQCN exclude masks separated by ;") String exclude) {
+            @ShellOption(value = "--classes", help = "Path to directory with .class files") String classes,
+            @ShellOption(value = "--output", help = "Path to output JSON file") String output,
+            @ShellOption(value = "--include", help = "FQCN include masks separated by ;", defaultValue = "") String include,
+            @ShellOption(value = "--exclude", help = "FQCN exclude masks separated by ;", defaultValue = "") String exclude) {
         try {
             ScanBytecodeParams params = ScanBytecodeParams.of(
                     Path.of(classes),

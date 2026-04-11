@@ -5,6 +5,15 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.mockito.ArgumentCaptor;
 
+import spring.twin.scan.AnnotationTypeExtractor;
+import spring.twin.scan.BytecodeClassAnalyzer;
+import spring.twin.scan.ClassFileScanner;
+import spring.twin.scan.CodeUsageExtractor;
+import spring.twin.scan.DependencyGraphBuilder;
+import spring.twin.scan.DependencyJsonWriter;
+import spring.twin.scan.FieldTypeExtractor;
+import spring.twin.scan.InheritanceExtractor;
+import spring.twin.scan.MethodTypeExtractor;
 import spring.twin.scan.ScanBytecodeParams;
 import spring.twin.scan.ScanBytecodeService;
 
@@ -13,10 +22,8 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 /**
  * Unit tests for {@link ScanBytecodeCommand}.
@@ -96,10 +103,30 @@ class ScanBytecodeCommandTest {
      */
     @Test
     void testScanBytecode_nonExistingClassesDir_throwsException() {
+        // Create real service with all real dependencies to test actual error handling
+        ClassFileScanner classFileScanner = new ClassFileScanner();
+        BytecodeClassAnalyzer bytecodeClassAnalyzer = new BytecodeClassAnalyzer(
+                new InheritanceExtractor(),
+                new FieldTypeExtractor(),
+                new MethodTypeExtractor(),
+                new AnnotationTypeExtractor(),
+                new CodeUsageExtractor()
+        );
+        DependencyGraphBuilder dependencyGraphBuilder = new DependencyGraphBuilder(
+                classFileScanner,
+                bytecodeClassAnalyzer
+        );
+        DependencyJsonWriter dependencyJsonWriter = new DependencyJsonWriter();
+        ScanBytecodeService realService = new ScanBytecodeService(
+                dependencyGraphBuilder,
+                dependencyJsonWriter
+        );
+        ScanBytecodeCommand realCommand = new ScanBytecodeCommand(realService);
+
         String nonExistingPath = "non_existing_directory";
         Path outputFile = tempDir.resolve("output.json");
 
-        String result = command.scanBytecode(nonExistingPath, outputFile.toString(), "", "");
+        String result = realCommand.scanBytecode(nonExistingPath, outputFile.toString(), "", "");
 
         assertTrue(result.startsWith("Error:"));
     }

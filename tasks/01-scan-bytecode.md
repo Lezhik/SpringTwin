@@ -74,7 +74,7 @@ graph TD
 | 012 | +          | dependency-graph-builder  | Построение полного графа зависимостей                               | 004, 011, 003 |
 | 013 | +          | dependency-json-writer    | Запись графа зависимостей в JSON файл                               | —             |
 | 014 | +          | scan-bytecode-service     | Главный сервис пайплайна scan-bytecode                              | 001, 012, 013 |
-| 015 | -          | cli-command               | CLI команда scan-bytecode                                           | 001, 014      |
+| 015 | +          | cli-command               | CLI команда scan-bytecode                                           | 001, 014      |
 | 016 | -          | e2e-tests                 | End-to-end тесты полного пайплайна                                  | 015           |
 
 ## Чек-лист задач
@@ -166,10 +166,10 @@ graph TD
 - [+] [014-scan-bytecode-service-fix](scan-bytecode/014-scan-bytecode-service-fix.md)
 
 ### Фича 015: cli-command
-- [ ] [015-cli-command-api](scan-bytecode/015-cli-command-api.md)
-- [ ] [015-cli-command-tests](scan-bytecode/015-cli-command-tests.md)
-- [ ] [015-cli-command-code](scan-bytecode/015-cli-command-code.md)
-- [ ] [015-cli-command-fix](scan-bytecode/015-cli-command-fix.md)
+- [+] [015-cli-command-api](scan-bytecode/015-cli-command-api.md)
+- [+] [015-cli-command-tests](scan-bytecode/015-cli-command-tests.md)
+- [+] [015-cli-command-code](scan-bytecode/015-cli-command-code.md)
+- [+] [015-cli-command-fix](scan-bytecode/015-cli-command-fix.md)
 
 ### Фича 016: e2e-tests
 - [ ] [016-e2e-tests-api](scan-bytecode/016-e2e-tests-api.md)
