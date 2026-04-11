@@ -1,6 +1,6 @@
 # 014-scan-bytecode-service — Тесты
 
-## Статус: pending
+## Статус: complete
 
 ## Описание
 
