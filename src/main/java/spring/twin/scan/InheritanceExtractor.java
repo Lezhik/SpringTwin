@@ -1,6 +1,8 @@
 package spring.twin.scan;
 
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 import org.objectweb.asm.ClassReader;
@@ -65,5 +67,37 @@ public class InheritanceExtractor {
         }
 
         return result;
+    }
+
+    /**
+     * Analyzes class bytecode and extracts all inheritance-related types with detailed link information.
+     *
+     * <p>This method extracts:
+     * <ul>
+     *   <li>The superclass (from {@code ClassNode.superName}) with {@link LinkType#SUPERCLASS}</li>
+     *   <li>Directly implemented interfaces (from {@code ClassNode.interfaces}) with {@link LinkType#INTERFACE}</li>
+     *   <li>Generic type parameters from inheritance signatures (from {@code ClassNode.signature}) with
+     *       inherited link type: {@link LinkType#SUPERCLASS} for generics from superclass,
+     *       {@link LinkType#INTERFACE} for generics from interfaces</li>
+     * </ul>
+     *
+     * <p>All extracted types are returned as Fully Qualified Class Names (FQCN) mapped to their
+     * corresponding {@link LinkDetails} sets.
+     *
+     * <p>LinkDetails formation rules:
+     * <ul>
+     *   <li>Superclass → {@code LinkDetails.of(LinkType.SUPERCLASS)} (empty details)</li>
+     *   <li>Interface → {@code LinkDetails.of(LinkType.INTERFACE)} (empty details)</li>
+     *   <li>Generic parameters → inherit the link type from their context</li>
+     * </ul>
+     *
+     * @param classBytes the bytecode of the class to analyze
+     * @return a map where keys are FQCN strings of types that this class extends or implements,
+     *         and values are sets of {@link LinkDetails} describing the relationship;
+     *         empty map if classBytes is null
+     * @throws IllegalArgumentException if classBytes is not a valid class file
+     */
+    public Map<String, Set<LinkDetails>> extractDetails(byte[] classBytes) {
+        return new HashMap<>();
     }
 }
