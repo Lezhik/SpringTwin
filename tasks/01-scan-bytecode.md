@@ -2,7 +2,7 @@
 
 ## Обзор
 
-Команда `spring-twin scan-bytecode` анализирует `.class` файлы и извлекает структурные зависимости между классами. Результат сохраняется в `dependencies.json` в формате `Map<String, Set<String>>`, где ключ — полное имя класса (FQCN), а множество — все классы, на которые он ссылается.
+Команда `spring-twin scan-bytecode` анализирует `.class` файлы и извлекает структурные зависимости между классами. Результат сохраняется в `dependencies.json` в формате `Map<String, Map<String, Set<LinkDetails>>>`, где ключ первого уровня — полное имя класса (FQCN), ключ второго уровня — полное имя класса, на который он ссылается, а значение — множество деталей ссылки `LinkDetails` с типом связи и описанием.
 
 ## Виды связей (по SPEC)
 
@@ -221,3 +221,106 @@ graph TD
 - [+] [022-e2e-merge-tests-tests](scan-bytecode/022-e2e-merge-tests-tests.md)
 - [+] [022-e2e-merge-tests-code](scan-bytecode/022-e2e-merge-tests-code.md)
 - [+] [022-e2e-merge-tests-fix](scan-bytecode/022-e2e-merge-tests-fix.md)
+
+---
+
+## Этап 2: Поддержка нового формата сохранения данных (LinkDetails)
+
+Переход от формата `Map<String, Set<String>>` к формату `Map<String, Map<String, Set<LinkDetails>>>`.
+Каждая связь теперь содержит тип (LinkType) и детали (details).
+
+### Порядок реализации
+
+| #   | Реализация | Фича                              | Описание                                                                 | Зависимости         |
+|-----|------------|-----------------------------------|--------------------------------------------------------------------------|---------------------|
+| 023 | +          | link-type-enum                    | Перечисление типов связей LinkType                                       | —                   |
+| 024 | +          | link-details-model                | Модель данных LinkDetails с type и details                                | 023                 |
+| 025 | +          | inheritance-extractor-details     | Детализированное извлечение наследования и имплементации                  | 024                 |
+| 026 | +          | field-type-extractor-details      | Детализированное извлечение типов полей                                   | 024                 |
+| 027 | +          | method-type-extractor-details     | Детализированное извлечение типов методов                                 | 024                 |
+| 028 | +          | annotation-type-extractor-details | Детализированное извлечение аннотаций                                     | 024                 |
+| 029 | +          | code-usage-extractor-details      | Детализированное извлечение использования в коде                          | 024                 |
+| 030 | +          | bytecode-class-analyzer-details   | Оркестрация детализированных экстракторов                                 | 025–029             |
+| 031 | +          | dependency-graph-builder-details  | Построение графа с детализированными связями                              | 030                 |
+| 032 | +          | dependency-json-writer-details    | Запись детализированного графа в JSON                                     | 024                 |
+| 033 | +          | inner-class-merger-details        | Поддержка нового формата в InnerClassMerger                               | 024                 |
+| 034 | +          | scan-bytecode-service-details     | Обновление сервиса для использования нового формата                       | 031, 032, 033       |
+| 035 | +          | e2e-details-tests                 | End-to-end тесты нового формата JSON                                      | 034                 |
+
+### Фича 023: link-type-enum
+- [ ] [023-link-type-enum-api](scan-bytecode/023-link-type-enum-api.md)
+- [ ] [023-link-type-enum-tests](scan-bytecode/023-link-type-enum-tests.md)
+- [ ] [023-link-type-enum-code](scan-bytecode/023-link-type-enum-code.md)
+- [ ] [023-link-type-enum-fix](scan-bytecode/023-link-type-enum-fix.md)
+
+### Фича 024: link-details-model
+- [ ] [024-link-details-model-api](scan-bytecode/024-link-details-model-api.md)
+- [ ] [024-link-details-model-tests](scan-bytecode/024-link-details-model-tests.md)
+- [ ] [024-link-details-model-code](scan-bytecode/024-link-details-model-code.md)
+- [ ] [024-link-details-model-fix](scan-bytecode/024-link-details-model-fix.md)
+
+### Фича 025: inheritance-extractor-details
+- [ ] [025-inheritance-extractor-details-api](scan-bytecode/025-inheritance-extractor-details-api.md)
+- [ ] [025-inheritance-extractor-details-tests](scan-bytecode/025-inheritance-extractor-details-tests.md)
+- [ ] [025-inheritance-extractor-details-code](scan-bytecode/025-inheritance-extractor-details-code.md)
+- [ ] [025-inheritance-extractor-details-fix](scan-bytecode/025-inheritance-extractor-details-fix.md)
+
+### Фича 026: field-type-extractor-details
+- [ ] [026-field-type-extractor-details-api](scan-bytecode/026-field-type-extractor-details-api.md)
+- [ ] [026-field-type-extractor-details-tests](scan-bytecode/026-field-type-extractor-details-tests.md)
+- [ ] [026-field-type-extractor-details-code](scan-bytecode/026-field-type-extractor-details-code.md)
+- [ ] [026-field-type-extractor-details-fix](scan-bytecode/026-field-type-extractor-details-fix.md)
+
+### Фича 027: method-type-extractor-details
+- [ ] [027-method-type-extractor-details-api](scan-bytecode/027-method-type-extractor-details-api.md)
+- [ ] [027-method-type-extractor-details-tests](scan-bytecode/027-method-type-extractor-details-tests.md)
+- [ ] [027-method-type-extractor-details-code](scan-bytecode/027-method-type-extractor-details-code.md)
+- [ ] [027-method-type-extractor-details-fix](scan-bytecode/027-method-type-extractor-details-fix.md)
+
+### Фича 028: annotation-type-extractor-details
+- [ ] [028-annotation-type-extractor-details-api](scan-bytecode/028-annotation-type-extractor-details-api.md)
+- [ ] [028-annotation-type-extractor-details-tests](scan-bytecode/028-annotation-type-extractor-details-tests.md)
+- [ ] [028-annotation-type-extractor-details-code](scan-bytecode/028-annotation-type-extractor-details-code.md)
+- [ ] [028-annotation-type-extractor-details-fix](scan-bytecode/028-annotation-type-extractor-details-fix.md)
+
+### Фича 029: code-usage-extractor-details
+- [ ] [029-code-usage-extractor-details-api](scan-bytecode/029-code-usage-extractor-details-api.md)
+- [ ] [029-code-usage-extractor-details-tests](scan-bytecode/029-code-usage-extractor-details-tests.md)
+- [ ] [029-code-usage-extractor-details-code](scan-bytecode/029-code-usage-extractor-details-code.md)
+- [ ] [029-code-usage-extractor-details-fix](scan-bytecode/029-code-usage-extractor-details-fix.md)
+
+### Фича 030: bytecode-class-analyzer-details
+- [ ] [030-bytecode-class-analyzer-details-api](scan-bytecode/030-bytecode-class-analyzer-details-api.md)
+- [ ] [030-bytecode-class-analyzer-details-tests](scan-bytecode/030-bytecode-class-analyzer-details-tests.md)
+- [ ] [030-bytecode-class-analyzer-details-code](scan-bytecode/030-bytecode-class-analyzer-details-code.md)
+- [ ] [030-bytecode-class-analyzer-details-fix](scan-bytecode/030-bytecode-class-analyzer-details-fix.md)
+
+### Фича 031: dependency-graph-builder-details
+- [ ] [031-dependency-graph-builder-details-api](scan-bytecode/031-dependency-graph-builder-details-api.md)
+- [ ] [031-dependency-graph-builder-details-tests](scan-bytecode/031-dependency-graph-builder-details-tests.md)
+- [ ] [031-dependency-graph-builder-details-code](scan-bytecode/031-dependency-graph-builder-details-code.md)
+- [ ] [031-dependency-graph-builder-details-fix](scan-bytecode/031-dependency-graph-builder-details-fix.md)
+
+### Фича 032: dependency-json-writer-details
+- [ ] [032-dependency-json-writer-details-api](scan-bytecode/032-dependency-json-writer-details-api.md)
+- [ ] [032-dependency-json-writer-details-tests](scan-bytecode/032-dependency-json-writer-details-tests.md)
+- [ ] [032-dependency-json-writer-details-code](scan-bytecode/032-dependency-json-writer-details-code.md)
+- [ ] [032-dependency-json-writer-details-fix](scan-bytecode/032-dependency-json-writer-details-fix.md)
+
+### Фича 033: inner-class-merger-details
+- [ ] [033-inner-class-merger-details-api](scan-bytecode/033-inner-class-merger-details-api.md)
+- [ ] [033-inner-class-merger-details-tests](scan-bytecode/033-inner-class-merger-details-tests.md)
+- [ ] [033-inner-class-merger-details-code](scan-bytecode/033-inner-class-merger-details-code.md)
+- [ ] [033-inner-class-merger-details-fix](scan-bytecode/033-inner-class-merger-details-fix.md)
+
+### Фича 034: scan-bytecode-service-details
+- [ ] [034-scan-bytecode-service-details-api](scan-bytecode/034-scan-bytecode-service-details-api.md)
+- [ ] [034-scan-bytecode-service-details-tests](scan-bytecode/034-scan-bytecode-service-details-tests.md)
+- [ ] [034-scan-bytecode-service-details-code](scan-bytecode/034-scan-bytecode-service-details-code.md)
+- [ ] [034-scan-bytecode-service-details-fix](scan-bytecode/034-scan-bytecode-service-details-fix.md)
+
+### Фича 035: e2e-details-tests
+- [ ] [035-e2e-details-tests-api](scan-bytecode/035-e2e-details-tests-api.md)
+- [ ] [035-e2e-details-tests-tests](scan-bytecode/035-e2e-details-tests-tests.md)
+- [ ] [035-e2e-details-tests-code](scan-bytecode/035-e2e-details-tests-code.md)
+- [ ] [035-e2e-details-tests-fix](scan-bytecode/035-e2e-details-tests-fix.md)
