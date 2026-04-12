@@ -234,7 +234,7 @@ graph TD
 | #   | Реализация | Фича                              | Описание                                                                 | Зависимости         |
 |-----|------------|-----------------------------------|--------------------------------------------------------------------------|---------------------|
 | 023 | +          | link-type-enum                    | Перечисление типов связей LinkType                                       | —                   |
-| 024 | -          | link-details-model                | Модель данных LinkDetails с type и details                                | 023                 |
+| 024 | +          | link-details-model                | Модель данных LinkDetails с type и details                                | 023                 |
 | 025 | -          | inheritance-extractor-details     | Детализированное извлечение наследования и имплементации                  | 024                 |
 | 026 | -          | field-type-extractor-details      | Детализированное извлечение типов полей                                   | 024                 |
 | 027 | -          | method-type-extractor-details     | Детализированное извлечение типов методов                                 | 024                 |
@@ -254,10 +254,10 @@ graph TD
 - [+] [023-link-type-enum-fix](scan-bytecode/023-link-type-enum-fix.md)
 
 ### Фича 024: link-details-model
-- [ ] [024-link-details-model-api](scan-bytecode/024-link-details-model-api.md)
-- [ ] [024-link-details-model-tests](scan-bytecode/024-link-details-model-tests.md)
-- [ ] [024-link-details-model-code](scan-bytecode/024-link-details-model-code.md)
-- [ ] [024-link-details-model-fix](scan-bytecode/024-link-details-model-fix.md)
+- [+] [024-link-details-model-api](scan-bytecode/024-link-details-model-api.md)
+- [+] [024-link-details-model-tests](scan-bytecode/024-link-details-model-tests.md)
+- [+] [024-link-details-model-code](scan-bytecode/024-link-details-model-code.md)
+- [+] [024-link-details-model-fix](scan-bytecode/024-link-details-model-fix.md)
 
 ### Фича 025: inheritance-extractor-details
 - [ ] [025-inheritance-extractor-details-api](scan-bytecode/025-inheritance-extractor-details-api.md)

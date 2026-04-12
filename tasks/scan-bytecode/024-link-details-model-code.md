@@ -1,6 +1,6 @@
 # 024-link-details-model — Реализация
 
-## Статус: pending
+## Статус: complete
 
 ## Описание
 

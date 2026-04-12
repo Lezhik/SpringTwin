@@ -1,6 +1,16 @@
 package spring.twin.scan;
 
-import java.util.Objects;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.databind.DeserializationContext;
+import com.fasterxml.jackson.databind.JsonDeserializer;
+import com.fasterxml.jackson.databind.JsonSerializer;
+import com.fasterxml.jackson.databind.SerializerProvider;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+
+import java.io.IOException;
 
 /**
  * Model for storing detailed information about a link between classes.
@@ -29,7 +39,9 @@ import java.util.Objects;
  *                <li>METHOD_ARG_ANNOTATION — method signature</li>
  *                </ul>
  */
-public record LinkDetails(LinkType type, String details) {
+public record LinkDetails(
+        @JsonProperty("type") @JsonSerialize(using = LinkTypeSerializer.class) @JsonDeserialize(using = LinkTypeDeserializer.class) LinkType type,
+        @JsonProperty("details") String details) {
 
     /**
      * Creates a new LinkDetails instance with the specified type and details.
@@ -37,14 +49,16 @@ public record LinkDetails(LinkType type, String details) {
      * <p>This factory method is used when additional information about the link
      * is available (e.g., field name for FIELD type, method signature for METHOD type).
      *
+     * <p>If details is null, it will be replaced with an empty string.
+     *
      * <p>The returned instance is suitable for use in collections such as {@code Set<LinkDetails>}.
      *
      * @param type    the type of link, must not be null
-     * @param details additional information about the link, may be empty but not null
+     * @param details additional information about the link, may be null (will be converted to empty string)
      * @return a new LinkDetails instance
      */
     public static LinkDetails of(LinkType type, String details) {
-        return new LinkDetails(type, details);
+        return new LinkDetails(type, details == null ? "" : details);
     }
 
     /**
@@ -63,33 +77,26 @@ public record LinkDetails(LinkType type, String details) {
     }
 
     /**
-     * Indicates whether some other object is "equal to" this one.
+     * Custom Jackson serializer for LinkType.
      *
-     * <p>Two LinkDetails instances are considered equal if both their {@code type}
-     * and {@code details} fields are equal. This ensures that duplicate links
-     * are avoided when stored in a {@code Set<LinkDetails>}.
-     *
-     * @param o the reference object with which to compare
-     * @return true if this object is the same as the o argument; false otherwise
+     * <p>Serializes LinkType using its JSON name via {@link LinkType#getJsonName()}.
      */
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        LinkDetails that = (LinkDetails) o;
-        return type == that.type && Objects.equals(details, that.details);
+    public static class LinkTypeSerializer extends JsonSerializer<LinkType> {
+        @Override
+        public void serialize(LinkType value, JsonGenerator gen, SerializerProvider serializers) throws IOException {
+            gen.writeString(value.getJsonName());
+        }
     }
 
     /**
-     * Returns a hash code value for this LinkDetails.
+     * Custom Jackson deserializer for LinkType.
      *
-     * <p>The hash code is computed from both the {@code type} and {@code details}
-     * fields to ensure consistent behavior with {@link #equals(Object)}.
-     *
-     * @return a hash code value for this object
+     * <p>Deserializes LinkType from its JSON name via {@link LinkType#valueOf(String)}.
      */
-    @Override
-    public int hashCode() {
-        return Objects.hash(type, details);
+    public static class LinkTypeDeserializer extends JsonDeserializer<LinkType> {
+        @Override
+        public LinkType deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
+            return LinkType.valueOf(p.getValueAsString());
+        }
     }
 }

@@ -1,6 +1,6 @@
 # 024-link-details-model — Исправление
 
-## Статус: pending
+## Статус: complete
 
 ## Описание
 
