@@ -1,6 +1,6 @@
 # 023-link-type-enum — Исправление
 
-## Статус: pending
+## Статус: complete
 
 ## Описание
 

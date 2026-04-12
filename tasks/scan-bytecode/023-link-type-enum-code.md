@@ -1,6 +1,6 @@
 # 023-link-type-enum — Реализация
 
-## Статус: pending
+## Статус: complete
 
 ## Описание
 

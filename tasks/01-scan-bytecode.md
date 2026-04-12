@@ -233,7 +233,7 @@ graph TD
 
 | #   | Реализация | Фича                              | Описание                                                                 | Зависимости         |
 |-----|------------|-----------------------------------|--------------------------------------------------------------------------|---------------------|
-| 023 | -          | link-type-enum                    | Перечисление типов связей LinkType                                       | —                   |
+| 023 | +          | link-type-enum                    | Перечисление типов связей LinkType                                       | —                   |
 | 024 | -          | link-details-model                | Модель данных LinkDetails с type и details                                | 023                 |
 | 025 | -          | inheritance-extractor-details     | Детализированное извлечение наследования и имплементации                  | 024                 |
 | 026 | -          | field-type-extractor-details      | Детализированное извлечение типов полей                                   | 024                 |
@@ -248,10 +248,10 @@ graph TD
 | 035 | -          | e2e-details-tests                 | End-to-end тесты нового формата JSON                                      | 034                 |
 
 ### Фича 023: link-type-enum
-- [ ] [023-link-type-enum-api](scan-bytecode/023-link-type-enum-api.md)
-- [ ] [023-link-type-enum-tests](scan-bytecode/023-link-type-enum-tests.md)
-- [ ] [023-link-type-enum-code](scan-bytecode/023-link-type-enum-code.md)
-- [ ] [023-link-type-enum-fix](scan-bytecode/023-link-type-enum-fix.md)
+- [+] [023-link-type-enum-api](scan-bytecode/023-link-type-enum-api.md)
+- [+] [023-link-type-enum-tests](scan-bytecode/023-link-type-enum-tests.md)
+- [+] [023-link-type-enum-code](scan-bytecode/023-link-type-enum-code.md)
+- [+] [023-link-type-enum-fix](scan-bytecode/023-link-type-enum-fix.md)
 
 ### Фича 024: link-details-model
 - [ ] [024-link-details-model-api](scan-bytecode/024-link-details-model-api.md)
