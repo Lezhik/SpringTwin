@@ -1,7 +1,9 @@
 package spring.twin.scan;
 
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.objectweb.asm.ClassReader;
@@ -77,6 +79,33 @@ public class AnnotationTypeExtractor {
         }
 
         return result;
+    }
+
+    /**
+     * Analyzes class bytecode and extracts all annotation types with detailed link information.
+     *
+     * <p>This method extracts the same annotation types as {@link #extract(byte[])}, but provides
+     * additional context about where each annotation is used:
+     * <ul>
+     *   <li>Class annotations → {@link LinkType#CLASS_ANNOTATION} with empty details</li>
+     *   <li>Field annotations → {@link LinkType#FIELD_ANNOTATION} with field name</li>
+     *   <li>Method annotations → {@link LinkType#METHOD_ANNOTATION} with method signature</li>
+     *   <li>Parameter annotations → {@link LinkType#METHOD_ARG_ANNOTATION} with method signature</li>
+     * </ul>
+     *
+     * <p>The method signature format follows ASM conventions: {@code ownerClassName.methodName(descriptor)}.
+     *
+     * @param classBytes the bytecode of the class to analyze
+     * @return a map where key is FQCN of the annotation class and value is a set of LinkDetails
+     *         describing the annotation usage context; empty map if no annotations are present
+     * @throws IllegalArgumentException if classBytes is null
+     */
+    public Map<String, Set<LinkDetails>> extractDetails(byte[] classBytes) {
+        if (classBytes == null) {
+            throw new IllegalArgumentException("classBytes must not be null");
+        }
+        // Stub implementation - to be fully implemented in subsequent tasks
+        return new HashMap<>();
     }
 
     /**
