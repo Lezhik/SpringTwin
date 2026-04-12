@@ -1,6 +1,6 @@
 # 029-code-usage-extractor-details — Тесты
 
-## Статус: pending
+## Статус: complete
 
 ## Описание
 
