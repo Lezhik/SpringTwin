@@ -98,6 +98,52 @@ public class InheritanceExtractor {
      * @throws IllegalArgumentException if classBytes is not a valid class file
      */
     public Map<String, Set<LinkDetails>> extractDetails(byte[] classBytes) {
-        return new HashMap<>();
+        if (classBytes == null) {
+            throw new IllegalArgumentException("classBytes must not be null");
+        }
+
+        ClassNode classNode = new ClassNode();
+        ClassReader classReader = new ClassReader(classBytes);
+        classReader.accept(classNode, 0);
+
+        Map<String, Set<LinkDetails>> result = new HashMap<>();
+
+        // Extract superclass (excluding java/lang/Object)
+        if (classNode.superName != null && !"java/lang/Object".equals(classNode.superName)) {
+            FqcnNormalizer.fromInternalName(classNode.superName).ifPresent(fqcn ->
+                addDetail(result, fqcn, LinkDetails.of(LinkType.SUPERCLASS))
+            );
+        }
+
+        // Extract implemented interfaces
+        if (classNode.interfaces != null) {
+            for (String iface : classNode.interfaces) {
+                FqcnNormalizer.fromInternalName(iface).ifPresent(fqcn ->
+                    addDetail(result, fqcn, LinkDetails.of(LinkType.INTERFACE))
+                );
+            }
+        }
+
+        // Extract generic types from signature - they inherit SUPERCLASS type
+        if (classNode.signature != null) {
+            Set<String> genericTypes = GenericTypeExtractor.extractTypes(classNode.signature);
+            for (String genericType : genericTypes) {
+                addDetail(result, genericType, LinkDetails.of(LinkType.SUPERCLASS));
+            }
+        }
+
+        return result;
+    }
+
+    /**
+     * Adds a LinkDetails to the Set for the specified FQCN in the map.
+     * Creates a new Set if one does not already exist for the FQCN.
+     *
+     * @param map    the map to add to
+     * @param fqcn   the fully qualified class name
+     * @param detail the LinkDetails to add
+     */
+    private void addDetail(Map<String, Set<LinkDetails>> map, String fqcn, LinkDetails detail) {
+        map.computeIfAbsent(fqcn, k -> new HashSet<>()).add(detail);
     }
 }

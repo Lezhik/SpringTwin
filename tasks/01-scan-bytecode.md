@@ -235,7 +235,7 @@ graph TD
 |-----|------------|-----------------------------------|--------------------------------------------------------------------------|---------------------|
 | 023 | +          | link-type-enum                    | Перечисление типов связей LinkType                                       | —                   |
 | 024 | +          | link-details-model                | Модель данных LinkDetails с type и details                                | 023                 |
-| 025 | -          | inheritance-extractor-details     | Детализированное извлечение наследования и имплементации                  | 024                 |
+| 025 | +          | inheritance-extractor-details     | Детализированное извлечение наследования и имплементации                  | 024                 |
 | 026 | -          | field-type-extractor-details      | Детализированное извлечение типов полей                                   | 024                 |
 | 027 | -          | method-type-extractor-details     | Детализированное извлечение типов методов                                 | 024                 |
 | 028 | -          | annotation-type-extractor-details | Детализированное извлечение аннотаций                                     | 024                 |
@@ -260,10 +260,10 @@ graph TD
 - [+] [024-link-details-model-fix](scan-bytecode/024-link-details-model-fix.md)
 
 ### Фича 025: inheritance-extractor-details
-- [ ] [025-inheritance-extractor-details-api](scan-bytecode/025-inheritance-extractor-details-api.md)
-- [ ] [025-inheritance-extractor-details-tests](scan-bytecode/025-inheritance-extractor-details-tests.md)
-- [ ] [025-inheritance-extractor-details-code](scan-bytecode/025-inheritance-extractor-details-code.md)
-- [ ] [025-inheritance-extractor-details-fix](scan-bytecode/025-inheritance-extractor-details-fix.md)
+- [+] [025-inheritance-extractor-details-api](scan-bytecode/025-inheritance-extractor-details-api.md)
+- [+] [025-inheritance-extractor-details-tests](scan-bytecode/025-inheritance-extractor-details-tests.md)
+- [+] [025-inheritance-extractor-details-code](scan-bytecode/025-inheritance-extractor-details-code.md)
+- [+] [025-inheritance-extractor-details-fix](scan-bytecode/025-inheritance-extractor-details-fix.md)
 
 ### Фича 026: field-type-extractor-details
 - [ ] [026-field-type-extractor-details-api](scan-bytecode/026-field-type-extractor-details-api.md)

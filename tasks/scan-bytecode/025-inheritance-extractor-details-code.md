@@ -1,6 +1,6 @@
 # 025-inheritance-extractor-details — Реализация
 
-## Статус: pending
+## Статус: complete
 
 ## Описание
 
