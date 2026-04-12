@@ -1,6 +1,8 @@
 package spring.twin.scan;
 
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 import lombok.RequiredArgsConstructor;
@@ -72,5 +74,70 @@ public class BytecodeClassAnalyzer {
         String internalName = classReader.getClassName();
         return FqcnNormalizer.fromInternalName(internalName)
                 .orElseThrow(() -> new IllegalArgumentException("Cannot extract class name from bytecode"));
+    }
+
+    /**
+     * Analyzes class bytecode and extracts all dependencies with detailed link information.
+     *
+     * <p>This method combines results from all extractors to produce a detailed dependency map:
+     * <ul>
+     *   <li>{@link InheritanceExtractor#extractDetails(byte[])} for superclass and interface dependencies
+     *       → {@link LinkType#SUPERCLASS}, {@link LinkType#INTERFACE}</li>
+     *   <li>{@link FieldTypeExtractor#extractDetails(byte[])} for field type dependencies
+     *       → {@link LinkType#FIELD}</li>
+     *   <li>{@link MethodTypeExtractor#extractDetails(byte[])} for method signature dependencies
+     *       → {@link LinkType#METHOD}</li>
+     *   <li>{@link AnnotationTypeExtractor#extractDetails(byte[])} for annotation type dependencies
+     *       → {@link LinkType#CLASS_ANNOTATION}, {@link LinkType#FIELD_ANNOTATION},
+     *       {@link LinkType#METHOD_ANNOTATION}, {@link LinkType#METHOD_ARG_ANNOTATION}</li>
+     *   <li>{@link CodeUsageExtractor#extractDetails(byte[])} for code body usage dependencies
+     *       → {@link LinkType#STATIC_BLOCK}, {@link LinkType#METHOD}</li>
+     * </ul>
+     *
+     * <p>The returned structure is {@code Map<targetFqcn, Map<sourceFqcn, Set<LinkDetails>>>} where:
+     * <ul>
+     *   <li>{@code targetFqcn} - the FQCN of the analyzed class (extracted from bytecode)</li>
+     *   <li>{@code sourceFqcn} - the FQCN of a class that the analyzed class depends on</li>
+     *   <li>{@code Set<LinkDetails>} - set of details describing each link between target and source</li>
+     * </ul>
+     *
+     * @param classBytes the bytecode of the class to analyze
+     * @return a two-level map where the outer key is the target class FQCN,
+     *         the inner key is the dependency class FQCN,
+     *         and the value is a set of LinkDetails describing the relationship
+     * @throws IllegalArgumentException if classBytes is null
+     */
+    public Map<String, Map<String, Set<LinkDetails>>> extractDependenciesDetails(byte[] classBytes) {
+        String targetFqcn = extractClassName(classBytes);
+
+        Map<String, Set<LinkDetails>> combinedDetails = new HashMap<>();
+
+        // Merge results from all extractors
+        mergeDetails(combinedDetails, inheritanceExtractor.extractDetails(classBytes));
+        mergeDetails(combinedDetails, fieldTypeExtractor.extractDetails(classBytes));
+        mergeDetails(combinedDetails, methodTypeExtractor.extractDetails(classBytes));
+        mergeDetails(combinedDetails, annotationTypeExtractor.extractDetails(classBytes));
+        mergeDetails(combinedDetails, codeUsageExtractor.extractDetails(classBytes));
+
+        Map<String, Map<String, Set<LinkDetails>>> result = new HashMap<>();
+        result.put(targetFqcn, combinedDetails);
+        return result;
+    }
+
+    /**
+     * Merges source details into the target map.
+     *
+     * <p>For each entry in the source map, adds all LinkDetails to the corresponding
+     * entry in the target map. Creates new sets as needed.
+     *
+     * @param target the map to merge into
+     * @param source the map to merge from
+     */
+    private void mergeDetails(Map<String, Set<LinkDetails>> target, Map<String, Set<LinkDetails>> source) {
+        for (Map.Entry<String, Set<LinkDetails>> entry : source.entrySet()) {
+            String fqcn = entry.getKey();
+            Set<LinkDetails> details = entry.getValue();
+            target.computeIfAbsent(fqcn, k -> new HashSet<>()).addAll(details);
+        }
     }
 }

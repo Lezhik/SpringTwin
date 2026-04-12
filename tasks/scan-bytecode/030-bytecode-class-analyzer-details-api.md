@@ -1,6 +1,6 @@
 # 030-bytecode-class-analyzer-details — API
 
-## Статус: pending
+## Статус: complete
 
 ## Описание
 
