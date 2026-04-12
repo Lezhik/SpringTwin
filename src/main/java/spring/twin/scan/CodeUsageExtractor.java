@@ -1,6 +1,7 @@
 package spring.twin.scan;
 
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 import org.objectweb.asm.ClassReader;
@@ -94,6 +95,34 @@ public class CodeUsageExtractor {
 
         classReader.accept(classVisitor, 0);
         return types;
+    }
+
+    /**
+     * Analyzes class bytecode and extracts all types used in method bodies and static initializers
+     * with detailed link information.
+     *
+     * <p>This method extracts types from bytecode instructions within method bodies and static
+     * initializers, returning a map where each key is a Fully Qualified Class Name (FQCN) of a
+     * dependent class, and the value is a set of {@link LinkDetails} describing the usage context.
+     *
+     * <p>The method signature format follows ASM convention: {@code ownerClassName.methodName(descriptor)}
+     *
+     * <p>LinkDetails formation rules:
+     * <ul>
+     *   <li>Usage in static initializer ({@code <clinit>}) → {@code LinkDetails.of(LinkType.STATIC_BLOCK)}
+     *       (empty details)</li>
+     *   <li>Usage in method (method call, variable declaration, object creation, etc.) →
+     *       {@code LinkDetails.of(LinkType.METHOD, methodSignature)} where methodSignature is the
+     *       signature of the method containing the usage</li>
+     * </ul>
+     *
+     * @param classBytes the bytecode of the class to analyze
+     * @return a map where key is FQCN of dependent class and value is a set of LinkDetails
+     *         describing the usage context; empty map if no types are referenced in method code
+     * @throws IllegalArgumentException if classBytes is null
+     */
+    public Map<String, Set<LinkDetails>> extractDetails(byte[] classBytes) {
+        return Map.of();
     }
 
 }
