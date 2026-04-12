@@ -1,6 +1,6 @@
 # 027-method-type-extractor-details — Тесты
 
-## Статус: pending
+## Статус: complete
 
 ## Описание
 
