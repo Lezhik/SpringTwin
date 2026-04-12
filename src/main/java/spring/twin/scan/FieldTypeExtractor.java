@@ -84,7 +84,48 @@ public class FieldTypeExtractor {
      * @throws IllegalArgumentException if classBytes is null
      */
     public Map<String, Set<LinkDetails>> extractDetails(byte[] classBytes) {
-        // TODO: implement extraction logic
-        return new HashMap<>();
+        if (classBytes == null) {
+            throw new IllegalArgumentException("classBytes must not be null");
+        }
+
+        ClassNode classNode = new ClassNode();
+        ClassReader classReader = new ClassReader(classBytes);
+        classReader.accept(classNode, 0);
+
+        Map<String, Set<LinkDetails>> result = new HashMap<>();
+
+        // Extract field types with details
+        if (classNode.fields != null) {
+            for (FieldNode field : classNode.fields) {
+                LinkDetails detail = LinkDetails.of(LinkType.FIELD, field.name);
+
+                // Extract type from descriptor
+                FqcnNormalizer.fromDescriptor(field.desc).ifPresent(fqcn -> addDetail(result, fqcn, detail));
+
+                // Extract generic types from signature
+                if (field.signature != null) {
+                    Set<String> genericTypes = GenericTypeExtractor.extractTypeNames(field.signature);
+                    for (String genericFqcn : genericTypes) {
+                        addDetail(result, genericFqcn, detail);
+                    }
+                }
+            }
+        }
+
+        return result;
+    }
+
+    /**
+     * Adds a LinkDetails to the Set for the specified FQCN in the map.
+     *
+     * <p>If the FQCN is not yet present in the map, a new HashSet is created.
+     * The LinkDetails is then added to the set associated with the FQCN.
+     *
+     * @param map the map to add the detail to
+     * @param fqcn the Fully Qualified Class Name to use as the key
+     * @param detail the LinkDetails to add to the set
+     */
+    private void addDetail(Map<String, Set<LinkDetails>> map, String fqcn, LinkDetails detail) {
+        map.computeIfAbsent(fqcn, k -> new HashSet<>()).add(detail);
     }
 }
