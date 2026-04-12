@@ -1,6 +1,6 @@
 # 024-link-details-model — API
 
-## Статус: pending
+## Статус: complete
 
 ## Описание
 
