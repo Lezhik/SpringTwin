@@ -242,7 +242,7 @@ graph TD
 | 029 | +          | code-usage-extractor-details      | Детализированное извлечение использования в коде                          | 024                 |
 | 030 | +          | bytecode-class-analyzer-details   | Оркестрация детализированных экстракторов                                 | 025–029             |
 | 031 | +          | dependency-graph-builder-details  | Построение графа с детализированными связями                              | 030                 |
-| 032 | -          | dependency-json-writer-details    | Запись детализированного графа в JSON                                     | 024                 |
+| 032 | +          | dependency-json-writer-details    | Запись детализированного графа в JSON                                     | 024                 |
 | 033 | -          | inner-class-merger-details        | Поддержка нового формата в InnerClassMerger                               | 024                 |
 | 034 | -          | scan-bytecode-service-details     | Обновление сервиса для использования нового формата                       | 031, 032, 033       |
 | 035 | -          | e2e-details-tests                 | End-to-end тесты нового формата JSON                                      | 034                 |
@@ -302,10 +302,10 @@ graph TD
 - [+] [031-dependency-graph-builder-details-fix](scan-bytecode/031-dependency-graph-builder-details-fix.md)
 
 ### Фича 032: dependency-json-writer-details
-- [ ] [032-dependency-json-writer-details-api](scan-bytecode/032-dependency-json-writer-details-api.md)
-- [ ] [032-dependency-json-writer-details-tests](scan-bytecode/032-dependency-json-writer-details-tests.md)
-- [ ] [032-dependency-json-writer-details-code](scan-bytecode/032-dependency-json-writer-details-code.md)
-- [ ] [032-dependency-json-writer-details-fix](scan-bytecode/032-dependency-json-writer-details-fix.md)
+- [+] [032-dependency-json-writer-details-api](scan-bytecode/032-dependency-json-writer-details-api.md)
+- [+] [032-dependency-json-writer-details-tests](scan-bytecode/032-dependency-json-writer-details-tests.md)
+- [+] [032-dependency-json-writer-details-code](scan-bytecode/032-dependency-json-writer-details-code.md)
+- [+] [032-dependency-json-writer-details-fix](scan-bytecode/032-dependency-json-writer-details-fix.md)
 
 ### Фича 033: inner-class-merger-details
 - [ ] [033-inner-class-merger-details-api](scan-bytecode/033-inner-class-merger-details-api.md)

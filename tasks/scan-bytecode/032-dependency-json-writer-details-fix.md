@@ -1,6 +1,6 @@
 # 032-dependency-json-writer-details — Исправление
 
-## Статус: pending
+## Статус: complete
 
 ## Описание
 

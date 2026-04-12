@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -131,7 +131,53 @@ public class DependencyJsonWriter {
      * @throws UncheckedIOException if the file cannot be written
      */
     public void writeDetails(Map<String, Map<String, Set<LinkDetails>>> graph, Path outputFile) {
-        // TODO: Implementation to be added in code phase
-        throw new UnsupportedOperationException("writeDetails() not yet implemented");
+        // Create ObjectMapper with INDENT_OUTPUT
+        ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.enable(SerializationFeature.INDENT_OUTPUT);
+
+        // Convert Map<String, Map<String, Set<LinkDetails>>> to sorted structure:
+        // - Outer TreeMap for first-level key sorting
+        // - Inner TreeMap for second-level key sorting
+        // - Set<LinkDetails> -> sorted List (by type, then by details)
+        Map<String, Map<String, List<LinkDetails>>> sortedMap = new TreeMap<>();
+
+        for (Map.Entry<String, Map<String, Set<LinkDetails>>> outerEntry : graph.entrySet()) {
+            String outerKey = outerEntry.getKey();
+            Map<String, Set<LinkDetails>> innerMap = outerEntry.getValue();
+
+            Map<String, List<LinkDetails>> sortedInnerMap = new TreeMap<>();
+
+            for (Map.Entry<String, Set<LinkDetails>> innerEntry : innerMap.entrySet()) {
+                String innerKey = innerEntry.getKey();
+                Set<LinkDetails> linkDetailsSet = innerEntry.getValue();
+
+                // Convert Set to sorted List by type, then by details
+                List<LinkDetails> sortedList = linkDetailsSet.stream()
+                        .sorted(Comparator.comparing(LinkDetails::type)
+                                .thenComparing(LinkDetails::details))
+                        .collect(Collectors.toList());
+
+                sortedInnerMap.put(innerKey, sortedList);
+            }
+
+            sortedMap.put(outerKey, sortedInnerMap);
+        }
+
+        try {
+            // Create parent directories if they don't exist
+            var path = outputFile.getParent();
+            if (path != null) {
+                Files.createDirectories(path);
+            }
+
+            // Write JSON
+            if (sortedMap.isEmpty()) {
+                Files.writeString(outputFile, "{}");
+            } else {
+                objectMapper.writeValue(outputFile.toFile(), sortedMap);
+            }
+        } catch (IOException e) {
+            throw new UncheckedIOException("Failed to write dependency graph to: " + outputFile, e);
+        }
     }
 }
