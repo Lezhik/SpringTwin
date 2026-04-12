@@ -1,6 +1,8 @@
 package spring.twin.scan;
 
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 import org.objectweb.asm.ClassReader;
@@ -62,5 +64,27 @@ public class FieldTypeExtractor {
         }
 
         return result;
+    }
+
+    /**
+     * Analyzes class bytecode and extracts all field-related types with link details.
+     *
+     * <p>This method extracts:
+     * <ul>
+     *   <li>Field types from descriptors (from {@code FieldNode.desc})</li>
+     *   <li>Generic type parameters from field signatures (from {@code FieldNode.signature})</li>
+     * </ul>
+     *
+     * <p>All extracted types are returned as Fully Qualified Class Names (FQCN) mapped to
+     * {@link LinkDetails} with type {@link LinkType#FIELD} and field name in details.
+     *
+     * @param classBytes the bytecode of the class to analyze
+     * @return a map where key is FQCN of dependent class and value is a set of LinkDetails
+     *         with type FIELD and field name in details; empty map if no fields reference non-primitive types
+     * @throws IllegalArgumentException if classBytes is null
+     */
+    public Map<String, Set<LinkDetails>> extractDetails(byte[] classBytes) {
+        // TODO: implement extraction logic
+        return new HashMap<>();
     }
 }
