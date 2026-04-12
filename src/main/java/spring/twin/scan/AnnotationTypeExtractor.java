@@ -104,8 +104,40 @@ public class AnnotationTypeExtractor {
         if (classBytes == null) {
             throw new IllegalArgumentException("classBytes must not be null");
         }
-        // Stub implementation - to be fully implemented in subsequent tasks
-        return new HashMap<>();
+
+        ClassNode classNode = new ClassNode();
+        ClassReader classReader = new ClassReader(classBytes);
+        classReader.accept(classNode, 0);
+
+        Map<String, Set<LinkDetails>> result = new HashMap<>();
+        String className = FqcnNormalizer.internalToFqcn(classNode.name);
+
+        // Extract class-level annotations
+        extractAnnotationDetails(classNode.visibleAnnotations, LinkType.CLASS_ANNOTATION, "", result);
+        extractAnnotationDetails(classNode.invisibleAnnotations, LinkType.CLASS_ANNOTATION, "", result);
+
+        // Extract field annotations
+        if (classNode.fields != null) {
+            for (FieldNode field : classNode.fields) {
+                extractAnnotationDetails(field.visibleAnnotations, LinkType.FIELD_ANNOTATION, field.name, result);
+                extractAnnotationDetails(field.invisibleAnnotations, LinkType.FIELD_ANNOTATION, field.name, result);
+            }
+        }
+
+        // Extract method annotations and parameter annotations
+        if (classNode.methods != null) {
+            for (MethodNode method : classNode.methods) {
+                String methodSignature = className + "." + method.name + method.desc;
+                extractAnnotationDetails(method.visibleAnnotations, LinkType.METHOD_ANNOTATION, methodSignature, result);
+                extractAnnotationDetails(method.invisibleAnnotations, LinkType.METHOD_ANNOTATION, methodSignature, result);
+
+                // Extract parameter annotations
+                extractParameterAnnotationDetails(method.visibleParameterAnnotations, methodSignature, result);
+                extractParameterAnnotationDetails(method.invisibleParameterAnnotations, methodSignature, result);
+            }
+        }
+
+        return result;
     }
 
     /**
@@ -135,6 +167,61 @@ public class AnnotationTypeExtractor {
         }
         for (List<AnnotationNode> annotations : parameterAnnotations) {
             extractAnnotations(annotations, result);
+        }
+    }
+
+    /**
+     * Adds LinkDetails to the Set for the specified FQCN in the result map.
+     *
+     * <p>If the FQCN is not yet present in the map, a new Set is created.
+     * The LinkDetails is then added to the Set associated with the FQCN.
+     *
+     * @param map    the result map to add to
+     * @param fqcn   the fully qualified class name of the annotation
+     * @param detail the LinkDetails to add
+     */
+    private void addDetail(Map<String, Set<LinkDetails>> map, String fqcn, LinkDetails detail) {
+        map.computeIfAbsent(fqcn, k -> new HashSet<>()).add(detail);
+    }
+
+    /**
+     * Extracts FQCN from a list of annotation nodes and adds them with the specified link type and details.
+     *
+     * <p>For each annotation in the list, extracts the FQCN using {@link FqcnNormalizer#fromDescriptor(String)}
+     * and adds a LinkDetails entry to the result map.
+     *
+     * @param annotations the list of annotation nodes
+     * @param linkType    the type of link to create
+     * @param details     the details string for the link
+     * @param result      the result map to add entries to
+     */
+    private void extractAnnotationDetails(List<AnnotationNode> annotations, LinkType linkType, String details, Map<String, Set<LinkDetails>> result) {
+        if (annotations == null) {
+            return;
+        }
+        for (AnnotationNode annotation : annotations) {
+            FqcnNormalizer.fromDescriptor(annotation.desc).ifPresent(fqcn ->
+                addDetail(result, fqcn, LinkDetails.of(linkType, details))
+            );
+        }
+    }
+
+    /**
+     * Extracts FQCN from parameter annotations and adds them with METHOD_ARG_ANNOTATION link type.
+     *
+     * <p>Iterates through the array of annotation lists (one per parameter) and adds
+     * each annotation with the specified method signature as details.
+     *
+     * @param parameterAnnotations the array of annotation lists per parameter
+     * @param methodSignature      the method signature to use as details
+     * @param result               the result map to add entries to
+     */
+    private void extractParameterAnnotationDetails(List<AnnotationNode>[] parameterAnnotations, String methodSignature, Map<String, Set<LinkDetails>> result) {
+        if (parameterAnnotations == null) {
+            return;
+        }
+        for (List<AnnotationNode> annotations : parameterAnnotations) {
+            extractAnnotationDetails(annotations, LinkType.METHOD_ARG_ANNOTATION, methodSignature, result);
         }
     }
 }

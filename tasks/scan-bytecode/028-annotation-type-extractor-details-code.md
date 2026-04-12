@@ -1,6 +1,6 @@
 # 028-annotation-type-extractor-details — Реализация
 
-## Статус: pending
+## Статус: complete
 
 ## Описание
 

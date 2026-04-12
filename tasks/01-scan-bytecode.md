@@ -238,7 +238,7 @@ graph TD
 | 025 | +          | inheritance-extractor-details     | Детализированное извлечение наследования и имплементации                  | 024                 |
 | 026 | +          | field-type-extractor-details      | Детализированное извлечение типов полей                                   | 024                 |
 | 027 | +          | method-type-extractor-details     | Детализированное извлечение типов методов                                 | 024                 |
-| 028 | -          | annotation-type-extractor-details | Детализированное извлечение аннотаций                                     | 024                 |
+| 028 | +          | annotation-type-extractor-details | Детализированное извлечение аннотаций                                     | 024                 |
 | 029 | -          | code-usage-extractor-details      | Детализированное извлечение использования в коде                          | 024                 |
 | 030 | -          | bytecode-class-analyzer-details   | Оркестрация детализированных экстракторов                                 | 025–029             |
 | 031 | -          | dependency-graph-builder-details  | Построение графа с детализированными связями                              | 030                 |
@@ -278,10 +278,10 @@ graph TD
 - [+] [027-method-type-extractor-details-fix](scan-bytecode/027-method-type-extractor-details-fix.md)
 
 ### Фича 028: annotation-type-extractor-details
-- [ ] [028-annotation-type-extractor-details-api](scan-bytecode/028-annotation-type-extractor-details-api.md)
-- [ ] [028-annotation-type-extractor-details-tests](scan-bytecode/028-annotation-type-extractor-details-tests.md)
-- [ ] [028-annotation-type-extractor-details-code](scan-bytecode/028-annotation-type-extractor-details-code.md)
-- [ ] [028-annotation-type-extractor-details-fix](scan-bytecode/028-annotation-type-extractor-details-fix.md)
+- [+] [028-annotation-type-extractor-details-api](scan-bytecode/028-annotation-type-extractor-details-api.md)
+- [+] [028-annotation-type-extractor-details-tests](scan-bytecode/028-annotation-type-extractor-details-tests.md)
+- [+] [028-annotation-type-extractor-details-code](scan-bytecode/028-annotation-type-extractor-details-code.md)
+- [+] [028-annotation-type-extractor-details-fix](scan-bytecode/028-annotation-type-extractor-details-fix.md)
 
 ### Фича 029: code-usage-extractor-details
 - [ ] [029-code-usage-extractor-details-api](scan-bytecode/029-code-usage-extractor-details-api.md)
