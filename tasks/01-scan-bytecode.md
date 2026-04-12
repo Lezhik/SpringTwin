@@ -233,19 +233,19 @@ graph TD
 
 | #   | Реализация | Фича                              | Описание                                                                 | Зависимости         |
 |-----|------------|-----------------------------------|--------------------------------------------------------------------------|---------------------|
-| 023 | +          | link-type-enum                    | Перечисление типов связей LinkType                                       | —                   |
-| 024 | +          | link-details-model                | Модель данных LinkDetails с type и details                                | 023                 |
-| 025 | +          | inheritance-extractor-details     | Детализированное извлечение наследования и имплементации                  | 024                 |
-| 026 | +          | field-type-extractor-details      | Детализированное извлечение типов полей                                   | 024                 |
-| 027 | +          | method-type-extractor-details     | Детализированное извлечение типов методов                                 | 024                 |
-| 028 | +          | annotation-type-extractor-details | Детализированное извлечение аннотаций                                     | 024                 |
-| 029 | +          | code-usage-extractor-details      | Детализированное извлечение использования в коде                          | 024                 |
-| 030 | +          | bytecode-class-analyzer-details   | Оркестрация детализированных экстракторов                                 | 025–029             |
-| 031 | +          | dependency-graph-builder-details  | Построение графа с детализированными связями                              | 030                 |
-| 032 | +          | dependency-json-writer-details    | Запись детализированного графа в JSON                                     | 024                 |
-| 033 | +          | inner-class-merger-details        | Поддержка нового формата в InnerClassMerger                               | 024                 |
-| 034 | +          | scan-bytecode-service-details     | Обновление сервиса для использования нового формата                       | 031, 032, 033       |
-| 035 | +          | e2e-details-tests                 | End-to-end тесты нового формата JSON                                      | 034                 |
+| 023 | -          | link-type-enum                    | Перечисление типов связей LinkType                                       | —                   |
+| 024 | -          | link-details-model                | Модель данных LinkDetails с type и details                                | 023                 |
+| 025 | -          | inheritance-extractor-details     | Детализированное извлечение наследования и имплементации                  | 024                 |
+| 026 | -          | field-type-extractor-details      | Детализированное извлечение типов полей                                   | 024                 |
+| 027 | -          | method-type-extractor-details     | Детализированное извлечение типов методов                                 | 024                 |
+| 028 | -          | annotation-type-extractor-details | Детализированное извлечение аннотаций                                     | 024                 |
+| 029 | -          | code-usage-extractor-details      | Детализированное извлечение использования в коде                          | 024                 |
+| 030 | -          | bytecode-class-analyzer-details   | Оркестрация детализированных экстракторов                                 | 025–029             |
+| 031 | -          | dependency-graph-builder-details  | Построение графа с детализированными связями                              | 030                 |
+| 032 | -          | dependency-json-writer-details    | Запись детализированного графа в JSON                                     | 024                 |
+| 033 | -          | inner-class-merger-details        | Поддержка нового формата в InnerClassMerger                               | 024                 |
+| 034 | -          | scan-bytecode-service-details     | Обновление сервиса для использования нового формата                       | 031, 032, 033       |
+| 035 | -          | e2e-details-tests                 | End-to-end тесты нового формата JSON                                      | 034                 |
 
 ### Фича 023: link-type-enum
 - [ ] [023-link-type-enum-api](scan-bytecode/023-link-type-enum-api.md)

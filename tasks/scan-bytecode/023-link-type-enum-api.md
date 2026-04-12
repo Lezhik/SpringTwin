@@ -1,6 +1,6 @@
 # 023-link-type-enum — API
 
-## Статус: pending
+## Статус: complete
 
 ## Описание
 
