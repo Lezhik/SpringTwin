@@ -1,6 +1,6 @@
 # 032-dependency-json-writer-details — Тесты
 
-## Статус: pending
+## Статус: complete
 
 ## Описание
 
