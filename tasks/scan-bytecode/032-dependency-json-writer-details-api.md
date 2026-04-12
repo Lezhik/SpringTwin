@@ -1,5 +1,7 @@
 # 032-dependency-json-writer-details — API
 
+## Статус: complete
+
 ## Описание
 
 Добавление метода записи детализированного графа в JSON в `DependencyJsonWriter`. Новый метод записывает `Map<String, Map<String, Set<LinkDetails>>>` в формат, соответствующий новой спецификации SPEC.

@@ -93,4 +93,45 @@ public class DependencyJsonWriter {
             throw new UncheckedIOException("Failed to write dependency graph to: " + outputFile, e);
         }
     }
+
+    /**
+     * Writes the detailed dependency graph to a JSON file.
+     *
+     * <p>This method writes a detailed graph containing {@link LinkDetails} information
+     * for each dependency. The output format includes link types and additional details
+     * about each dependency.
+     *
+     * <p>The output JSON format follows the SPEC:
+     * <ul>
+     *   <li>First-level keys (source classes) are sorted alphabetically</li>
+     *   <li>Second-level keys (target classes) are sorted alphabetically</li>
+     *   <li>LinkDetails arrays are sorted by type, then by details</li>
+     *   <li>Pretty-printed with 2-space indentation</li>
+     *   <li>UTF-8 encoded</li>
+     *   <li>Empty graph is written as {@code {}}</li>
+     * </ul>
+     *
+     * <p>Example output:
+     * <pre>
+     * {
+     *   "com.example.OrderService": {
+     *     "com.example.PaymentClient": [
+     *       {"type": "FIELD", "details": "paymentClient"}
+     *     ],
+     *     "com.example.repository.OrderRepository": [
+     *       {"type": "FIELD", "details": "orderRepository"}
+     *     ]
+     *   }
+     * }
+     * </pre>
+     *
+     * @param graph      the detailed dependency graph as a map from FQCN to a map of
+     *                   dependency FQCNs to set of {@link LinkDetails}
+     * @param outputFile the path to the output JSON file
+     * @throws UncheckedIOException if the file cannot be written
+     */
+    public void writeDetails(Map<String, Map<String, Set<LinkDetails>>> graph, Path outputFile) {
+        // TODO: Implementation to be added in code phase
+        throw new UnsupportedOperationException("writeDetails() not yet implemented");
+    }
 }
