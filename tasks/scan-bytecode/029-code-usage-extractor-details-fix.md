@@ -1,6 +1,6 @@
 # 029-code-usage-extractor-details — Исправление
 
-## Статус: pending
+## Статус: complete
 
 ## Описание
 

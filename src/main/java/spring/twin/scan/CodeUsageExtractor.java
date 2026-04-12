@@ -1,5 +1,6 @@
 package spring.twin.scan;
 
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -122,7 +123,92 @@ public class CodeUsageExtractor {
      * @throws IllegalArgumentException if classBytes is null
      */
     public Map<String, Set<LinkDetails>> extractDetails(byte[] classBytes) {
-        return Map.of();
+        if (classBytes == null) {
+            throw new IllegalArgumentException("classBytes must not be null");
+        }
+
+        Map<String, Set<LinkDetails>> result = new HashMap<>();
+        ClassReader classReader = new ClassReader(classBytes);
+
+        ClassVisitor classVisitor = new ClassVisitor(Opcodes.ASM9) {
+            private String className;
+
+            @Override
+            public void visit(int version, int access, String name, String signature,
+                              String superName, String[] interfaces) {
+                this.className = name;
+            }
+
+            @Override
+            public MethodVisitor visitMethod(int access, String name, String descriptor,
+                                             String signature, String[] exceptions) {
+                LinkType linkType = "<clinit>".equals(name) ? LinkType.STATIC_BLOCK : LinkType.METHOD;
+                String methodSignature = "L" + className + ";" + name + descriptor;
+
+                return new MethodVisitor(Opcodes.ASM9) {
+                    @Override
+                    public void visitTypeInsn(int opcode, String type) {
+                        FqcnNormalizer.fromInternalName(type).ifPresent(fqcn -> {
+                            LinkDetails detail = linkType == LinkType.STATIC_BLOCK
+                                    ? LinkDetails.of(linkType)
+                                    : LinkDetails.of(linkType, methodSignature);
+                            addDetail(result, fqcn, detail);
+                        });
+                    }
+
+                    @Override
+                    public void visitFieldInsn(int opcode, String owner, String name, String descriptor) {
+                        FqcnNormalizer.fromInternalName(owner).ifPresent(fqcn -> {
+                            LinkDetails detail = linkType == LinkType.STATIC_BLOCK
+                                    ? LinkDetails.of(linkType)
+                                    : LinkDetails.of(linkType, methodSignature);
+                            addDetail(result, fqcn, detail);
+                        });
+                    }
+
+                    @Override
+                    public void visitMethodInsn(int opcode, String owner, String name,
+                                                String descriptor, boolean isInterface) {
+                        FqcnNormalizer.fromInternalName(owner).ifPresent(fqcn -> {
+                            LinkDetails detail = linkType == LinkType.STATIC_BLOCK
+                                    ? LinkDetails.of(linkType)
+                                    : LinkDetails.of(linkType, methodSignature);
+                            addDetail(result, fqcn, detail);
+                        });
+                    }
+
+                    @Override
+                    public void visitLdcInsn(Object value) {
+                        if (value instanceof Type) {
+                            Type type = (Type) value;
+                            FqcnNormalizer.fromDescriptor(type.getDescriptor()).ifPresent(fqcn -> {
+                                LinkDetails detail = linkType == LinkType.STATIC_BLOCK
+                                        ? LinkDetails.of(linkType)
+                                        : LinkDetails.of(linkType, methodSignature);
+                                addDetail(result, fqcn, detail);
+                            });
+                        }
+                    }
+                };
+            }
+        };
+
+        classReader.accept(classVisitor, 0);
+        return result;
+    }
+
+    /**
+     * Adds a LinkDetails entry to the set for the specified FQCN.
+     *
+     * <p>If the FQCN is not yet present in the map, a new HashSet is created.
+     * The LinkDetails is then added to the set associated with the FQCN.
+     *
+     * @param map    the result map to add to
+     * @param fqcn   the Fully Qualified Class Name
+     * @param detail the LinkDetails to add
+     */
+    private void addDetail(Map<String, Set<LinkDetails>> map, String fqcn, LinkDetails detail) {
+        map.computeIfAbsent(fqcn, k -> new HashSet<>()).add(detail);
     }
 
 }

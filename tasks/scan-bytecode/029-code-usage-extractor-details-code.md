@@ -1,6 +1,6 @@
 # 029-code-usage-extractor-details — Реализация
 
-## Статус: pending
+## Статус: complete
 
 ## Описание
 
