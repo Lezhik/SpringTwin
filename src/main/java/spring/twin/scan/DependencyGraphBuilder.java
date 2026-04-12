@@ -133,4 +133,63 @@ public class DependencyGraphBuilder {
         // 2. Apply inner class merge based on the flag
         return InnerClassMerger.mergeInnerClasses(graph, mergeInnerClasses);
     }
+
+    /**
+     * Builds a detailed dependency graph from .class files in the specified directory.
+     *
+     * <p>This method:
+     * <ul>
+     *   <li>Scans the directory for all .class files</li>
+     *   <li>Extracts the FQCN from each class file</li>
+     *   <li>Filters classes based on include/exclude masks</li>
+     *   <li>Extracts detailed dependencies for each included class with link information</li>
+     *   <li>Filters out primitive types and excluded dependencies</li>
+     *   <li>Returns a sorted map for deterministic ordering</li>
+     * </ul>
+     *
+     * <p>The returned structure is {@code Map<String, Map<String, Set<LinkDetails>>>} where:
+     * <ul>
+     *   <li>Outer key - FQCN of the analyzed class</li>
+     *   <li>Inner key - FQCN of a dependency class</li>
+     *   <li>Value - set of LinkDetails describing the relationship</li>
+     * </ul>
+     *
+     * @param classesDir   the directory containing .class files
+     * @param includeMasks list of masks for including classes (empty = include all)
+     * @param excludeMasks list of masks for excluding classes (empty = exclude none)
+     * @return a two-level map from FQCN to dependency FQCN to set of LinkDetails, sorted by keys
+     * @throws UncheckedIOException if class files cannot be read
+     */
+    public Map<String, Map<String, Set<LinkDetails>>> buildDetails(Path classesDir, List<String> includeMasks, List<String> excludeMasks) {
+        throw new UnsupportedOperationException("buildDetails() is not yet implemented");
+    }
+
+    /**
+     * Builds a detailed dependency graph from .class files in the specified directory
+     * with optional merging of inner classes.
+     *
+     * <p>This method:
+     * <ul>
+     *   <li>Calls the buildDetails method to construct the initial detailed graph</li>
+     *   <li>Conditionally merges inner classes with their outer classes based on the flag</li>
+     *   <li>Returns the resulting detailed graph</li>
+     * </ul>
+     *
+     * <p>The returned structure is {@code Map<String, Map<String, Set<LinkDetails>>>} where:
+     * <ul>
+     *   <li>Outer key - FQCN of the analyzed class</li>
+     *   <li>Inner key - FQCN of a dependency class</li>
+     *   <li>Value - set of LinkDetails describing the relationship</li>
+     * </ul>
+     *
+     * @param classesDir        the directory containing .class files
+     * @param includeMasks      list of masks for including classes (empty = include all)
+     * @param excludeMasks      list of masks for excluding classes (empty = exclude none)
+     * @param mergeInnerClasses whether to merge inner classes with their outer classes
+     * @return a two-level map from FQCN to dependency FQCN to set of LinkDetails, sorted by keys
+     * @throws UncheckedIOException if class files cannot be read
+     */
+    public Map<String, Map<String, Set<LinkDetails>>> buildDetails(Path classesDir, List<String> includeMasks, List<String> excludeMasks, boolean mergeInnerClasses) {
+        throw new UnsupportedOperationException("buildDetails() with mergeInnerClasses is not yet implemented");
+    }
 }
