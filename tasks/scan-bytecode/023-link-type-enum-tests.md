@@ -1,6 +1,6 @@
 # 023-link-type-enum — Тесты
 
-## Статус: pending
+## Статус: complete
 
 ## Описание
 
