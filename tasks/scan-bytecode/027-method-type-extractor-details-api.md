@@ -1,6 +1,6 @@
 # 027-method-type-extractor-details — API
 
-## Статус: pending
+## Статус: complete
 
 ## Описание
 
