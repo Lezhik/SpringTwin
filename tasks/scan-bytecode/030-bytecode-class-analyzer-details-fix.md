@@ -1,6 +1,6 @@
 # 030-bytecode-class-analyzer-details — Исправление
 
-## Статус: pending
+## Статус: complete
 
 ## Описание
 

@@ -240,7 +240,7 @@ graph TD
 | 027 | +          | method-type-extractor-details     | Детализированное извлечение типов методов                                 | 024                 |
 | 028 | +          | annotation-type-extractor-details | Детализированное извлечение аннотаций                                     | 024                 |
 | 029 | +          | code-usage-extractor-details      | Детализированное извлечение использования в коде                          | 024                 |
-| 030 | -          | bytecode-class-analyzer-details   | Оркестрация детализированных экстракторов                                 | 025–029             |
+| 030 | +          | bytecode-class-analyzer-details   | Оркестрация детализированных экстракторов                                 | 025–029             |
 | 031 | -          | dependency-graph-builder-details  | Построение графа с детализированными связями                              | 030                 |
 | 032 | -          | dependency-json-writer-details    | Запись детализированного графа в JSON                                     | 024                 |
 | 033 | -          | inner-class-merger-details        | Поддержка нового формата в InnerClassMerger                               | 024                 |
@@ -290,10 +290,10 @@ graph TD
 - [+] [029-code-usage-extractor-details-fix](scan-bytecode/029-code-usage-extractor-details-fix.md)
 
 ### Фича 030: bytecode-class-analyzer-details
-- [ ] [030-bytecode-class-analyzer-details-api](scan-bytecode/030-bytecode-class-analyzer-details-api.md)
-- [ ] [030-bytecode-class-analyzer-details-tests](scan-bytecode/030-bytecode-class-analyzer-details-tests.md)
-- [ ] [030-bytecode-class-analyzer-details-code](scan-bytecode/030-bytecode-class-analyzer-details-code.md)
-- [ ] [030-bytecode-class-analyzer-details-fix](scan-bytecode/030-bytecode-class-analyzer-details-fix.md)
+- [+] [030-bytecode-class-analyzer-details-api](scan-bytecode/030-bytecode-class-analyzer-details-api.md)
+- [+] [030-bytecode-class-analyzer-details-tests](scan-bytecode/030-bytecode-class-analyzer-details-tests.md)
+- [+] [030-bytecode-class-analyzer-details-code](scan-bytecode/030-bytecode-class-analyzer-details-code.md)
+- [+] [030-bytecode-class-analyzer-details-fix](scan-bytecode/030-bytecode-class-analyzer-details-fix.md)
 
 ### Фича 031: dependency-graph-builder-details
 - [ ] [031-dependency-graph-builder-details-api](scan-bytecode/031-dependency-graph-builder-details-api.md)
