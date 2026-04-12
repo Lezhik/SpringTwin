@@ -1,5 +1,7 @@
 package spring.twin.scan;
 
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
@@ -123,6 +125,92 @@ public final class InnerClassMerger {
     public static Map<String, Set<String>> mergeInnerClasses(Map<String, Set<String>> graph, boolean merge) {
         if (merge) {
             return mergeInnerClasses(graph);
+        } else {
+            return graph;
+        }
+    }
+
+    /**
+     * Merges inner classes with their outer classes in the detailed dependency graph.
+     * For each key that is an inner class: removes it from keys, adds its
+     * dependencies to the outer class dependencies. If outer class is not
+     * in the graph, creates a new entry with inner class dependencies.
+     * Also replaces inner classes in dependency values with their outer classes
+     * and removes self-references.
+     *
+     * @param <T> the type of the details set (LinkDetails)
+     * @param graph the detailed dependency graph to process
+     * @return a new graph with inner classes merged
+     */
+    public static <T> Map<String, Map<String, Set<T>>> mergeInnerClassesDetails(Map<String, Map<String, Set<T>>> graph) {
+        TreeMap<String, Map<String, Set<T>>> result = new TreeMap<>();
+        
+        // Step 1: Process keys - merge inner classes to outer classes
+        for (Map.Entry<String, Map<String, Set<T>>> entry : graph.entrySet()) {
+            String key = entry.getKey();
+            Map<String, Set<T>> dependencies = entry.getValue();
+            
+            String targetKey;
+            if (isInnerClass(key)) {
+                targetKey = getOuterClassName(key);
+            } else {
+                targetKey = key;
+            }
+            
+            Map<String, Set<T>> targetMap = result.computeIfAbsent(targetKey, k -> new TreeMap<>());
+            if (dependencies != null) {
+                for (Map.Entry<String, Set<T>> depEntry : dependencies.entrySet()) {
+                    String depKey = depEntry.getKey();
+                    Set<T> depDetails = depEntry.getValue();
+                    targetMap.computeIfAbsent(depKey, k -> new HashSet<>()).addAll(depDetails);
+                }
+            }
+        }
+        
+        // Step 2: Replace inner classes in values with outer classes, remove self-references
+        for (Map.Entry<String, Map<String, Set<T>>> entry : result.entrySet()) {
+            String key = entry.getKey();
+            Map<String, Set<T>> dependencies = entry.getValue();
+            Map<String, Set<T>> newDependencies = new TreeMap<>();
+            
+            for (Map.Entry<String, Set<T>> depEntry : dependencies.entrySet()) {
+                String dep = depEntry.getKey();
+                Set<T> details = depEntry.getValue();
+                
+                // Map inner classes to their outer classes in dependencies
+                String mappedDep;
+                if (isInnerClass(dep)) {
+                    mappedDep = getOuterClassName(dep);
+                } else {
+                    mappedDep = dep;
+                }
+                
+                // Remove self-references
+                if (!mappedDep.equals(key)) {
+                    newDependencies.computeIfAbsent(mappedDep, k -> new HashSet<>()).addAll(details);
+                }
+            }
+            
+            entry.setValue(newDependencies);
+        }
+        
+        // Return LinkedHashMap for deterministic order
+        return new LinkedHashMap<>(result);
+    }
+    
+    /**
+     * Conditionally merges inner classes with their outer classes for detailed dependency graph.
+     * If merge == true, merges inner classes (Outer$Inner) with their outer classes.
+     * If merge == false, returns the original graph unchanged.
+     *
+     * @param <T> the type of the details set (LinkDetails)
+     * @param graph the detailed dependency graph to process
+     * @param merge whether to perform the merge
+     * @return the processed graph or the original graph
+     */
+    public static <T> Map<String, Map<String, Set<T>>> mergeInnerClassesDetails(Map<String, Map<String, Set<T>>> graph, boolean merge) {
+        if (merge) {
+            return mergeInnerClassesDetails(graph);
         } else {
             return graph;
         }

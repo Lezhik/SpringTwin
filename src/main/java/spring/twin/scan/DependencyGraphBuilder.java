@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -160,8 +161,83 @@ public class DependencyGraphBuilder {
      * @return a two-level map from FQCN to dependency FQCN to set of LinkDetails, sorted by keys
      * @throws UncheckedIOException if class files cannot be read
      */
+    /**
+     * Builds a detailed dependency graph from .class files in the specified directory.
+     *
+     * <p>This method:
+     * <ul>
+     *   <li>Scans the directory for all .class files</li>
+     *   <li>Extracts the FQCN from each class file</li>
+     *   <li>Filters classes based on include/exclude masks</li>
+     *   <li>Extracts detailed dependencies for each included class with link information</li>
+     *   <li>Filters out primitive types and excluded dependencies</li>
+     *   <li>Returns a sorted map for deterministic ordering</li>
+     * </ul>
+     *
+     * <p>The returned structure is {@code Map<String, Map<String, Set<LinkDetails>>>} where:
+     * <ul>
+     *   <li>Outer key - FQCN of the analyzed class</li>
+     *   <li>Inner key - FQCN of a dependency class</li>
+     *   <li>Value - set of LinkDetails describing the relationship</li>
+     * </ul>
+     *
+     * @param classesDir   the directory containing .class files
+     * @param includeMasks list of masks for including classes (empty = include all)
+     * @param excludeMasks list of masks for excluding classes (empty = exclude none)
+     * @return a two-level map from FQCN to dependency FQCN to set of LinkDetails, sorted by keys
+     * @throws UncheckedIOException if class files cannot be read
+     */
     public Map<String, Map<String, Set<LinkDetails>>> buildDetails(Path classesDir, List<String> includeMasks, List<String> excludeMasks) {
-        throw new UnsupportedOperationException("buildDetails() is not yet implemented");
+        // 1. Scan the directory to get a list of .class files
+        List<Path> classFiles = classFileScanner.scan(classesDir);
+
+        // Use TreeMap for sorted keys
+        TreeMap<String, Map<String, Set<LinkDetails>>> graph = new TreeMap<>();
+
+        for (Path classFile : classFiles) {
+            try {
+                // 2. Read bytecode via Files.readAllBytes()
+                byte[] classBytes = Files.readAllBytes(classFile);
+
+                // 3. Extract FQCN via bytecodeClassAnalyzer.extractClassName(bytes)
+                String fqcn = bytecodeClassAnalyzer.extractClassName(classBytes);
+
+                // 4. Check FQCN via MaskMatcher.shouldInclude(fqcn, includeMasks, excludeMasks)
+                if (!MaskMatcher.shouldInclude(fqcn, includeMasks, excludeMasks)) {
+                    continue;
+                }
+
+                // 5. Extract detailed dependencies via bytecodeClassAnalyzer.extractDependenciesDetails(bytes)
+                Map<String, Map<String, Set<LinkDetails>>> classDetails = bytecodeClassAnalyzer.extractDependenciesDetails(classBytes);
+
+                // Get the dependencies for this class (outer key is the class FQCN)
+                Map<String, Set<LinkDetails>> dependencies = classDetails.get(fqcn);
+                if (dependencies == null) {
+                    dependencies = new HashMap<>();
+                }
+
+                // 6. Filter dependencies: remove primitive types and excluded FQCNs from inner keys
+                Map<String, Set<LinkDetails>> filteredDependencies = new TreeMap<>();
+                for (Map.Entry<String, Set<LinkDetails>> entry : dependencies.entrySet()) {
+                    String depFqcn = entry.getKey();
+                    Set<LinkDetails> details = entry.getValue();
+
+                    // Filter out primitive types and excluded dependencies
+                    if (!PRIMITIVE_TYPES.contains(depFqcn) && MaskMatcher.shouldInclude(depFqcn, includeMasks, excludeMasks)) {
+                        filteredDependencies.put(depFqcn, details);
+                    }
+                }
+
+                // 7. Add entry to graph
+                graph.put(fqcn, filteredDependencies);
+
+            } catch (IOException e) {
+                throw new UncheckedIOException("Failed to read class file: " + classFile, e);
+            }
+        }
+
+        // 8. Return sorted graph (TreeMap for keys)
+        return new LinkedHashMap<>(graph);
     }
 
     /**
@@ -190,6 +266,10 @@ public class DependencyGraphBuilder {
      * @throws UncheckedIOException if class files cannot be read
      */
     public Map<String, Map<String, Set<LinkDetails>>> buildDetails(Path classesDir, List<String> includeMasks, List<String> excludeMasks, boolean mergeInnerClasses) {
-        throw new UnsupportedOperationException("buildDetails() with mergeInnerClasses is not yet implemented");
+        // 1. Call existing buildDetails method to build the original graph
+        Map<String, Map<String, Set<LinkDetails>>> graph = buildDetails(classesDir, includeMasks, excludeMasks);
+
+        // 2. Apply inner class merge based on the flag
+        return InnerClassMerger.mergeInnerClassesDetails(graph, mergeInnerClasses);
     }
 }

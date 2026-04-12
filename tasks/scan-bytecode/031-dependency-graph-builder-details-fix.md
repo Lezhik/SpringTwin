@@ -1,6 +1,6 @@
 # 031-dependency-graph-builder-details — Исправление
 
-## Статус: pending
+## Статус: complete
 
 ## Описание
 

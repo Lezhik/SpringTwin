@@ -110,8 +110,9 @@ class DependencyGraphBuilderDetailsTest {
     @Test
     void testBuildDetails_resultStructure_correctNestedMap() {
         Path dir = testClassesDir.resolve("spring/twin/testee");
+        // Include InheritanceChild but exclude InheritanceChildInterface
         List<String> includeMasks = List.of("spring.twin.testee.InheritanceChild");
-        List<String> excludeMasks = List.of();
+        List<String> excludeMasks = List.of("*InheritanceChildInterface*");
 
         Map<String, Map<String, Set<LinkDetails>>> result = builder.buildDetails(dir, includeMasks, excludeMasks);
 

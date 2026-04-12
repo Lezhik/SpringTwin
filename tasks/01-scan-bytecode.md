@@ -241,7 +241,7 @@ graph TD
 | 028 | +          | annotation-type-extractor-details | Детализированное извлечение аннотаций                                     | 024                 |
 | 029 | +          | code-usage-extractor-details      | Детализированное извлечение использования в коде                          | 024                 |
 | 030 | +          | bytecode-class-analyzer-details   | Оркестрация детализированных экстракторов                                 | 025–029             |
-| 031 | -          | dependency-graph-builder-details  | Построение графа с детализированными связями                              | 030                 |
+| 031 | +          | dependency-graph-builder-details  | Построение графа с детализированными связями                              | 030                 |
 | 032 | -          | dependency-json-writer-details    | Запись детализированного графа в JSON                                     | 024                 |
 | 033 | -          | inner-class-merger-details        | Поддержка нового формата в InnerClassMerger                               | 024                 |
 | 034 | -          | scan-bytecode-service-details     | Обновление сервиса для использования нового формата                       | 031, 032, 033       |
@@ -296,10 +296,10 @@ graph TD
 - [+] [030-bytecode-class-analyzer-details-fix](scan-bytecode/030-bytecode-class-analyzer-details-fix.md)
 
 ### Фича 031: dependency-graph-builder-details
-- [ ] [031-dependency-graph-builder-details-api](scan-bytecode/031-dependency-graph-builder-details-api.md)
-- [ ] [031-dependency-graph-builder-details-tests](scan-bytecode/031-dependency-graph-builder-details-tests.md)
-- [ ] [031-dependency-graph-builder-details-code](scan-bytecode/031-dependency-graph-builder-details-code.md)
-- [ ] [031-dependency-graph-builder-details-fix](scan-bytecode/031-dependency-graph-builder-details-fix.md)
+- [+] [031-dependency-graph-builder-details-api](scan-bytecode/031-dependency-graph-builder-details-api.md)
+- [+] [031-dependency-graph-builder-details-tests](scan-bytecode/031-dependency-graph-builder-details-tests.md)
+- [+] [031-dependency-graph-builder-details-code](scan-bytecode/031-dependency-graph-builder-details-code.md)
+- [+] [031-dependency-graph-builder-details-fix](scan-bytecode/031-dependency-graph-builder-details-fix.md)
 
 ### Фича 032: dependency-json-writer-details
 - [ ] [032-dependency-json-writer-details-api](scan-bytecode/032-dependency-json-writer-details-api.md)
