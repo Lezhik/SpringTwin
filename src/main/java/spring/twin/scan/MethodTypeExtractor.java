@@ -101,7 +101,46 @@ public class MethodTypeExtractor {
      * @throws IllegalArgumentException if classBytes is null
      */
     public Map<String, Set<LinkDetails>> extractDetails(byte[] classBytes) {
-        throw new UnsupportedOperationException("Not implemented yet");
+        if (classBytes == null) {
+            throw new IllegalArgumentException("classBytes cannot be null");
+        }
+
+        ClassReader classReader = new ClassReader(classBytes);
+        ClassNode classNode = new ClassNode();
+        classReader.accept(classNode, 0);
+
+        Map<String, Set<LinkDetails>> result = new HashMap<>();
+
+        for (MethodNode method : classNode.methods) {
+            // Form signature in ASM convention: className.methodName(descriptor)
+            String signature = classNode.name + "." + method.name + method.desc;
+
+            // Extract types from method descriptor arguments
+            Type[] argumentTypes = Type.getArgumentTypes(method.desc);
+            for (Type argType : argumentTypes) {
+                String fqcn = FqcnNormalizer.fromDescriptor(argType.getDescriptor()).orElse(null);
+                if (fqcn != null) {
+                    addDetail(result, fqcn, LinkDetails.of(LinkType.METHOD, signature));
+                }
+            }
+
+            // Extract return type from method descriptor
+            Type returnType = Type.getReturnType(method.desc);
+            String returnFqcn = FqcnNormalizer.fromDescriptor(returnType.getDescriptor()).orElse(null);
+            if (returnFqcn != null) {
+                addDetail(result, returnFqcn, LinkDetails.of(LinkType.METHOD, signature));
+            }
+
+            // Extract types from generic signature if present
+            if (method.signature != null) {
+                Set<String> genericTypes = GenericTypeExtractor.extractTypes(method.signature);
+                for (String genericFqcn : genericTypes) {
+                    addDetail(result, genericFqcn, LinkDetails.of(LinkType.METHOD, signature));
+                }
+            }
+        }
+
+        return result;
     }
 
     /**
