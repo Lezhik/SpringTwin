@@ -1,6 +1,6 @@
 # 026-field-type-extractor-details — Тесты
 
-## Статус: pending
+## Статус: complete
 
 ## Описание
 
