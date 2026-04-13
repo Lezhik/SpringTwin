@@ -64,4 +64,31 @@ public class ScanBytecodeService {
                 params.mergeInnerClasses()
         );
     }
+
+    /**
+     * Executes the scan-bytecode pipeline with detailed output.
+     * Builds the detailed dependency graph from .class files and writes it to a JSON file.
+     *
+     * <p>This method:
+     * <ul>
+     *   <li>Calls {@code dependencyGraphBuilder.buildDetails()} with the classes directory and masks from params</li>
+     *   <li>Calls {@code dependencyJsonWriter.writeDetails()} to serialize the detailed graph to the output file</li>
+     * </ul>
+     *
+     * @param params the parameters for the scan-bytecode command
+     */
+    public void executeDetails(ScanBytecodeParams params) {
+        throw new UnsupportedOperationException("Not implemented yet");
+    }
+
+    /**
+     * Analyzes bytecode and returns the detailed dependency graph without writing to a file.
+     * Useful for programmatic usage when the detailed graph is needed in memory.
+     *
+     * @param params the parameters for the scan-bytecode command
+     * @return a map from FQCN to map of dependency FQCNs to set of LinkDetails
+     */
+    public Map<String, Map<String, Set<LinkDetails>>> analyzeDetails(ScanBytecodeParams params) {
+        throw new UnsupportedOperationException("Not implemented yet");
+    }
 }
