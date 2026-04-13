@@ -1,6 +1,6 @@
 # 033-inner-class-merger-details — Тесты
 
-## Статус: pending
+## Статус: complete
 
 ## Описание
 
