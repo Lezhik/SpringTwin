@@ -8,6 +8,8 @@ import org.junit.jupiter.api.io.TempDir;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
+import spring.twin.scan.LinkDetails;
+import spring.twin.scan.LinkType;
 import spring.twin.scan.ScanBytecodeParams;
 import spring.twin.scan.ScanBytecodeService;
 
@@ -16,6 +18,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -75,10 +78,14 @@ class ScanBytecodeE2eTest {
                 List.of()
         );
 
-        scanBytecodeService.execute(params);
+        scanBytecodeService.executeDetails(params);
 
         assertTrue(Files.exists(outputFile), "Output file should be created");
-        Map<String, List<String>> result = readOutputJson(outputFile);
+
+        // Parse as detailed format
+        ObjectMapper objectMapper = new ObjectMapper();
+        Map<String, Map<String, Set<LinkDetails>>> result =
+            objectMapper.readValue(outputFile.toFile(), new TypeReference<>() {});
         assertFalse(result.isEmpty(), "Result should not be empty");
         
         // Should contain testee classes
@@ -97,9 +104,12 @@ class ScanBytecodeE2eTest {
                 List.of()
         );
 
-        scanBytecodeService.execute(params);
+        scanBytecodeService.executeDetails(params);
 
-        Map<String, List<String>> result = readOutputJson(outputFile);
+        // Parse as detailed format
+        ObjectMapper objectMapper = new ObjectMapper();
+        Map<String, Map<String, Set<LinkDetails>>> result =
+            objectMapper.readValue(outputFile.toFile(), new TypeReference<>() {});
         
         // All keys should match the include mask
         for (String key : result.keySet()) {
@@ -121,12 +131,15 @@ class ScanBytecodeE2eTest {
                 List.of("*FieldHolder*")
         );
 
-        scanBytecodeService.execute(params);
+        scanBytecodeService.executeDetails(params);
 
-        Map<String, List<String>> result = readOutputJson(outputFile);
+        // Parse as detailed format
+        ObjectMapper objectMapper = new ObjectMapper();
+        Map<String, Map<String, Set<LinkDetails>>> result =
+            objectMapper.readValue(outputFile.toFile(), new TypeReference<>() {});
         
         // FieldHolder should be absent from keys
-        assertFalse(result.containsKey("spring.twin.testee.FieldHolder"), 
+        assertFalse(result.containsKey("spring.twin.testee.FieldHolder"),
                 "FieldHolder should be excluded from keys");
     }
 
@@ -143,9 +156,12 @@ class ScanBytecodeE2eTest {
                 List.of()
         );
 
-        scanBytecodeService.execute(params);
+        scanBytecodeService.executeDetails(params);
 
-        Map<String, List<String>> result = readOutputJson(outputFile);
+        // Parse as detailed format
+        ObjectMapper objectMapper = new ObjectMapper();
+        Map<String, Map<String, Set<LinkDetails>>> result =
+            objectMapper.readValue(outputFile.toFile(), new TypeReference<>() {});
         assertTrue(result.isEmpty(), "Result should be empty for empty directory");
     }
 
@@ -160,9 +176,12 @@ class ScanBytecodeE2eTest {
                 List.of()
         );
 
-        scanBytecodeService.execute(params);
+        scanBytecodeService.executeDetails(params);
 
-        Map<String, List<String>> result = readOutputJson(outputFile);
+        // Parse as detailed format
+        ObjectMapper objectMapper = new ObjectMapper();
+        Map<String, Map<String, Set<LinkDetails>>> result =
+            objectMapper.readValue(outputFile.toFile(), new TypeReference<>() {});
         
         // Check that keys are sorted alphabetically
         List<String> keys = List.copyOf(result.keySet());
@@ -183,15 +202,19 @@ class ScanBytecodeE2eTest {
                 List.of()
         );
 
-        scanBytecodeService.execute(params);
+        scanBytecodeService.executeDetails(params);
 
-        Map<String, List<String>> result = readOutputJson(outputFile);
+        // Parse as detailed format - values are inner maps with sorted keys
+        ObjectMapper objectMapper = new ObjectMapper();
+        Map<String, Map<String, Set<LinkDetails>>> result =
+            objectMapper.readValue(outputFile.toFile(), new TypeReference<>() {});
         
-        // Check that each dependency list is sorted
-        for (List<String> dependencies : result.values()) {
-            for (int i = 1; i < dependencies.size(); i++) {
-                assertTrue(dependencies.get(i - 1).compareTo(dependencies.get(i)) <= 0,
-                        "Dependency values should be sorted alphabetically");
+        // Check that each inner map's keys (dependency class names) are sorted
+        for (Map<String, Set<LinkDetails>> innerMap : result.values()) {
+            List<String> innerKeys = List.copyOf(innerMap.keySet());
+            for (int i = 1; i < innerKeys.size(); i++) {
+                assertTrue(innerKeys.get(i - 1).compareTo(innerKeys.get(i)) <= 0,
+                        "Dependency keys should be sorted alphabetically");
             }
         }
     }
@@ -208,15 +231,18 @@ class ScanBytecodeE2eTest {
                 List.of()
         );
 
-        scanBytecodeService.execute(params);
+        scanBytecodeService.executeDetails(params);
 
-        Map<String, List<String>> result = readOutputJson(outputFile);
+        // Parse as detailed format
+        ObjectMapper objectMapper = new ObjectMapper();
+        Map<String, Map<String, Set<LinkDetails>>> result =
+            objectMapper.readValue(outputFile.toFile(), new TypeReference<>() {});
         
         String childClass = "spring.twin.testee.InheritanceChild";
         String parentClass = "spring.twin.testee.InheritanceBase";
         
         assertTrue(result.containsKey(childClass), "Should contain InheritanceChild");
-        assertTrue(result.get(childClass).contains(parentClass),
+        assertTrue(result.get(childClass).containsKey(parentClass),
                 "InheritanceChild should depend on InheritanceBase");
     }
 
@@ -232,17 +258,20 @@ class ScanBytecodeE2eTest {
                 List.of()
         );
 
-        scanBytecodeService.execute(params);
+        scanBytecodeService.executeDetails(params);
 
-        Map<String, List<String>> result = readOutputJson(outputFile);
+        // Parse as detailed format
+        ObjectMapper objectMapper = new ObjectMapper();
+        Map<String, Map<String, Set<LinkDetails>>> result =
+            objectMapper.readValue(outputFile.toFile(), new TypeReference<>() {});
         
         String fieldHolder = "spring.twin.testee.FieldHolder";
         
         assertTrue(result.containsKey(fieldHolder), "Should contain FieldHolder");
         // FieldHolder has fields: String, List, int, String[], Map
-        assertTrue(result.get(fieldHolder).contains("java.lang.String"),
+        assertTrue(result.get(fieldHolder).containsKey("java.lang.String"),
                 "FieldHolder should depend on String");
-        assertTrue(result.get(fieldHolder).contains("java.util.List"),
+        assertTrue(result.get(fieldHolder).containsKey("java.util.List"),
                 "FieldHolder should depend on List");
     }
 
@@ -258,17 +287,20 @@ class ScanBytecodeE2eTest {
                 List.of()
         );
 
-        scanBytecodeService.execute(params);
+        scanBytecodeService.executeDetails(params);
 
-        Map<String, List<String>> result = readOutputJson(outputFile);
+        // Parse as detailed format
+        ObjectMapper objectMapper = new ObjectMapper();
+        Map<String, Map<String, Set<LinkDetails>>> result =
+            objectMapper.readValue(outputFile.toFile(), new TypeReference<>() {});
         
         String methodHolder = "spring.twin.testee.MethodHolder";
         
         assertTrue(result.containsKey(methodHolder), "Should contain MethodHolder");
         // MethodHolder has methods with: String, List, Map, int, String[]
-        assertTrue(result.get(methodHolder).contains("java.lang.String"),
+        assertTrue(result.get(methodHolder).containsKey("java.lang.String"),
                 "MethodHolder should depend on String");
-        assertTrue(result.get(methodHolder).contains("java.util.List"),
+        assertTrue(result.get(methodHolder).containsKey("java.util.List"),
                 "MethodHolder should depend on List");
     }
 
@@ -284,15 +316,18 @@ class ScanBytecodeE2eTest {
                 List.of()
         );
 
-        scanBytecodeService.execute(params);
+        scanBytecodeService.executeDetails(params);
 
-        Map<String, List<String>> result = readOutputJson(outputFile);
+        // Parse as detailed format
+        ObjectMapper objectMapper = new ObjectMapper();
+        Map<String, Map<String, Set<LinkDetails>>> result =
+            objectMapper.readValue(outputFile.toFile(), new TypeReference<>() {});
         
         String annotatedClass = "spring.twin.testee.AnnotatedClass";
         
         assertTrue(result.containsKey(annotatedClass), "Should contain AnnotatedClass");
         // AnnotatedClass has @Deprecated annotation
-        assertTrue(result.get(annotatedClass).contains("java.lang.Deprecated"),
+        assertTrue(result.get(annotatedClass).containsKey("java.lang.Deprecated"),
                 "AnnotatedClass should depend on Deprecated annotation");
     }
 
@@ -308,17 +343,20 @@ class ScanBytecodeE2eTest {
                 List.of()
         );
 
-        scanBytecodeService.execute(params);
+        scanBytecodeService.executeDetails(params);
 
-        Map<String, List<String>> result = readOutputJson(outputFile);
+        // Parse as detailed format
+        ObjectMapper objectMapper = new ObjectMapper();
+        Map<String, Map<String, Set<LinkDetails>>> result =
+            objectMapper.readValue(outputFile.toFile(), new TypeReference<>() {});
         
         String genericChild = "spring.twin.testee.InheritanceGenericChild";
         
         assertTrue(result.containsKey(genericChild), "Should contain InheritanceGenericChild");
         // InheritanceGenericChild extends ArrayList<String>
-        assertTrue(result.get(genericChild).contains("java.util.ArrayList"),
+        assertTrue(result.get(genericChild).containsKey("java.util.ArrayList"),
                 "InheritanceGenericChild should depend on ArrayList");
-        assertTrue(result.get(genericChild).contains("java.lang.String"),
+        assertTrue(result.get(genericChild).containsKey("java.lang.String"),
                 "InheritanceGenericChild should depend on String (generic type)");
     }
 
@@ -334,19 +372,124 @@ class ScanBytecodeE2eTest {
                 List.of()
         );
 
-        scanBytecodeService.execute(params);
+        scanBytecodeService.executeDetails(params);
 
-        Map<String, List<String>> result = readOutputJson(outputFile);
+        // Parse as detailed format
+        ObjectMapper objectMapper = new ObjectMapper();
+        Map<String, Map<String, Set<LinkDetails>>> result =
+            objectMapper.readValue(outputFile.toFile(), new TypeReference<>() {});
         
         String fieldHolder = "spring.twin.testee.FieldHolder";
         
         assertTrue(result.containsKey(fieldHolder), "Should contain FieldHolder");
         // FieldHolder has String[] field - should depend on String, not String[]
-        assertTrue(result.get(fieldHolder).contains("java.lang.String"),
+        assertTrue(result.get(fieldHolder).containsKey("java.lang.String"),
                 "FieldHolder should depend on String (base type of array)");
         
         // Should not contain the array type itself (just the base type)
         // Note: depending on implementation, array type might or might not be included
         // The key point is that the base type IS included
+    }
+
+    /**
+     * Verifies that output JSON contains LinkDetails structure (type and details fields).
+     * This test ensures the CLI produces the correct format with detailed link information.
+     */
+    @Test
+    void e2e_scanBytecode_outputFormat_containsLinkDetails() throws IOException {
+        Path outputFile = tempDir.resolve("dependencies.json");
+
+        ScanBytecodeParams params = new ScanBytecodeParams(
+                classesDir,
+                outputFile,
+                List.of(),
+                List.of()
+        );
+
+        scanBytecodeService.executeDetails(params);
+
+        assertTrue(Files.exists(outputFile), "Output file should be created");
+
+        // Parse JSON as raw map to verify structure
+        ObjectMapper objectMapper = new ObjectMapper();
+        String content = Files.readString(outputFile);
+        
+        // Verify the JSON contains "type" and "details" fields (LinkDetails format)
+        assertTrue(content.contains("\"type\""),
+            "Output JSON should contain 'type' field (LinkDetails format). Content: " + content);
+        assertTrue(content.contains("\"details\""),
+            "Output JSON should contain 'details' field (LinkDetails format). Content: " + content);
+
+        // Try to parse as detailed format
+        Map<String, Map<String, Set<LinkDetails>>> detailedResult = null;
+        try {
+            detailedResult = objectMapper.readValue(outputFile.toFile(), new TypeReference<>() {});
+        } catch (Exception e) {
+            throw new AssertionError("Output JSON is not in LinkDetails format. " +
+                "Expected Map<String, Map<String, Set<LinkDetails>>>. Content: " + content, e);
+        }
+
+        // Verify structure
+        assertNotNull(detailedResult, "Parsed result should not be null");
+        assertFalse(detailedResult.isEmpty(), "Result should not be empty");
+
+        // Verify each entry has proper LinkDetails structure
+        for (Map.Entry<String, Map<String, Set<LinkDetails>>> entry : detailedResult.entrySet()) {
+            Map<String, Set<LinkDetails>> dependencies = entry.getValue();
+            assertNotNull(dependencies, "Dependencies map should not be null for " + entry.getKey());
+            
+            for (Map.Entry<String, Set<LinkDetails>> depEntry : dependencies.entrySet()) {
+                Set<LinkDetails> linkDetailsSet = depEntry.getValue();
+                assertNotNull(linkDetailsSet, "LinkDetails set should not be null for " + depEntry.getKey());
+                assertFalse(linkDetailsSet.isEmpty(), "LinkDetails set should not be empty for " + depEntry.getKey());
+                
+                // Verify each LinkDetails has required fields
+                for (LinkDetails linkDetails : linkDetailsSet) {
+                    assertNotNull(linkDetails.type(), "LinkDetails type should not be null");
+                    assertNotNull(linkDetails.details(), "LinkDetails details should not be null");
+                }
+            }
+        }
+    }
+
+    /**
+     * Verifies that output JSON contains all LinkType values in the details.
+     */
+    @Test
+    void e2e_scanBytecode_outputFormat_containsAllLinkTypes() throws IOException {
+        Path outputFile = tempDir.resolve("dependencies.json");
+
+        ScanBytecodeParams params = new ScanBytecodeParams(
+                classesDir,
+                outputFile,
+                List.of(),
+                List.of()
+        );
+
+        scanBytecodeService.executeDetails(params);
+
+        assertTrue(Files.exists(outputFile), "Output file should be created");
+
+        // Parse as detailed format
+        ObjectMapper objectMapper = new ObjectMapper();
+        Map<String, Map<String, Set<LinkDetails>>> result =
+            objectMapper.readValue(outputFile.toFile(), new TypeReference<>() {});
+
+        // Collect all link types present in output
+        Set<LinkType> foundTypes = java.util.EnumSet.noneOf(LinkType.class);
+        for (Map.Entry<String, Map<String, Set<LinkDetails>>> entry : result.entrySet()) {
+            for (Set<LinkDetails> linkSet : entry.getValue().values()) {
+                for (LinkDetails link : linkSet) {
+                    foundTypes.add(link.type());
+                }
+            }
+        }
+
+        // Verify at least some link types are present
+        assertTrue(foundTypes.contains(LinkType.SUPERCLASS) ||
+                   foundTypes.contains(LinkType.INTERFACE) ||
+                   foundTypes.contains(LinkType.FIELD) ||
+                   foundTypes.contains(LinkType.METHOD),
+            "Output should contain at least one of the basic link types (SUPERCLASS, INTERFACE, FIELD, METHOD)");
     }
 }

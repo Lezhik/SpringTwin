@@ -65,7 +65,7 @@ public class ScanBytecodeCommand {
                     exclude,
                     Boolean.parseBoolean(mergeInnerClasses)
             );
-            scanBytecodeService.execute(params);
+            scanBytecodeService.executeDetails(params);
             return "Dependencies written to: " + output;
         } catch (Throwable t) {
             log.error("Error: ", t);
