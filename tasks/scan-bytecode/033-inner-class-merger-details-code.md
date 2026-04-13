@@ -1,6 +1,6 @@
 # 033-inner-class-merger-details — Реализация
 
-## Статус: pending
+## Статус: complete
 
 ## Описание
 

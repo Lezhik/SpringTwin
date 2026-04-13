@@ -199,32 +199,84 @@ public final class InnerClassMerger {
     }
     
     /**
-     * Conditionally merges inner classes with their outer classes for detailed dependency graph.
-     * If merge == true, merges inner classes (Outer$Inner) with their outer classes.
-     * If merge == false, returns the original graph unchanged.
+     * Conditionally merges inner classes with their outer classes in the detailed dependency graph.
+     * If merge is false, returns the original graph without modifications.
+     * If merge is true, performs a three-step merge process.
      *
-     * <p>This method works with detailed dependency graphs containing LinkDetails sets:
-     * {@code Map<String, Map<String, Set<LinkDetails>>>}.
+     * <p>Step 1: Process keys - inner class keys are merged into their parent class keys.
+     * Dependencies of inner classes are added to the parent class dependencies.
+     * If the parent class does not exist in the graph, a new entry is created.
      *
-     * <p>Merging rules:
-     * <ul>
-     *   <li>Inner class keys are removed from the outer map</li>
-     *   <li>Inner class dependencies are added to the parent class dependencies</li>
-     *   <li>References to inner classes in values are replaced with parent class references</li>
-     *   <li>Self-references (parent -> parent) are removed</li>
-     *   <li>LinkDetails are preserved unchanged during merge</li>
-     * </ul>
+     * <p>Step 2: Replace inner class references in values with their outer class names.
+     * When multiple inner classes map to the same outer class, their LinkDetails are merged.
      *
-     * @param <T> the type of the details set (LinkDetails)
+     * <p>Step 3: Remove self-references that may appear after the merge
+     * (e.g., when Outer$Inner references Outer, after merge it becomes Outer -> Outer).
+     *
+     * <p>The result is returned as a sorted TreeMap to ensure deterministic output.
+     *
      * @param graph the detailed dependency graph to process, containing LinkDetails sets
      * @param merge whether to perform the merge; if false, returns the original graph unchanged
      * @return the processed graph with inner classes merged, or the original graph if merge is false
      */
-    public static <T> Map<String, Map<String, Set<T>>> mergeInnerClassesDetails(Map<String, Map<String, Set<T>>> graph, boolean merge) {
-        if (merge) {
-            return mergeInnerClassesDetails(graph);
-        } else {
+    public static Map<String, Map<String, Set<LinkDetails>>> mergeInnerClassesDetails(
+            Map<String, Map<String, Set<LinkDetails>>> graph, boolean merge) {
+        if (!merge) {
             return graph;
         }
+        
+        TreeMap<String, Map<String, Set<LinkDetails>>> result = new TreeMap<>();
+        
+        // Step 1: Process keys - merge inner classes to outer classes
+        for (Map.Entry<String, Map<String, Set<LinkDetails>>> entry : graph.entrySet()) {
+            String key = entry.getKey();
+            Map<String, Set<LinkDetails>> dependencies = entry.getValue();
+            
+            String targetKey;
+            if (isInnerClass(key)) {
+                targetKey = getOuterClassName(key);
+            } else {
+                targetKey = key;
+            }
+            
+            Map<String, Set<LinkDetails>> targetMap = result.computeIfAbsent(targetKey, k -> new TreeMap<>());
+            if (dependencies != null) {
+                for (Map.Entry<String, Set<LinkDetails>> depEntry : dependencies.entrySet()) {
+                    String depKey = depEntry.getKey();
+                    Set<LinkDetails> depDetails = depEntry.getValue();
+                    targetMap.computeIfAbsent(depKey, k -> new HashSet<>()).addAll(depDetails);
+                }
+            }
+        }
+        
+        // Step 2: Replace inner classes in values with outer classes, remove self-references
+        for (Map.Entry<String, Map<String, Set<LinkDetails>>> entry : result.entrySet()) {
+            String key = entry.getKey();
+            Map<String, Set<LinkDetails>> dependencies = entry.getValue();
+            Map<String, Set<LinkDetails>> newDependencies = new TreeMap<>();
+            
+            for (Map.Entry<String, Set<LinkDetails>> depEntry : dependencies.entrySet()) {
+                String dep = depEntry.getKey();
+                Set<LinkDetails> details = depEntry.getValue();
+                
+                // Map inner classes to their outer classes in dependencies
+                String mappedDep;
+                if (isInnerClass(dep)) {
+                    mappedDep = getOuterClassName(dep);
+                } else {
+                    mappedDep = dep;
+                }
+                
+                // Remove self-references
+                if (!mappedDep.equals(key)) {
+                    newDependencies.computeIfAbsent(mappedDep, k -> new HashSet<>()).addAll(details);
+                }
+            }
+            
+            entry.setValue(newDependencies);
+        }
+        
+        // Return LinkedHashMap for deterministic order
+        return new LinkedHashMap<>(result);
     }
 }

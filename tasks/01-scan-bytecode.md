@@ -243,7 +243,7 @@ graph TD
 | 030 | +          | bytecode-class-analyzer-details   | Оркестрация детализированных экстракторов                                 | 025–029             |
 | 031 | +          | dependency-graph-builder-details  | Построение графа с детализированными связями                              | 030                 |
 | 032 | +          | dependency-json-writer-details    | Запись детализированного графа в JSON                                     | 024                 |
-| 033 | -          | inner-class-merger-details        | Поддержка нового формата в InnerClassMerger                               | 024                 |
+| 033 | +          | inner-class-merger-details        | Поддержка нового формата в InnerClassMerger                               | 024                 |
 | 034 | -          | scan-bytecode-service-details     | Обновление сервиса для использования нового формата                       | 031, 032, 033       |
 | 035 | -          | e2e-details-tests                 | End-to-end тесты нового формата JSON                                      | 034                 |
 
@@ -308,10 +308,10 @@ graph TD
 - [+] [032-dependency-json-writer-details-fix](scan-bytecode/032-dependency-json-writer-details-fix.md)
 
 ### Фича 033: inner-class-merger-details
-- [ ] [033-inner-class-merger-details-api](scan-bytecode/033-inner-class-merger-details-api.md)
-- [ ] [033-inner-class-merger-details-tests](scan-bytecode/033-inner-class-merger-details-tests.md)
-- [ ] [033-inner-class-merger-details-code](scan-bytecode/033-inner-class-merger-details-code.md)
-- [ ] [033-inner-class-merger-details-fix](scan-bytecode/033-inner-class-merger-details-fix.md)
+- [+] [033-inner-class-merger-details-api](scan-bytecode/033-inner-class-merger-details-api.md)
+- [+] [033-inner-class-merger-details-tests](scan-bytecode/033-inner-class-merger-details-tests.md)
+- [+] [033-inner-class-merger-details-code](scan-bytecode/033-inner-class-merger-details-code.md)
+- [+] [033-inner-class-merger-details-fix](scan-bytecode/033-inner-class-merger-details-fix.md)
 
 ### Фича 034: scan-bytecode-service-details
 - [ ] [034-scan-bytecode-service-details-api](scan-bytecode/034-scan-bytecode-service-details-api.md)
