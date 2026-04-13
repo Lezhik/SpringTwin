@@ -1,6 +1,6 @@
 # 035-e2e-details-tests — API
 
-## Статус: pending
+## Статус: complete
 
 ## Описание
 
