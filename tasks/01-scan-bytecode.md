@@ -244,7 +244,7 @@ graph TD
 | 031 | +          | dependency-graph-builder-details  | Построение графа с детализированными связями                              | 030                 |
 | 032 | +          | dependency-json-writer-details    | Запись детализированного графа в JSON                                     | 024                 |
 | 033 | +          | inner-class-merger-details        | Поддержка нового формата в InnerClassMerger                               | 024                 |
-| 034 | -          | scan-bytecode-service-details     | Обновление сервиса для использования нового формата                       | 031, 032, 033       |
+| 034 | +          | scan-bytecode-service-details     | Обновление сервиса для использования нового формата                       | 031, 032, 033       |
 | 035 | -          | e2e-details-tests                 | End-to-end тесты нового формата JSON                                      | 034                 |
 
 ### Фича 023: link-type-enum
@@ -314,10 +314,10 @@ graph TD
 - [+] [033-inner-class-merger-details-fix](scan-bytecode/033-inner-class-merger-details-fix.md)
 
 ### Фича 034: scan-bytecode-service-details
-- [ ] [034-scan-bytecode-service-details-api](scan-bytecode/034-scan-bytecode-service-details-api.md)
-- [ ] [034-scan-bytecode-service-details-tests](scan-bytecode/034-scan-bytecode-service-details-tests.md)
-- [ ] [034-scan-bytecode-service-details-code](scan-bytecode/034-scan-bytecode-service-details-code.md)
-- [ ] [034-scan-bytecode-service-details-fix](scan-bytecode/034-scan-bytecode-service-details-fix.md)
+- [+] [034-scan-bytecode-service-details-api](scan-bytecode/034-scan-bytecode-service-details-api.md)
+- [+] [034-scan-bytecode-service-details-tests](scan-bytecode/034-scan-bytecode-service-details-tests.md)
+- [+] [034-scan-bytecode-service-details-code](scan-bytecode/034-scan-bytecode-service-details-code.md)
+- [+] [034-scan-bytecode-service-details-fix](scan-bytecode/034-scan-bytecode-service-details-fix.md)
 
 ### Фича 035: e2e-details-tests
 - [ ] [035-e2e-details-tests-api](scan-bytecode/035-e2e-details-tests-api.md)

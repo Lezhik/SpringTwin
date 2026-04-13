@@ -78,7 +78,13 @@ public class ScanBytecodeService {
      * @param params the parameters for the scan-bytecode command
      */
     public void executeDetails(ScanBytecodeParams params) {
-        throw new UnsupportedOperationException("Not implemented yet");
+        Map<String, Map<String, Set<LinkDetails>>> graph = dependencyGraphBuilder.buildDetails(
+                params.classesDir(),
+                params.includeMasks(),
+                params.excludeMasks(),
+                params.mergeInnerClasses()
+        );
+        dependencyJsonWriter.writeDetails(graph, params.outputFile());
     }
 
     /**
@@ -89,6 +95,11 @@ public class ScanBytecodeService {
      * @return a map from FQCN to map of dependency FQCNs to set of LinkDetails
      */
     public Map<String, Map<String, Set<LinkDetails>>> analyzeDetails(ScanBytecodeParams params) {
-        throw new UnsupportedOperationException("Not implemented yet");
+        return dependencyGraphBuilder.buildDetails(
+                params.classesDir(),
+                params.includeMasks(),
+                params.excludeMasks(),
+                params.mergeInnerClasses()
+        );
     }
 }
