@@ -203,10 +203,22 @@ public final class InnerClassMerger {
      * If merge == true, merges inner classes (Outer$Inner) with their outer classes.
      * If merge == false, returns the original graph unchanged.
      *
+     * <p>This method works with detailed dependency graphs containing LinkDetails sets:
+     * {@code Map<String, Map<String, Set<LinkDetails>>>}.
+     *
+     * <p>Merging rules:
+     * <ul>
+     *   <li>Inner class keys are removed from the outer map</li>
+     *   <li>Inner class dependencies are added to the parent class dependencies</li>
+     *   <li>References to inner classes in values are replaced with parent class references</li>
+     *   <li>Self-references (parent -> parent) are removed</li>
+     *   <li>LinkDetails are preserved unchanged during merge</li>
+     * </ul>
+     *
      * @param <T> the type of the details set (LinkDetails)
-     * @param graph the detailed dependency graph to process
-     * @param merge whether to perform the merge
-     * @return the processed graph or the original graph
+     * @param graph the detailed dependency graph to process, containing LinkDetails sets
+     * @param merge whether to perform the merge; if false, returns the original graph unchanged
+     * @return the processed graph with inner classes merged, or the original graph if merge is false
      */
     public static <T> Map<String, Map<String, Set<T>>> mergeInnerClassesDetails(Map<String, Map<String, Set<T>>> graph, boolean merge) {
         if (merge) {
