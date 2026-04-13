@@ -1,6 +1,6 @@
 # 034-scan-bytecode-service-details — Тесты
 
-## Статус: pending
+## Статус: complete
 
 ## Описание
 
