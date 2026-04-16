@@ -1,6 +1,6 @@
 # 004-partition-model — Тесты
 
-## Статус: pending
+## Статус: complete
 
 ## Описание
 
