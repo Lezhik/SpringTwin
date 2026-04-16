@@ -1,0 +1,15 @@
+{
+  "com.example.OrderService": {
+    "com.example.PaymentClient": [
+      {"type": "FIELD", "details": "paymentClient"}
+    ],
+    "com.example.repository.OrderRepository": [
+      {"type": "FIELD", "details": "orderRepository"}
+    ]
+  },
+  "com.example.repository.OrderRepository": {
+    "com.example.model.OrderModel": [
+      {"type": "METHOD", "details": "add(Lcom/example/model/OrderModel;)"}
+    ]
+  }
+}

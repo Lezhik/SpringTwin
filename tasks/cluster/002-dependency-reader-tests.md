@@ -1,6 +1,6 @@
 # 002-dependency-reader — Тесты
 
-## Статус: pending
+## Статус: complete
 
 ## Описание
 
