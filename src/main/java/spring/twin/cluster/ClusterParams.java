@@ -24,6 +24,14 @@ public record ClusterParams(
      * @throws IllegalArgumentException if resolution is outside valid range 0.5–5.0
      */
     public static ClusterParams of(Path depsFile, Path outputFile, String resolutionRaw) {
-        throw new UnsupportedOperationException("Not implemented yet");
+        double resolution = 1.5;
+        if (resolutionRaw != null && !resolutionRaw.isBlank()) {
+            resolution = Double.parseDouble(resolutionRaw);
+            if (resolution < 0.5 || resolution > 5.0) {
+                throw new IllegalArgumentException(
+                    "Resolution must be between 0.5 and 5.0, but was: " + resolution);
+            }
+        }
+        return new ClusterParams(depsFile, outputFile, resolution);
     }
 }

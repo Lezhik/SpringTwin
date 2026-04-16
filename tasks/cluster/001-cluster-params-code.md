@@ -1,6 +1,6 @@
 # 001-cluster-params — Реализация
 
-## Статус: pending
+## Статус: complete
 
 ## Описание
 

@@ -51,34 +51,34 @@ graph TD
 
 ## Порядок реализации
 
-| #   | Фича                  | Описание                                                        | Зависимости       |
-|-----|-----------------------|-----------------------------------------------------------------|-------------------|
-| 001 | cluster-params        | DTO параметров команды cluster                                  | —                 |
-| 002 | dependency-reader     | Чтение dependencies.json в Map                                  | —                 |
-| 003 | graph-converter       | Конвертация направленного графа зависимостей в ненаправленный взвешенный | —           |
-| 004 | partition-model       | Модель данных разбиения графа на сообщества                     | —                 |
-| 005 | modularity-calculator | Вычисление модулярности и прироста модулярности                 | 003, 004          |
-| 006 | leiden-local-move     | Фаза локального перемещения узлов алгоритма Лейдена             | 004, 005          |
-| 007 | leiden-refine         | Фаза уточнения сообществ алгоритма Лейдена                      | 004, 005          |
-| 008 | leiden-aggregate      | Фаза агрегации графа алгоритма Лейдена                          | 003, 004          |
-| 009 | leiden-algorithm      | Полный алгоритм Лейдена — оркестрация трёх фаз                  | 006, 007, 008     |
-| 010 | cluster-metrics       | Вычисление метрик cohesion и coupling для кластеров             | —                 |
-| 011 | penalty-edges         | Обнаружение штрафных рёбер между кластерами                     | 004               |
-| 012 | cluster-result        | Модели данных результата кластеризации                          | 004, 010, 011     |
-| 013 | cluster-json-writer   | Запись clusters.json                                            | 012               |
-| 014 | cluster-service       | Главный сервис пайплайна cluster                                | 001–003, 009, 012, 013 |
-| 015 | cluster-command       | CLI команда cluster                                             | 001, 014          |
-| 016 | e2e-tests             | End-to-end тесты полного пайплайна cluster                      | 015               |
+| #   | Реализация | Фича                  | Описание                                                        | Зависимости       |
+|-----|------------|-----------------------|-----------------------------------------------------------------|-------------------|
+| 001 | +          | cluster-params        | DTO параметров команды cluster                                  | —                 |
+| 002 | -          | dependency-reader     | Чтение dependencies.json в Map                                  | —                 |
+| 003 | -          | graph-converter       | Конвертация направленного графа зависимостей в ненаправленный взвешенный | —           |
+| 004 | -          | partition-model       | Модель данных разбиения графа на сообщества                     | —                 |
+| 005 | -          | modularity-calculator | Вычисление модулярности и прироста модулярности                 | 003, 004          |
+| 006 | -          | leiden-local-move     | Фаза локального перемещения узлов алгоритма Лейдена             | 004, 005          |
+| 007 | -          | leiden-refine         | Фаза уточнения сообществ алгоритма Лейдена                      | 004, 005          |
+| 008 | -          | leiden-aggregate      | Фаза агрегации графа алгоритма Лейдена                          | 003, 004          |
+| 009 | -          | leiden-algorithm      | Полный алгоритм Лейдена — оркестрация трёх фаз                  | 006, 007, 008     |
+| 010 | -          | cluster-metrics       | Вычисление метрик cohesion и coupling для кластеров             | —                 |
+| 011 | -          | penalty-edges         | Обнаружение штрафных рёбер между кластерами                     | 004               |
+| 012 | -          | cluster-result        | Модели данных результата кластеризации                          | 004, 010, 011     |
+| 013 | -          | cluster-json-writer   | Запись clusters.json                                            | 012               |
+| 014 | -          | cluster-service       | Главный сервис пайплайна cluster                                | 001–003, 009, 012, 013 |
+| 015 | -          | cluster-command       | CLI команда cluster                                             | 001, 014          |
+| 016 | -          | e2e-tests             | End-to-end тесты полного пайплайна cluster                      | 015               |
 
 ## Чек-лист задач
 
 Каждая фича имеет 4 задачи в порядке реализации: **api** → **tests** → **code** → **fix**
 
 ### Фича 001: cluster-params
-- [ ] [001-cluster-params-api](cluster/001-cluster-params-api.md)
-- [ ] [001-cluster-params-tests](cluster/001-cluster-params-tests.md)
-- [ ] [001-cluster-params-code](cluster/001-cluster-params-code.md)
-- [ ] [001-cluster-params-fix](cluster/001-cluster-params-fix.md)
+- [+] [001-cluster-params-api](cluster/001-cluster-params-api.md)
+- [+] [001-cluster-params-tests](cluster/001-cluster-params-tests.md)
+- [+] [001-cluster-params-code](cluster/001-cluster-params-code.md)
+- [+] [001-cluster-params-fix](cluster/001-cluster-params-fix.md)
 
 ### Фича 002: dependency-reader
 - [ ] [002-dependency-reader-api](cluster/002-dependency-reader-api.md)

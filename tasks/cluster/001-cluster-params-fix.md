@@ -1,6 +1,6 @@
 # 001-cluster-params — Исправление
 
-## Статус: pending
+## Статус: complete
 
 ## Описание
 
