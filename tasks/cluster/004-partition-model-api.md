@@ -1,6 +1,6 @@
 # 004-partition-model — API
 
-## Статус: pending
+## Статус: complete
 
 ## Описание
 
