@@ -1,6 +1,6 @@
 # 004-partition-model — Исправление
 
-## Статус: pending
+## Статус: complete
 
 ## Описание
 

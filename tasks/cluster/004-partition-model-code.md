@@ -1,6 +1,6 @@
 # 004-partition-model — Реализация
 
-## Статус: pending
+## Статус: complete
 
 ## Описание
 

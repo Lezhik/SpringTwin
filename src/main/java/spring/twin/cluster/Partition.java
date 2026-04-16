@@ -6,8 +6,8 @@ import java.util.HashMap;
 import java.util.HashSet;
 
 /**
- * Модель данных разбиения графа на сообщества (кластеры).
- * Хранит принадлежность узлов к сообществам и предоставляет методы для манипуляции.
+ * Data model for partitioning a graph into communities (clusters).
+ * Stores node membership in communities and provides manipulation methods.
  */
 public class Partition {
     
@@ -15,9 +15,11 @@ public class Partition {
     private int communityCount;
     
     /**
-     * Создаёт разбиение, где каждый узел в своём собственном сообществе.
-     * 
-     * @param nodes множество узлов
+     * Creates a partition where each node is in its own community.
+     * Initializes nodeCommunity so that each node gets a unique community number (0, 1, 2, ...).
+     * communityCount is set to nodes.size().
+     *
+     * @param nodes set of nodes
      */
     public Partition(Set<String> nodes) {
         this.nodeCommunity = new HashMap<>();
@@ -29,10 +31,11 @@ public class Partition {
     }
     
     /**
-     * Создаёт разбиение из готового маппинга.
-     * 
-     * @param nodeCommunity маппинг узел → сообщество
-     * @param communityCount количество сообществ
+     * Creates a partition from an existing mapping.
+     * Copies the Map via new HashMap<>().
+     *
+     * @param nodeCommunity mapping of node → community
+     * @param communityCount number of communities
      */
     public Partition(Map<String, Integer> nodeCommunity, int communityCount) {
         this.nodeCommunity = new HashMap<>(nodeCommunity);
@@ -40,86 +43,105 @@ public class Partition {
     }
     
     /**
-     * Возвращает номер сообщества для узла.
-     * 
-     * @param node имя узла
-     * @return номер сообщества
+     * Returns the community number for a node.
+     *
+     * @param node node name
+     * @return community number
      */
     public int communityOf(String node) {
-        throw new UnsupportedOperationException();
+        return nodeCommunity.get(node);
     }
     
     /**
-     * Перемещает узел в другое сообщество.
-     * 
-     * @param node имя узла
-     * @param newCommunity новый номер сообщества
+     * Moves a node to a different community.
+     * Updates nodeCommunity.put(node, newCommunity).
+     * If newCommunity >= communityCount, updates communityCount = newCommunity + 1.
+     *
+     * @param node node name
+     * @param newCommunity new community number
      */
     public void moveNode(String node, int newCommunity) {
-        throw new UnsupportedOperationException();
+        int oldCommunity = nodeCommunity.get(node);
+        nodeCommunity.put(node, newCommunity);
+        if (newCommunity >= communityCount) {
+            communityCount = communityCount + 1;
+        }
     }
     
     /**
-     * Возвращает все узлы данного сообщества.
-     * 
-     * @param community номер сообщества
-     * @return множество узлов
+     * Returns all nodes in the given community.
+     * Filters nodeCommunity by community value, returns set of nodes.
+     *
+     * @param community community number
+     * @return set of nodes
      */
     public Set<String> nodesInCommunity(int community) {
-        throw new UnsupportedOperationException();
+        Set<String> nodes = new HashSet<>();
+        for (Map.Entry<String, Integer> entry : nodeCommunity.entrySet()) {
+            if (entry.getValue() == community) {
+                nodes.add(entry.getKey());
+            }
+        }
+        return nodes;
     }
     
     /**
-     * Возвращает множество всех номеров сообществ.
-     * 
-     * @return множество номеров сообществ
+     * Returns a set of all community numbers.
+     *
+     * @return set of community numbers
      */
     public Set<Integer> communities() {
-        throw new UnsupportedOperationException();
+        return new HashSet<>(nodeCommunity.values());
     }
     
     /**
-     * Возвращает множество всех узлов.
-     * 
-     * @return множество узлов
+     * Returns a set of all nodes.
+     *
+     * @return set of nodes
      */
     public Set<String> nodes() {
-        throw new UnsupportedOperationException();
+        return nodeCommunity.keySet();
     }
     
     /**
-     * Возвращает количество сообществ.
-     * 
-     * @return количество сообществ
+     * Returns the number of communities.
+     *
+     * @return number of communities
      */
     public int communityCount() {
-        throw new UnsupportedOperationException();
+        return communityCount;
     }
     
     /**
-     * Проверяет, пустое ли разбиение.
-     * 
-     * @return true если разбиение пустое
+     * Checks if the partition is empty.
+     *
+     * @return true if partition is empty
      */
     public boolean isEmpty() {
-        throw new UnsupportedOperationException();
+        return nodeCommunity.isEmpty();
     }
     
     /**
-     * Создаёт глубокую копию разбиения.
-     * 
-     * @return копия разбиения
+     * Creates a deep copy of the partition.
+     * Creates a new Partition with a copy of nodeCommunity and the same communityCount.
+     *
+     * @return copy of the partition
      */
     public Partition copy() {
-        throw new UnsupportedOperationException();
+        return new Partition(this.nodeCommunity, this.communityCount);
     }
     
     /**
-     * Возвращает маппинг: номер сообщества → множество узлов.
-     * 
-     * @return маппинг сообществ на узлы
+     * Returns a mapping: community number → set of nodes.
+     * Groups nodes by community number in Map<Integer, Set<String>>.
+     *
+     * @return mapping of communities to nodes
      */
     public Map<Integer, Set<String>> toCommunityMap() {
-        throw new UnsupportedOperationException();
+        Map<Integer, Set<String>> communityMap = new HashMap<>();
+        for (Map.Entry<String, Integer> entry : nodeCommunity.entrySet()) {
+            communityMap.computeIfAbsent(entry.getValue(), k -> new HashSet<>()).add(entry.getKey());
+        }
+        return communityMap;
     }
 }
