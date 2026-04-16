@@ -1,6 +1,6 @@
 # 005-modularity-calculator — Тесты
 
-## Статус: pending
+## Статус: complete
 
 ## Описание
 
