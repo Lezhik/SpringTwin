@@ -1,6 +1,6 @@
 # 003-graph-converter — Тесты
 
-## Статус: pending
+## Статус: complete
 
 ## Описание
 
