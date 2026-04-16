@@ -1,6 +1,6 @@
 # 002-dependency-reader — Исправление
 
-## Статус: pending
+## Статус: complete
 
 ## Описание
 

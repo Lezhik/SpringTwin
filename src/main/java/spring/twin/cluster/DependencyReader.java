@@ -1,8 +1,12 @@
 package spring.twin.cluster;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.stereotype.Component;
 import spring.twin.scan.LinkDetails;
 
+import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.nio.file.Path;
 import java.util.Map;
 import java.util.Set;
@@ -51,6 +55,11 @@ public class DependencyReader {
      * @throws UncheckedIOException if the file is not found, cannot be read, or contains invalid JSON
      */
     public Map<String, Map<String, Set<LinkDetails>>> read(Path depsFile) {
-        throw new UnsupportedOperationException("Not implemented yet");
+        ObjectMapper objectMapper = new ObjectMapper();
+        try {
+            return objectMapper.readValue(depsFile.toFile(), new TypeReference<Map<String, Map<String, Set<LinkDetails>>>>() {});
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
     }
 }

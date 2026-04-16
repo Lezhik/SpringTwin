@@ -1,6 +1,6 @@
 # 002-dependency-reader — Реализация
 
-## Статус: pending
+## Статус: complete
 
 ## Описание
 

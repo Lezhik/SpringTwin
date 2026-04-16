@@ -54,7 +54,7 @@ graph TD
 | #   | Реализация | Фича                  | Описание                                                        | Зависимости       |
 |-----|------------|-----------------------|-----------------------------------------------------------------|-------------------|
 | 001 | +          | cluster-params        | DTO параметров команды cluster                                  | —                 |
-| 002 | -          | dependency-reader     | Чтение dependencies.json в Map                                  | —                 |
+| 002 | +          | dependency-reader     | Чтение dependencies.json в Map                                  | —                 |
 | 003 | -          | graph-converter       | Конвертация направленного графа зависимостей в ненаправленный взвешенный | —           |
 | 004 | -          | partition-model       | Модель данных разбиения графа на сообщества                     | —                 |
 | 005 | -          | modularity-calculator | Вычисление модулярности и прироста модулярности                 | 003, 004          |
@@ -81,10 +81,10 @@ graph TD
 - [+] [001-cluster-params-fix](cluster/001-cluster-params-fix.md)
 
 ### Фича 002: dependency-reader
-- [ ] [002-dependency-reader-api](cluster/002-dependency-reader-api.md)
-- [ ] [002-dependency-reader-tests](cluster/002-dependency-reader-tests.md)
-- [ ] [002-dependency-reader-code](cluster/002-dependency-reader-code.md)
-- [ ] [002-dependency-reader-fix](cluster/002-dependency-reader-fix.md)
+- [+] [002-dependency-reader-api](cluster/002-dependency-reader-api.md)
+- [+] [002-dependency-reader-tests](cluster/002-dependency-reader-tests.md)
+- [+] [002-dependency-reader-code](cluster/002-dependency-reader-code.md)
+- [+] [002-dependency-reader-fix](cluster/002-dependency-reader-fix.md)
 
 ### Фича 003: graph-converter
 - [ ] [003-graph-converter-api](cluster/003-graph-converter-api.md)
