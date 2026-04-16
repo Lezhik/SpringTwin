@@ -1,6 +1,6 @@
 # 003-graph-converter — API
 
-## Статус: pending
+## Статус: complete
 
 ## Описание
 
