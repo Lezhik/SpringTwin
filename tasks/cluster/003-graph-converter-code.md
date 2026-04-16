@@ -1,6 +1,6 @@
 # 003-graph-converter — Реализация
 
-## Статус: pending
+## Статус: complete
 
 ## Описание
 

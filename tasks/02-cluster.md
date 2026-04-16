@@ -55,7 +55,7 @@ graph TD
 |-----|------------|-----------------------|-----------------------------------------------------------------|-------------------|
 | 001 | +          | cluster-params        | DTO параметров команды cluster                                  | —                 |
 | 002 | +          | dependency-reader     | Чтение dependencies.json в Map                                  | —                 |
-| 003 | -          | graph-converter       | Конвертация направленного графа зависимостей в ненаправленный взвешенный | —           |
+| 003 | +          | graph-converter       | Конвертация направленного графа зависимостей в ненаправленный взвешенный | —           |
 | 004 | -          | partition-model       | Модель данных разбиения графа на сообщества                     | —                 |
 | 005 | -          | modularity-calculator | Вычисление модулярности и прироста модулярности                 | 003, 004          |
 | 006 | -          | leiden-local-move     | Фаза локального перемещения узлов алгоритма Лейдена             | 004, 005          |
@@ -87,10 +87,10 @@ graph TD
 - [+] [002-dependency-reader-fix](cluster/002-dependency-reader-fix.md)
 
 ### Фича 003: graph-converter
-- [ ] [003-graph-converter-api](cluster/003-graph-converter-api.md)
-- [ ] [003-graph-converter-tests](cluster/003-graph-converter-tests.md)
-- [ ] [003-graph-converter-code](cluster/003-graph-converter-code.md)
-- [ ] [003-graph-converter-fix](cluster/003-graph-converter-fix.md)
+- [+] [003-graph-converter-api](cluster/003-graph-converter-api.md)
+- [+] [003-graph-converter-tests](cluster/003-graph-converter-tests.md)
+- [+] [003-graph-converter-code](cluster/003-graph-converter-code.md)
+- [+] [003-graph-converter-fix](cluster/003-graph-converter-fix.md)
 
 ### Фича 004: partition-model
 - [ ] [004-partition-model-api](cluster/004-partition-model-api.md)

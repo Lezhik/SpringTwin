@@ -3,6 +3,8 @@ package spring.twin.cluster;
 import org.springframework.stereotype.Component;
 import spring.twin.scan.LinkDetails;
 
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -41,7 +43,40 @@ public class GraphConverter {
      * @return the undirected weighted graph as {@code Map<String, Map<String, Double>>}
      */
     public Map<String, Map<String, Double>> toUndirectedWeightedGraph(Map<String, Map<String, Set<LinkDetails>>> dependencyGraph) {
-        throw new UnsupportedOperationException("Not implemented yet");
+        Map<String, Map<String, Double>> result = new HashMap<>();
+        
+        // First pass: collect all unique nodes and initialize their neighbor maps
+        Set<String> allNodes = collectNodes(dependencyGraph);
+        for (String node : allNodes) {
+            result.put(node, new HashMap<>());
+        }
+        
+        // Second pass: aggregate weights for each edge
+        for (Map.Entry<String, Map<String, Set<LinkDetails>>> sourceEntry : dependencyGraph.entrySet()) {
+            String source = sourceEntry.getKey();
+            Map<String, Set<LinkDetails>> targets = sourceEntry.getValue();
+            
+            for (Map.Entry<String, Set<LinkDetails>> targetEntry : targets.entrySet()) {
+                String target = targetEntry.getKey();
+                
+                // Skip self-loops
+                if (source.equals(target)) {
+                    continue;
+                }
+                
+                double weight = targetEntry.getValue().size();
+                
+                // Update weight in both directions (undirected graph)
+                // Use getOrDefault to accumulate weights if edge already exists
+                double currentWeightSourceToTarget = result.get(source).getOrDefault(target, 0.0);
+                double currentWeightTargetToSource = result.get(target).getOrDefault(source, 0.0);
+                
+                result.get(source).put(target, currentWeightSourceToTarget + weight);
+                result.get(target).put(source, currentWeightTargetToSource + weight);
+            }
+        }
+        
+        return result;
     }
 
     /**
@@ -60,7 +95,17 @@ public class GraphConverter {
      * @return a set of all unique class names (FQCN) present in the graph
      */
     public Set<String> collectNodes(Map<String, Map<String, Set<LinkDetails>>> dependencyGraph) {
-        throw new UnsupportedOperationException("Not implemented yet");
+        Set<String> nodes = new HashSet<>();
+        
+        for (Map.Entry<String, Map<String, Set<LinkDetails>>> entry : dependencyGraph.entrySet()) {
+            // Add the source node (key of outer map)
+            nodes.add(entry.getKey());
+            
+            // Add all target nodes (keys of inner map)
+            nodes.addAll(entry.getValue().keySet());
+        }
+        
+        return nodes;
     }
 
     /**
@@ -77,6 +122,24 @@ public class GraphConverter {
      * @return the sum of all edge weights (each edge counted once)
      */
     public double totalEdgeWeight(Map<String, Map<String, Double>> graph) {
-        throw new UnsupportedOperationException("Not implemented yet");
+        double totalWeight = 0.0;
+        
+        for (Map.Entry<String, Map<String, Double>> nodeEntry : graph.entrySet()) {
+            String nodeA = nodeEntry.getKey();
+            Map<String, Double> neighbors = nodeEntry.getValue();
+            
+            for (Map.Entry<String, Double> neighborEntry : neighbors.entrySet()) {
+                String nodeB = neighborEntry.getKey();
+                double weight = neighborEntry.getValue();
+                
+                // Count each edge only once by comparing strings lexicographically
+                // Only add weight when nodeA < nodeB to avoid double counting
+                if (nodeA.compareTo(nodeB) < 0) {
+                    totalWeight += weight;
+                }
+            }
+        }
+        
+        return totalWeight;
     }
 }

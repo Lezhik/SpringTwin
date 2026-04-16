@@ -1,6 +1,6 @@
 # 003-graph-converter — Исправление
 
-## Статус: pending
+## Статус: complete
 
 ## Описание
 
