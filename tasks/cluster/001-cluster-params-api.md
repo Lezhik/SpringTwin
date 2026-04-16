@@ -1,6 +1,6 @@
 # 001-cluster-params — API
 
-## Статус: pending
+## Статус: complete
 
 ## Описание
 
