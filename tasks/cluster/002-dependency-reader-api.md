@@ -1,6 +1,6 @@
 # 002-dependency-reader — API
 
-## Статус: pending
+## Статус: complete
 
 ## Описание
 
