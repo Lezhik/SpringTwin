@@ -49,11 +49,12 @@ class CodeUsageExtractorDetailsTest {
         Set<LinkDetails> links = result.get("java.util.ArrayList");
         assertNotNull(links);
         assertEquals(1, links.size());
-        // Signature format: Lspring/twin/testee/CodeUsageExample;createObject()V
+        // Signature format: createObject() - only method name and arguments, no class name, no return type
         assertTrue(links.stream().anyMatch(link ->
             link.type() == LinkType.METHOD &&
-            link.details().contains("createObject()")
-        ));
+            link.details().equals("createObject()")
+        ), "Expected signature to be 'createObject()' but got: " +
+            links.stream().filter(link -> link.type() == LinkType.METHOD).map(LinkDetails::details).toList());
     }
 
     @Test
@@ -66,11 +67,12 @@ class CodeUsageExtractorDetailsTest {
         assertTrue(result.containsKey("java.lang.String"));
         Set<LinkDetails> links = result.get("java.lang.String");
         assertNotNull(links);
-        // Signature format: Lspring/twin/testee/CodeUsageExample;callMethod()V
+        // Signature format: callMethod() - only method name and arguments, no class name, no return type
         assertTrue(links.stream().anyMatch(link ->
             link.type() == LinkType.METHOD &&
-            link.details().contains("callMethod()")
-        ));
+            link.details().equals("callMethod()")
+        ), "Expected signature to be 'callMethod()' but got: " +
+            links.stream().filter(link -> link.type() == LinkType.METHOD).map(LinkDetails::details).toList());
     }
 
     @Test
@@ -100,12 +102,12 @@ class CodeUsageExtractorDetailsTest {
         assertTrue(result.containsKey("java.lang.String"));
         Set<LinkDetails> links = result.get("java.lang.String");
         assertNotNull(links);
-        // Signature format: Lspring/twin/testee/CodeUsageExample;castType(Ljava/lang/Object;)V
+        // Signature format: castType(Ljava/lang/Object;) - method name and arguments only
         assertTrue(links.stream().anyMatch(link ->
             link.type() == LinkType.METHOD &&
-            link.details().contains("castType") &&
-            link.details().contains("Ljava/lang/Object;")
-        ));
+            link.details().equals("castType(Ljava/lang/Object;)")
+        ), "Expected signature to be 'castType(Ljava/lang/Object;)' but got: " +
+            links.stream().filter(link -> link.type() == LinkType.METHOD).map(LinkDetails::details).toList());
     }
 
     @Test
@@ -118,11 +120,12 @@ class CodeUsageExtractorDetailsTest {
         assertTrue(result.containsKey("java.lang.System"));
         Set<LinkDetails> links = result.get("java.lang.System");
         assertNotNull(links);
-        // Signature format: Lspring/twin/testee/CodeUsageExample;accessField()V
+        // Signature format: accessField() - only method name and arguments, no class name, no return type
         assertTrue(links.stream().anyMatch(link ->
             link.type() == LinkType.METHOD &&
-            link.details().contains("accessField()")
-        ));
+            link.details().equals("accessField()")
+        ), "Expected signature to be 'accessField()' but got: " +
+            links.stream().filter(link -> link.type() == LinkType.METHOD).map(LinkDetails::details).toList());
     }
 
     @Test
@@ -137,7 +140,7 @@ class CodeUsageExtractorDetailsTest {
         // Multiple usages in the same method should result in one LinkDetails entry
         // because Set eliminates duplicates based on equals/hashCode
         long callMethodLinksCount = links.stream()
-            .filter(link -> link.type() == LinkType.METHOD && link.details().contains("callMethod()"))
+            .filter(link -> link.type() == LinkType.METHOD && link.details().equals("callMethod()"))
             .count();
         assertEquals(1, callMethodLinksCount);
     }

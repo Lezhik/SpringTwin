@@ -112,8 +112,8 @@ public class MethodTypeExtractor {
         Map<String, Set<LinkDetails>> result = new HashMap<>();
 
         for (MethodNode method : classNode.methods) {
-            // Form signature in ASM convention: className.methodName(descriptor)
-            String signature = classNode.name + "." + method.name + method.desc;
+            // Form signature: methodName(argumentDescriptor) - only method name and arguments, no class name, no return type
+            String signature = extractMethodSignature(method.name, method.desc);
 
             // Extract types from method descriptor arguments
             Type[] argumentTypes = Type.getArgumentTypes(method.desc);
@@ -155,5 +155,32 @@ public class MethodTypeExtractor {
      */
     private void addDetail(Map<String, Set<LinkDetails>> map, String fqcn, LinkDetails detail) {
         map.computeIfAbsent(fqcn, k -> new HashSet<>()).add(detail);
+    }
+
+    /**
+     * Extracts method signature in the format: methodName(argumentDescriptor).
+     *
+     * <p>The signature includes only the method name and argument types (descriptor),
+     * without the class name and without the return type.
+     *
+     * <p>Examples:
+     * <ul>
+     *   <li>{@code getName()} for method with no arguments</li>
+     *   <li>{@code setName(Ljava/lang/String;)} for method with String argument</li>
+     *   <li>{@code <init>(Ljava/lang/String;)} for constructor with String argument</li>
+     * </ul>
+     *
+     * @param methodName the method name (or {@code <init>} for constructors)
+     * @param methodDesc the method descriptor in ASM format (e.g., {@code ()Ljava/lang/String;})
+     * @return the method signature with name and arguments only
+     */
+    private String extractMethodSignature(String methodName, String methodDesc) {
+        // Extract argument part from descriptor: (args)returnType -> (args)
+        int argsEnd = methodDesc.lastIndexOf(')');
+        if (argsEnd == -1) {
+            argsEnd = methodDesc.length();
+        }
+        String argumentPart = methodDesc.substring(0, argsEnd + 1);
+        return methodName + argumentPart;
     }
 }

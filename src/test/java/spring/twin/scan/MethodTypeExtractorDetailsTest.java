@@ -48,12 +48,12 @@ class MethodTypeExtractorDetailsTest {
         assertTrue(result.containsKey("java.lang.String"));
         Set<LinkDetails> links = result.get("java.lang.String");
         assertNotNull(links);
-        // Signature format: Lspring/twin/testee/MethodHolder;getName()Ljava/lang/String;
-        assertTrue(links.stream().anyMatch(link -> 
-            link.type() == LinkType.METHOD && 
-            link.details().contains("getName()") &&
-            link.details().contains("Ljava/lang/String;")
-        ));
+        // Signature format: getName() - only method name and arguments, no class name, no return type
+        assertTrue(links.stream().anyMatch(link ->
+            link.type() == LinkType.METHOD &&
+            link.details().equals("getName()")
+        ), "Expected signature to be 'getName()' but got: " +
+            links.stream().filter(link -> link.type() == LinkType.METHOD).map(LinkDetails::details).toList());
     }
 
     @Test
@@ -66,12 +66,12 @@ class MethodTypeExtractorDetailsTest {
         assertTrue(result.containsKey("java.lang.String"));
         Set<LinkDetails> links = result.get("java.lang.String");
         assertNotNull(links);
-        // Signature format includes method name and parameter
-        assertTrue(links.stream().anyMatch(link -> 
-            link.type() == LinkType.METHOD && 
-            link.details().contains("setName") &&
-            link.details().contains("Ljava/lang/String;")
-        ));
+        // Signature format: setName(Ljava/lang/String;) - method name and arguments only
+        assertTrue(links.stream().anyMatch(link ->
+            link.type() == LinkType.METHOD &&
+            link.details().equals("setName(Ljava/lang/String;)")
+        ), "Expected signature to be 'setName(Ljava/lang/String;)' but got: " +
+            links.stream().filter(link -> link.type() == LinkType.METHOD).map(LinkDetails::details).toList());
     }
 
     @Test
@@ -85,19 +85,21 @@ class MethodTypeExtractorDetailsTest {
         assertTrue(result.containsKey("java.util.List"));
         Set<LinkDetails> listLinks = result.get("java.util.List");
         assertNotNull(listLinks);
-        assertTrue(listLinks.stream().anyMatch(link -> 
-            link.type() == LinkType.METHOD && 
-            link.details().contains("getItems()")
-        ));
+        assertTrue(listLinks.stream().anyMatch(link ->
+            link.type() == LinkType.METHOD &&
+            link.details().equals("getItems()")
+        ), "Expected signature to be 'getItems()' but got: " +
+            listLinks.stream().filter(link -> link.type() == LinkType.METHOD).map(LinkDetails::details).toList());
 
         // Check String generic parameter
         assertTrue(result.containsKey("java.lang.String"));
         Set<LinkDetails> stringLinks = result.get("java.lang.String");
         assertNotNull(stringLinks);
-        assertTrue(stringLinks.stream().anyMatch(link -> 
-            link.type() == LinkType.METHOD && 
-            link.details().contains("getItems()")
-        ));
+        assertTrue(stringLinks.stream().anyMatch(link ->
+            link.type() == LinkType.METHOD &&
+            link.details().equals("getItems()")
+        ), "Expected signature to be 'getItems()' but got: " +
+            stringLinks.stream().filter(link -> link.type() == LinkType.METHOD).map(LinkDetails::details).toList());
     }
 
     @Test
@@ -110,12 +112,12 @@ class MethodTypeExtractorDetailsTest {
         assertTrue(result.containsKey("java.lang.String"));
         Set<LinkDetails> links = result.get("java.lang.String");
         assertNotNull(links);
-        // Constructor signature uses <init> as method name
-        assertTrue(links.stream().anyMatch(link -> 
-            link.type() == LinkType.METHOD && 
-            link.details().contains("<init>") &&
-            link.details().contains("Ljava/lang/String;")
-        ));
+        // Constructor signature uses <init> as method name, with arguments only
+        assertTrue(links.stream().anyMatch(link ->
+            link.type() == LinkType.METHOD &&
+            link.details().equals("<init>(Ljava/lang/String;)")
+        ), "Expected signature to be '<init>(Ljava/lang/String;)' but got: " +
+            links.stream().filter(link -> link.type() == LinkType.METHOD).map(LinkDetails::details).toList());
     }
 
     @Test

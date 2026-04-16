@@ -77,11 +77,12 @@ class AnnotationTypeExtractorDetailsTest {
         Set<LinkDetails> links = result.get("spring.twin.testee.CustomAnnotation");
         assertNotNull(links);
         assertEquals(1, links.size());
-        // Signature format: Lspring/twin/testee/MethodAnnotatedClass;annotatedMethod()I
+        // Signature format: annotatedMethod() - only method name and arguments, no class name, no return type
         assertTrue(links.stream().anyMatch(link ->
             link.type() == LinkType.METHOD_ANNOTATION &&
-            link.details().contains("annotatedMethod()")
-        ));
+            link.details().equals("annotatedMethod()")
+        ), "Expected signature to be 'annotatedMethod()' but got: " +
+            links.stream().filter(link -> link.type() == LinkType.METHOD_ANNOTATION).map(LinkDetails::details).toList());
     }
 
     @Test
@@ -95,12 +96,12 @@ class AnnotationTypeExtractorDetailsTest {
         Set<LinkDetails> links = result.get("spring.twin.testee.CustomAnnotation");
         assertNotNull(links);
         assertEquals(1, links.size());
-        // Signature format includes method name and parameter type
+        // Signature format: methodWithAnnotatedParameter(Ljava/lang/String;) - method name and arguments only
         assertTrue(links.stream().anyMatch(link ->
             link.type() == LinkType.METHOD_ARG_ANNOTATION &&
-            link.details().contains("methodWithAnnotatedParameter") &&
-            link.details().contains("Ljava/lang/String;")
-        ));
+            link.details().equals("methodWithAnnotatedParameter(Ljava/lang/String;)")
+        ), "Expected signature to be 'methodWithAnnotatedParameter(Ljava/lang/String;)' but got: " +
+            links.stream().filter(link -> link.type() == LinkType.METHOD_ARG_ANNOTATION).map(LinkDetails::details).toList());
     }
 
     @Test
@@ -140,10 +141,10 @@ class AnnotationTypeExtractorDetailsTest {
             link.type() == LinkType.FIELD_ANNOTATION && link.details().equals("annotatedField")
         ));
         assertTrue(customLinks.stream().anyMatch(link ->
-            link.type() == LinkType.METHOD_ANNOTATION && link.details().contains("annotatedMethod()")
+            link.type() == LinkType.METHOD_ANNOTATION && link.details().equals("annotatedMethod()")
         ));
         assertTrue(customLinks.stream().anyMatch(link ->
-            link.type() == LinkType.METHOD_ARG_ANNOTATION && link.details().contains("methodWithAnnotatedParameter")
+            link.type() == LinkType.METHOD_ARG_ANNOTATION && link.details().equals("methodWithAnnotatedParameter(Ljava/lang/String;)")
         ));
     }
 

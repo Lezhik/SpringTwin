@@ -114,7 +114,7 @@ type определяет тип связи (базовый класс, поле
   ],
   "com.example.repository.OrderRepository": [
 	"com.example.model.OrderModel": [
-	  {"type": "METHOD", "details": "Lcom/example/model/OrderModel;add(Lcom/example/model/OrderModel;)"}
+	  {"type": "METHOD", "details": "add(Lcom/example/model/OrderModel;)"}
 	]
   ]
 }

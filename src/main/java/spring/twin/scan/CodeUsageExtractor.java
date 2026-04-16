@@ -143,7 +143,7 @@ public class CodeUsageExtractor {
             public MethodVisitor visitMethod(int access, String name, String descriptor,
                                              String signature, String[] exceptions) {
                 LinkType linkType = "<clinit>".equals(name) ? LinkType.STATIC_BLOCK : LinkType.METHOD;
-                String methodSignature = "L" + className + ";" + name + descriptor;
+                String methodSignature = extractMethodSignature(name, descriptor);
 
                 return new MethodVisitor(Opcodes.ASM9) {
                     @Override
@@ -209,6 +209,33 @@ public class CodeUsageExtractor {
      */
     private void addDetail(Map<String, Set<LinkDetails>> map, String fqcn, LinkDetails detail) {
         map.computeIfAbsent(fqcn, k -> new HashSet<>()).add(detail);
+    }
+
+    /**
+     * Extracts method signature in the format: methodName(argumentDescriptor).
+     *
+     * <p>The signature includes only the method name and argument types (descriptor),
+     * without the class name and without the return type.
+     *
+     * <p>Examples:
+     * <ul>
+     *   <li>{@code getName()} for method with no arguments</li>
+     *   <li>{@code setName(Ljava/lang/String;)} for method with String argument</li>
+     *   <li>{@code <init>(Ljava/lang/String;)} for constructor with String argument</li>
+     * </ul>
+     *
+     * @param methodName the method name (or {@code <init>} for constructors)
+     * @param methodDesc the method descriptor in ASM format (e.g., {@code ()Ljava/lang/String;})
+     * @return the method signature with name and arguments only
+     */
+    private String extractMethodSignature(String methodName, String methodDesc) {
+        // Extract argument part from descriptor: (args)returnType -> (args)
+        int argsEnd = methodDesc.lastIndexOf(')');
+        if (argsEnd == -1) {
+            argsEnd = methodDesc.length();
+        }
+        String argumentPart = methodDesc.substring(0, argsEnd + 1);
+        return methodName + argumentPart;
     }
 
 }
