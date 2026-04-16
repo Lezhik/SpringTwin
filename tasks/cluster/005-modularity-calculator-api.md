@@ -1,6 +1,6 @@
 # 005-modularity-calculator — API
 
-## Статус: pending
+## Статус: complete
 
 ## Описание
 
