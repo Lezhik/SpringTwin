@@ -1,6 +1,6 @@
 # 015-cluster-command — Исправление ошибок
 
-## Статус: pending
+## Статус: complete
 
 ## Описание
 

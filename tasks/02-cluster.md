@@ -66,7 +66,7 @@ graph TD
 | 011 | +          | penalty-edges         | Обнаружение штрафных рёбер между кластерами                     | 004               |
 | 012 | +          | cluster-result        | Модели данных результата кластеризации                          | 004, 010, 011     |
 | 013 | +          | cluster-json-writer   | Запись clusters.json                                            | 012               |
-| 014 | -          | cluster-service       | Главный сервис пайплайна cluster                                | 001–003, 009, 012, 013 |
+| 014 | +          | cluster-service       | Главный сервис пайплайна cluster                                | 001–003, 009, 012, 013 |
 | 015 | -          | cluster-command       | CLI команда cluster                                             | 001, 014          |
 | 016 | -          | e2e-tests             | End-to-end тесты полного пайплайна cluster                      | 015               |
 
@@ -153,10 +153,10 @@ graph TD
 - [+] [013-cluster-json-writer-fix](cluster/013-cluster-json-writer-fix.md)
 
 ### Фича 014: cluster-service
-- [ ] [014-cluster-service-api](cluster/014-cluster-service-api.md)
-- [ ] [014-cluster-service-tests](cluster/014-cluster-service-tests.md)
-- [ ] [014-cluster-service-code](cluster/014-cluster-service-code.md)
-- [ ] [014-cluster-service-fix](cluster/014-cluster-service-fix.md)
+- [+] [014-cluster-service-api](cluster/014-cluster-service-api.md)
+- [+] [014-cluster-service-tests](cluster/014-cluster-service-tests.md)
+- [+] [014-cluster-service-code](cluster/014-cluster-service-code.md)
+- [+] [014-cluster-service-fix](cluster/014-cluster-service-fix.md)
 
 ### Фича 015: cluster-command
 - [ ] [015-cluster-command-api](cluster/015-cluster-command-api.md)

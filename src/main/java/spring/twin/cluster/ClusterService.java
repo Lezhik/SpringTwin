@@ -72,10 +72,13 @@ public class ClusterService {
      * </ol>
      *
      * @param params the clustering parameters including input/output paths and resolution
-     * @throws UnsupportedOperationException this method is not yet implemented
      */
     public void execute(ClusterParams params) {
-        throw new UnsupportedOperationException();
+        Map<String, Map<String, Set<LinkDetails>>> dependencyGraph = dependencyReader.read(params.depsFile());
+        Map<String, Map<String, Double>> undirectedGraph = graphConverter.toUndirectedWeightedGraph(dependencyGraph);
+        Partition partition = leidenAlgorithm.cluster(undirectedGraph, params.resolution());
+        ClusterResult clusterResult = resultBuilder.build(partition, dependencyGraph, metricsCalculator, penaltyDetector);
+        jsonWriter.write(clusterResult, params.outputFile());
     }
 
     /**
@@ -87,9 +90,11 @@ public class ClusterService {
      *
      * @param params the clustering parameters including input path and resolution
      * @return the clustering result containing all clusters and penalty edges
-     * @throws UnsupportedOperationException this method is not yet implemented
      */
     public ClusterResult analyze(ClusterParams params) {
-        throw new UnsupportedOperationException();
+        Map<String, Map<String, Set<LinkDetails>>> dependencyGraph = dependencyReader.read(params.depsFile());
+        Map<String, Map<String, Double>> undirectedGraph = graphConverter.toUndirectedWeightedGraph(dependencyGraph);
+        Partition partition = leidenAlgorithm.cluster(undirectedGraph, params.resolution());
+        return resultBuilder.build(partition, dependencyGraph, metricsCalculator, penaltyDetector);
     }
 }
