@@ -1,6 +1,6 @@
 # 012-cluster-result — API
 
-## Статус: pending
+## Статус: complete
 
 ## Описание
 
