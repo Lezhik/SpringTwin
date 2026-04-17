@@ -1,6 +1,6 @@
 # 016-e2e-tests — API
 
-## Статус: pending
+## Статус: complete
 
 ## Описание
 
