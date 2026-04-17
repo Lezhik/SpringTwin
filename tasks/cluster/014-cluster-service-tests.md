@@ -1,6 +1,6 @@
 # 014-cluster-service — Тесты
 
-## Статус: pending
+## Статус: complete
 
 ## Описание
 
