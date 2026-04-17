@@ -1,6 +1,6 @@
 # 014-cluster-service — API
 
-## Статус: pending
+## Статус: complete
 
 ## Описание
 
