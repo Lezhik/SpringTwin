@@ -1,6 +1,6 @@
 # 006-leiden-local-move — Тесты
 
-## Статус: pending
+## Статус: complete
 
 ## Описание
 
