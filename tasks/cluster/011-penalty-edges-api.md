@@ -1,6 +1,6 @@
 # 011-penalty-edges — API
 
-## Статус: pending
+## Статус: complete
 
 ## Описание
 
