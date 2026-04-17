@@ -1,6 +1,6 @@
 # 008-leiden-aggregate — API
 
-## Статус: pending
+## Статус: complete
 
 ## Описание
 
