@@ -93,26 +93,16 @@ public class LeidenAlgorithm {
         while (true) {
             // Local move phase
             Partition newPartition = localMove.move(graph, currentPartition, resolution, random);
-            
-            // Check convergence - compare using node names from the partition
-            boolean partitionChanged = false;
-            for (String node : newPartition.nodes()) {
-                int newCommunity = newPartition.communityOf(node);
-                int oldCommunity = currentPartition.communityOf(node);
-                if (newCommunity != oldCommunity) {
-                    partitionChanged = true;
-                    break;
-                }
-            }
-            if (!partitionChanged) {
+
+            // Check convergence - partitions are equivalent (same groupings, regardless of IDs)
+            if (arePartitionsEquivalent(newPartition, currentPartition)) {
                 // Algorithm has converged, flatten the result back to original nodes
-                return flattenToOriginalNodes(newPartition, superNodeToOriginalNodes, originalNodes);
+                // Renumber communities to ensure sequential IDs
+                Partition result = flattenToOriginalNodes(newPartition, superNodeToOriginalNodes, originalNodes);
+                return renumberCommunities(result);
             }
-            currentPartition = newPartition;
-            
             // Refinement phase
-            Partition refinedPartition = refine.refine(graph, currentPartition, resolution, random);
-            currentPartition = refinedPartition;
+            currentPartition = refine.refine(graph, newPartition, resolution, random);
             
             // Aggregation phase
             Map<String, Map<String, Double>> aggregatedGraph = aggregate.aggregate(graph, currentPartition);
@@ -134,13 +124,116 @@ public class LeidenAlgorithm {
             
             // Create new partition for aggregated graph (each super-node in its own community)
             Partition aggregatePartition = aggregate.createAggregatePartition(aggregatedGraph);
-            
+
+            // Check if aggregate partition produces the same grouping as current partition
+            // by comparing their flattened versions (mapped back to original nodes)
+            Partition flattenedCurrent = flattenToOriginalNodes(currentPartition, superNodeToOriginalNodes, originalNodes);
+            Partition flattenedAggregate = flattenAggregatePartition(aggregatePartition, newSuperNodeToOriginalNodes);
+            if (arePartitionsEquivalent(flattenedAggregate, flattenedCurrent)) {
+                // No change in grouping - return the flattened current partition with renumbered communities
+                return renumberCommunities(flattenedCurrent);
+            }
+
             // Continue with aggregated graph
             graph = aggregatedGraph;
             currentPartition = aggregatePartition;
         }
     }
-    
+
+    /**
+     * Checks if two partitions are structurally equivalent.
+     *
+     * <p>Two partitions are equivalent if they group nodes into the same clusters,
+     * regardless of community numbering. For example, partitions:
+     * <ul>
+     *   <li>{A:0, B:0, C:1, D:1}</li>
+     *   <li>{A:5, B:5, C:3, D:3}</li>
+     * </ul>
+     * are equivalent because both group {A,B} together and {C,D} together.
+     *
+     * @param p1 first partition
+     * @param p2 second partition
+     * @return true if partitions are structurally equivalent
+     */
+    private boolean arePartitionsEquivalent(Partition p1, Partition p2) {
+        Set<String> nodes1 = p1.nodes();
+        Set<String> nodes2 = p2.nodes();
+
+        // Must have the same set of nodes
+        if (!nodes1.equals(nodes2)) {
+            return false;
+        }
+
+        // For each pair of nodes, check if they are in the same community in p1
+        // if and only if they are in the same community in p2
+        for (String nodeA : nodes1) {
+            for (String nodeB : nodes1) {
+                boolean sameCommunityP1 = p1.communityOf(nodeA) == p1.communityOf(nodeB);
+                boolean sameCommunityP2 = p2.communityOf(nodeA) == p2.communityOf(nodeB);
+                if (sameCommunityP1 != sameCommunityP2) {
+                    return false;
+                }
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     * Flattens an aggregate partition back to original nodes.
+     * Each super-node is mapped to its constituent original nodes.
+     *
+     * @param aggregatePartition the partition of super-nodes
+     * @param superNodeToOriginalNodes mapping from super-node to original nodes
+     * @return partition of original nodes
+     */
+    private Partition flattenAggregatePartition(Partition aggregatePartition,
+                                                Map<String, Set<String>> superNodeToOriginalNodes) {
+        Map<String, Integer> nodeCommunity = new HashMap<>();
+
+        // For each super-node in the aggregate partition
+        for (String superNode : aggregatePartition.nodes()) {
+            int community = aggregatePartition.communityOf(superNode);
+            Set<String> originalNodes = superNodeToOriginalNodes.get(superNode);
+            if (originalNodes != null) {
+                for (String node : originalNodes) {
+                    nodeCommunity.put(node, community);
+                }
+            }
+        }
+
+        return new Partition(nodeCommunity, aggregatePartition.communityCount());
+    }
+
+    /**
+     * Creates a new partition with sequential community IDs starting from 0.
+     * This ensures that community IDs are contiguous (0, 1, 2, ...) regardless
+     * of the original numbering.
+     *
+     * @param partition the partition to renumber
+     * @return a new partition with sequential community IDs
+     */
+    private Partition renumberCommunities(Partition partition) {
+        Map<String, Integer> oldCommunityToNew = new HashMap<>();
+        Map<String, Integer> newNodeCommunity = new HashMap<>();
+
+        int nextCommunityId = 0;
+        for (String node : partition.nodes()) {
+            int oldCommunity = partition.communityOf(node);
+            String oldCommunityKey = String.valueOf(oldCommunity);
+
+            Integer newCommunity = oldCommunityToNew.get(oldCommunityKey);
+            if (newCommunity == null) {
+                newCommunity = nextCommunityId++;
+                oldCommunityToNew.put(oldCommunityKey, newCommunity);
+            }
+
+            newNodeCommunity.put(node, newCommunity);
+        }
+
+        return new Partition(newNodeCommunity, nextCommunityId);
+    }
+
     /**
      * Flattens a partition of super-nodes back to the original nodes.
      *
