@@ -1,6 +1,6 @@
 # 011-penalty-edges — Тесты
 
-## Статус: pending
+## Статус: complete
 
 ## Описание
 
