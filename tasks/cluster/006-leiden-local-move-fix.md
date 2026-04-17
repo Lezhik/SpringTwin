@@ -1,6 +1,6 @@
 # 006-leiden-local-move — Исправление
 
-## Статус: pending
+## Статус: complete
 
 ## Описание
 

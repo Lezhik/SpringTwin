@@ -58,7 +58,7 @@ graph TD
 | 003 | +          | graph-converter       | Конвертация направленного графа зависимостей в ненаправленный взвешенный | —           |
 | 004 | +          | partition-model       | Модель данных разбиения графа на сообщества                     | —                 |
 | 005 | +          | modularity-calculator | Вычисление модулярности и прироста модулярности                 | 003, 004          |
-| 006 | -          | leiden-local-move     | Фаза локального перемещения узлов алгоритма Лейдена             | 004, 005          |
+| 006 | +          | leiden-local-move     | Фаза локального перемещения узлов алгоритма Лейдена             | 004, 005          |
 | 007 | -          | leiden-refine         | Фаза уточнения сообществ алгоритма Лейдена                      | 004, 005          |
 | 008 | -          | leiden-aggregate      | Фаза агрегации графа алгоритма Лейдена                          | 003, 004          |
 | 009 | -          | leiden-algorithm      | Полный алгоритм Лейдена — оркестрация трёх фаз                  | 006, 007, 008     |
@@ -105,10 +105,10 @@ graph TD
 - [+] [005-modularity-calculator-fix](cluster/005-modularity-calculator-fix.md)
 
 ### Фича 006: leiden-local-move
-- [ ] [006-leiden-local-move-api](cluster/006-leiden-local-move-api.md)
-- [ ] [006-leiden-local-move-tests](cluster/006-leiden-local-move-tests.md)
-- [ ] [006-leiden-local-move-code](cluster/006-leiden-local-move-code.md)
-- [ ] [006-leiden-local-move-fix](cluster/006-leiden-local-move-fix.md)
+- [+] [006-leiden-local-move-api](cluster/006-leiden-local-move-api.md)
+- [+] [006-leiden-local-move-tests](cluster/006-leiden-local-move-tests.md)
+- [+] [006-leiden-local-move-code](cluster/006-leiden-local-move-code.md)
+- [+] [006-leiden-local-move-fix](cluster/006-leiden-local-move-fix.md)
 
 ### Фича 007: leiden-refine
 - [ ] [007-leiden-refine-api](cluster/007-leiden-refine-api.md)

@@ -1,6 +1,6 @@
 # 006-leiden-local-move — Реализация
 
-## Статус: pending
+## Статус: complete
 
 ## Описание
 
