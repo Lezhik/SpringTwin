@@ -1,6 +1,6 @@
 # 005-modularity-calculator — Исправление
 
-## Статус: pending
+## Статус: complete
 
 ## Описание
 

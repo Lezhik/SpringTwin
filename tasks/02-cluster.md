@@ -57,7 +57,7 @@ graph TD
 | 002 | +          | dependency-reader     | Чтение dependencies.json в Map                                  | —                 |
 | 003 | +          | graph-converter       | Конвертация направленного графа зависимостей в ненаправленный взвешенный | —           |
 | 004 | +          | partition-model       | Модель данных разбиения графа на сообщества                     | —                 |
-| 005 | -          | modularity-calculator | Вычисление модулярности и прироста модулярности                 | 003, 004          |
+| 005 | +          | modularity-calculator | Вычисление модулярности и прироста модулярности                 | 003, 004          |
 | 006 | -          | leiden-local-move     | Фаза локального перемещения узлов алгоритма Лейдена             | 004, 005          |
 | 007 | -          | leiden-refine         | Фаза уточнения сообществ алгоритма Лейдена                      | 004, 005          |
 | 008 | -          | leiden-aggregate      | Фаза агрегации графа алгоритма Лейдена                          | 003, 004          |
@@ -99,10 +99,10 @@ graph TD
 - [+] [004-partition-model-fix](cluster/004-partition-model-fix.md)
 
 ### Фича 005: modularity-calculator
-- [ ] [005-modularity-calculator-api](cluster/005-modularity-calculator-api.md)
-- [ ] [005-modularity-calculator-tests](cluster/005-modularity-calculator-tests.md)
-- [ ] [005-modularity-calculator-code](cluster/005-modularity-calculator-code.md)
-- [ ] [005-modularity-calculator-fix](cluster/005-modularity-calculator-fix.md)
+- [+] [005-modularity-calculator-api](cluster/005-modularity-calculator-api.md)
+- [+] [005-modularity-calculator-tests](cluster/005-modularity-calculator-tests.md)
+- [+] [005-modularity-calculator-code](cluster/005-modularity-calculator-code.md)
+- [+] [005-modularity-calculator-fix](cluster/005-modularity-calculator-fix.md)
 
 ### Фича 006: leiden-local-move
 - [ ] [006-leiden-local-move-api](cluster/006-leiden-local-move-api.md)

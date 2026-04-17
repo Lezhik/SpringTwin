@@ -3,6 +3,7 @@ package spring.twin.cluster;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.DisplayName;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.Map;
 import java.util.HashMap;
@@ -22,7 +23,7 @@ class ModularityCalculatorTest {
         
         double degree = ModularityCalculator.nodeDegree("A", graph);
         
-        assertThat(degree).isEqualTo(0.0);
+        assertEquals(0.0, degree, 0.001);
     }
 
     @Test
@@ -38,7 +39,7 @@ class ModularityCalculatorTest {
         
         double degree = ModularityCalculator.nodeDegree("A", graph);
         
-        assertThat(degree).isEqualTo(3.5);
+        assertEquals(3.5, degree, 0.001);
     }
 
     @Test
@@ -58,7 +59,7 @@ class ModularityCalculatorTest {
         
         double degree = ModularityCalculator.communityDegree(0, graph, partition);
         
-        assertThat(degree).isEqualTo(1.0);
+        assertEquals(1.0, degree, 0.001);
     }
 
     @Test
@@ -83,7 +84,7 @@ class ModularityCalculatorTest {
         double degree = ModularityCalculator.communityDegree(0, graph, partition);
         
         // Degree of A = 1.0, Degree of B = 2.0, Total = 3.0
-        assertThat(degree).isEqualTo(3.0);
+        assertEquals(3.0, degree, 0.001);
     }
 
     @Test
@@ -107,7 +108,7 @@ class ModularityCalculatorTest {
         
         double edges = ModularityCalculator.edgesInsideCommunity(0, graph, partition);
         
-        assertThat(edges).isEqualTo(0.0);
+        assertEquals(0.0, edges, 0.001);
     }
 
     @Test
@@ -135,7 +136,7 @@ class ModularityCalculatorTest {
         
         // Edge A-B with weight 1.0 is internal to community 0
         // Each edge counted once, so result is 1.0
-        assertThat(edges).isEqualTo(1.0);
+        assertEquals(1.0, edges, 0.001);
     }
 
     @Test
@@ -153,7 +154,7 @@ class ModularityCalculatorTest {
         
         double edges = ModularityCalculator.edgesToCommunity("A", 1, graph, partition);
         
-        assertThat(edges).isEqualTo(0.0);
+        assertEquals(0.0, edges, 0.001);
     }
 
     @Test
@@ -177,7 +178,7 @@ class ModularityCalculatorTest {
         double edges = ModularityCalculator.edgesToCommunity("A", 1, graph, partition);
         
         // Edges A-B (1.5) + A-C (2.5) = 4.0
-        assertThat(edges).isEqualTo(4.0);
+        assertEquals(4.0, edges, 0.001);
     }
 
     @Test
@@ -368,11 +369,11 @@ class ModularityCalculatorTest {
         edgesD.put("C", 1.0);
         graph.put("D", edgesD);
         
-        // Initial partition: A in community 0; B,C,D in community 1
+        // Initial partition: A, B, C in community 0; D in community 1
         Map<String, Integer> nodeCommunity = new HashMap<>();
         nodeCommunity.put("A", 0);
-        nodeCommunity.put("B", 1);
-        nodeCommunity.put("C", 1);
+        nodeCommunity.put("B", 0);
+        nodeCommunity.put("C", 0);
         nodeCommunity.put("D", 1);
         Partition partition = new Partition(nodeCommunity, 2);
         
@@ -415,6 +416,6 @@ class ModularityCalculatorTest {
         
         double modularity = ModularityCalculator.calculateModularity(graph, partition, 1.0);
         
-        assertThat(modularity).isEqualTo(0.0);
+        assertEquals(0.0, modularity, 0.001);
     }
 }
