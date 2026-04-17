@@ -48,11 +48,23 @@ public class ClusterCommand {
      * @param resolution clustering parameter that determines cluster size (0.5–5.0), default 1.5
      * @return a message indicating success (output file path) or error
      */
-    @ShellMethod(key = "cluster", value = "Cluster the dependency graph")
+    @ShellMethod(key = "cluster", value = "Cluster dependency graph")
     public String cluster(
-            @ShellOption(value = "--deps", help = "Path to dependencies.json file") String deps,
-            @ShellOption(value = "--output", help = "Path to output JSON file") String output,
-            @ShellOption(value = "--resolution", help = "Clustering parameter (0.5-5.0)", defaultValue = "1.5") String resolution) {
-        throw new UnsupportedOperationException("Not implemented yet");
+            @ShellOption("--deps") String deps,
+            @ShellOption("--output") String output,
+            @ShellOption(value = "--resolution", defaultValue = "1.5") String resolution) {
+        double parsedResolution;
+        try {
+            parsedResolution = Double.parseDouble(resolution);
+        } catch (NumberFormatException e) {
+            return "Error: Invalid resolution: must be a valid number between 0.5 and 5.0";
+        }
+        ClusterParams params = ClusterParams.of(Path.of(deps), Path.of(output), String.valueOf(parsedResolution));
+        try {
+            clusterService.execute(params);
+        } catch (Exception e) {
+            return "Error: " + e.getMessage();
+        }
+        return "Clusters written to: " + params.outputFile();
     }
 }

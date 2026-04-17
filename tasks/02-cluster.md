@@ -67,7 +67,7 @@ graph TD
 | 012 | +          | cluster-result        | Модели данных результата кластеризации                          | 004, 010, 011     |
 | 013 | +          | cluster-json-writer   | Запись clusters.json                                            | 012               |
 | 014 | +          | cluster-service       | Главный сервис пайплайна cluster                                | 001–003, 009, 012, 013 |
-| 015 | -          | cluster-command       | CLI команда cluster                                             | 001, 014          |
+| 015 | +          | cluster-command       | CLI команда cluster                                             | 001, 014          |
 | 016 | -          | e2e-tests             | End-to-end тесты полного пайплайна cluster                      | 015               |
 
 ## Чек-лист задач
@@ -159,10 +159,10 @@ graph TD
 - [+] [014-cluster-service-fix](cluster/014-cluster-service-fix.md)
 
 ### Фича 015: cluster-command
-- [ ] [015-cluster-command-api](cluster/015-cluster-command-api.md)
-- [ ] [015-cluster-command-tests](cluster/015-cluster-command-tests.md)
-- [ ] [015-cluster-command-code](cluster/015-cluster-command-code.md)
-- [ ] [015-cluster-command-fix](cluster/015-cluster-command-fix.md)
+- [+] [015-cluster-command-api](cluster/015-cluster-command-api.md)
+- [+] [015-cluster-command-tests](cluster/015-cluster-command-tests.md)
+- [+] [015-cluster-command-code](cluster/015-cluster-command-code.md)
+- [+] [015-cluster-command-fix](cluster/015-cluster-command-fix.md)
 
 ### Фича 016: e2e-tests
 - [ ] [016-e2e-tests-api](cluster/016-e2e-tests-api.md)
