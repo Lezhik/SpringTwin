@@ -1,6 +1,6 @@
 # 013-cluster-json-writer — API
 
-## Статус: pending
+## Статус: complete
 
 ## Описание
 
