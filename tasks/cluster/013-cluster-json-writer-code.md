@@ -1,6 +1,6 @@
 # 013-cluster-json-writer — Реализация
 
-## Статус: pending
+## Статус: complete
 
 ## Описание
 

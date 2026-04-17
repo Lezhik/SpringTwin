@@ -65,7 +65,7 @@ graph TD
 | 010 | +          | cluster-metrics       | Вычисление метрик cohesion и coupling для кластеров             | —                 |
 | 011 | +          | penalty-edges         | Обнаружение штрафных рёбер между кластерами                     | 004               |
 | 012 | +          | cluster-result        | Модели данных результата кластеризации                          | 004, 010, 011     |
-| 013 | -          | cluster-json-writer   | Запись clusters.json                                            | 012               |
+| 013 | +          | cluster-json-writer   | Запись clusters.json                                            | 012               |
 | 014 | -          | cluster-service       | Главный сервис пайплайна cluster                                | 001–003, 009, 012, 013 |
 | 015 | -          | cluster-command       | CLI команда cluster                                             | 001, 014          |
 | 016 | -          | e2e-tests             | End-to-end тесты полного пайплайна cluster                      | 015               |
@@ -147,10 +147,10 @@ graph TD
 - [+] [012-cluster-result-fix](cluster/012-cluster-result-fix.md)
 
 ### Фича 013: cluster-json-writer
-- [ ] [013-cluster-json-writer-api](cluster/013-cluster-json-writer-api.md)
-- [ ] [013-cluster-json-writer-tests](cluster/013-cluster-json-writer-tests.md)
-- [ ] [013-cluster-json-writer-code](cluster/013-cluster-json-writer-code.md)
-- [ ] [013-cluster-json-writer-fix](cluster/013-cluster-json-writer-fix.md)
+- [+] [013-cluster-json-writer-api](cluster/013-cluster-json-writer-api.md)
+- [+] [013-cluster-json-writer-tests](cluster/013-cluster-json-writer-tests.md)
+- [+] [013-cluster-json-writer-code](cluster/013-cluster-json-writer-code.md)
+- [+] [013-cluster-json-writer-fix](cluster/013-cluster-json-writer-fix.md)
 
 ### Фича 014: cluster-service
 - [ ] [014-cluster-service-api](cluster/014-cluster-service-api.md)
