@@ -1,6 +1,6 @@
 # 009-leiden-algorithm — Реализация
 
-## Статус: pending
+## Статус: complete
 
 ## Описание
 

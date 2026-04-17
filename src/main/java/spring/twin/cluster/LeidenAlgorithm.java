@@ -2,6 +2,8 @@ package spring.twin.cluster;
 
 import org.springframework.stereotype.Component;
 
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
@@ -47,7 +49,7 @@ public class LeidenAlgorithm {
      * @return the final partition of nodes into communities
      */
     public Partition cluster(Map<String, Map<String, Double>> graph, double resolution) {
-        throw new UnsupportedOperationException("Not implemented yet");
+        return cluster(graph, resolution, new Random().nextLong());
     }
 
     /**
@@ -66,7 +68,112 @@ public class LeidenAlgorithm {
      * @return the final partition of nodes into communities
      */
     public Partition cluster(Map<String, Map<String, Double>> graph, double resolution, long seed) {
-        throw new UnsupportedOperationException("Not implemented yet");
+        Random random = new Random(seed);
+        
+        // Handle empty graph
+        if (graph.isEmpty()) {
+            return new Partition(new HashSet<>());
+        }
+        
+        // Save original nodes for final result
+        Set<String> originalNodes = new HashSet<>(graph.keySet());
+        
+        // Step 1: Create initial partition where each node is in its own community
+        Partition currentPartition = new Partition(graph.keySet());
+        
+        // Step 2: Save initial super-node mapping (each node maps to itself initially)
+        Map<String, Set<String>> superNodeToOriginalNodes = new HashMap<>();
+        for (String node : graph.keySet()) {
+            Set<String> originalSet = new HashSet<>();
+            originalSet.add(node);
+            superNodeToOriginalNodes.put(node, originalSet);
+        }
+        
+        // Step 3: Iterative process
+        while (true) {
+            // Local move phase
+            Partition newPartition = localMove.move(graph, currentPartition, resolution, random);
+            
+            // Check convergence - compare using node names from the partition
+            boolean partitionChanged = false;
+            for (String node : newPartition.nodes()) {
+                int newCommunity = newPartition.communityOf(node);
+                int oldCommunity = currentPartition.communityOf(node);
+                if (newCommunity != oldCommunity) {
+                    partitionChanged = true;
+                    break;
+                }
+            }
+            if (!partitionChanged) {
+                // Algorithm has converged, flatten the result back to original nodes
+                return flattenToOriginalNodes(newPartition, superNodeToOriginalNodes, originalNodes);
+            }
+            currentPartition = newPartition;
+            
+            // Refinement phase
+            Partition refinedPartition = refine.refine(graph, currentPartition, resolution, random);
+            currentPartition = refinedPartition;
+            
+            // Aggregation phase
+            Map<String, Map<String, Double>> aggregatedGraph = aggregate.aggregate(graph, currentPartition);
+            
+            // Build new superNodeToOriginalNodes mapping for aggregated graph
+            Map<String, Set<String>> newSuperNodeToOriginalNodes = new HashMap<>();
+            for (Integer community : currentPartition.communities()) {
+                String superNode = aggregate.toSuperNodeName(community);
+                Set<String> mergedOriginalNodes = new HashSet<>();
+                for (String node : currentPartition.nodesInCommunity(community)) {
+                    Set<String> originalNodesForThisNode = superNodeToOriginalNodes.get(node);
+                    if (originalNodesForThisNode != null) {
+                        mergedOriginalNodes.addAll(originalNodesForThisNode);
+                    }
+                }
+                newSuperNodeToOriginalNodes.put(superNode, mergedOriginalNodes);
+            }
+            superNodeToOriginalNodes = newSuperNodeToOriginalNodes;
+            
+            // Create new partition for aggregated graph (each super-node in its own community)
+            Partition aggregatePartition = aggregate.createAggregatePartition(aggregatedGraph);
+            
+            // Continue with aggregated graph
+            graph = aggregatedGraph;
+            currentPartition = aggregatePartition;
+        }
+    }
+    
+    /**
+     * Flattens a partition of super-nodes back to the original nodes.
+     *
+     * @param partition the partition of super-nodes
+     * @param superNodeToOriginalNodes mapping from super-node to original nodes
+     * @param originalNodes the set of all original nodes
+     * @return partition of original nodes
+     */
+    private Partition flattenToOriginalNodes(Partition partition, 
+                                              Map<String, Set<String>> superNodeToOriginalNodes,
+                                              Set<String> originalNodes) {
+        Map<String, Integer> nodeCommunity = new HashMap<>();
+        
+        // For each super-node in the partition
+        for (String superNode : partition.nodes()) {
+            int community = partition.communityOf(superNode);
+            Set<String> nodes = superNodeToOriginalNodes.get(superNode);
+            if (nodes != null) {
+                for (String node : nodes) {
+                    nodeCommunity.put(node, community);
+                }
+            }
+        }
+        
+        // Ensure all original nodes are in the result (for isolated nodes that might have been lost)
+        int maxCommunity = partition.communityCount();
+        for (String node : originalNodes) {
+            if (!nodeCommunity.containsKey(node)) {
+                nodeCommunity.put(node, maxCommunity++);
+            }
+        }
+        
+        return new Partition(nodeCommunity, maxCommunity);
     }
 
     /**
@@ -82,7 +189,22 @@ public class LeidenAlgorithm {
      * @return the flattened partition mapped to original nodes
      */
     public Partition flattenPartition(Partition currentPartition, Partition aggregatePartition, Map<String, Set<String>> superNodeToNodes) {
-        throw new UnsupportedOperationException("Not implemented yet");
+        Map<String, Integer> nodeCommunity = new HashMap<>();
+        
+        // For each super-node in the aggregate partition
+        for (String superNode : aggregatePartition.nodes()) {
+            int community = aggregatePartition.communityOf(superNode);
+            Set<String> originalNodes = superNodeToNodes.get(superNode);
+            
+            // Assign the same community to all original nodes
+            if (originalNodes != null) {
+                for (String node : originalNodes) {
+                    nodeCommunity.put(node, community);
+                }
+            }
+        }
+        
+        return new Partition(nodeCommunity, aggregatePartition.communityCount());
     }
 
     /**
@@ -96,6 +218,17 @@ public class LeidenAlgorithm {
      * @return mapping from super-node name to set of original nodes in that community
      */
     public Map<String, Set<String>> buildSuperNodeMapping(Partition partition) {
-        throw new UnsupportedOperationException("Not implemented yet");
+        Map<String, Set<String>> superNodeToNodes = new HashMap<>();
+        
+        // Get community map: community ID -> set of nodes
+        Map<Integer, Set<String>> communityMap = partition.toCommunityMap();
+        
+        // Convert to super-node mapping: "community-{id}" -> set of nodes
+        for (Map.Entry<Integer, Set<String>> entry : communityMap.entrySet()) {
+            String superNodeName = "community-" + entry.getKey();
+            superNodeToNodes.put(superNodeName, new HashSet<>(entry.getValue()));
+        }
+        
+        return superNodeToNodes;
     }
 }

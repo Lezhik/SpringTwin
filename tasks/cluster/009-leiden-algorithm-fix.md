@@ -1,6 +1,6 @@
 # 009-leiden-algorithm — Исправление
 
-## Статус: pending
+## Статус: complete
 
 ## Описание
 
