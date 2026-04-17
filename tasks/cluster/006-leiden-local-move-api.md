@@ -1,6 +1,6 @@
 # 006-leiden-local-move — API
 
-## Статус: pending
+## Статус: complete
 
 ## Описание
 
