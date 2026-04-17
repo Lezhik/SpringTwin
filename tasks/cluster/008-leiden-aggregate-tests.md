@@ -1,6 +1,6 @@
 # 008-leiden-aggregate — Тесты
 
-## Статус: pending
+## Статус: complete
 
 ## Описание
 
