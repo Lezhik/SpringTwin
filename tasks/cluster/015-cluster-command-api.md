@@ -1,6 +1,6 @@
 # 015-cluster-command — API
 
-## Статус: pending
+## Статус: complete
 
 ## Описание
 

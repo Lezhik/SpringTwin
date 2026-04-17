@@ -1,6 +1,6 @@
 # 014-cluster-service — Исправление
 
-## Статус: pending
+## Статус: complete
 
 ## Описание
 

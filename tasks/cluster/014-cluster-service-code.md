@@ -1,6 +1,6 @@
 # 014-cluster-service — Реализация
 
-## Статус: pending
+## Статус: complete
 
 ## Описание
 

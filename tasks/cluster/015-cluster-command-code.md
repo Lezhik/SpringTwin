@@ -1,6 +1,6 @@
 # 015-cluster-command — Реализация
 
-## Статус: complete
+## Статус: pending
 
 ## Описание
 
