@@ -1,6 +1,6 @@
 # 010-cluster-metrics — API
 
-## Статус: pending
+## Статус: complete
 
 ## Описание
 
