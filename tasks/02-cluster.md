@@ -59,7 +59,7 @@ graph TD
 | 004 | +          | partition-model       | Модель данных разбиения графа на сообщества                     | —                 |
 | 005 | +          | modularity-calculator | Вычисление модулярности и прироста модулярности                 | 003, 004          |
 | 006 | +          | leiden-local-move     | Фаза локального перемещения узлов алгоритма Лейдена             | 004, 005          |
-| 007 | -          | leiden-refine         | Фаза уточнения сообществ алгоритма Лейдена                      | 004, 005          |
+| 007 | +          | leiden-refine         | Фаза уточнения сообществ алгоритма Лейдена                      | 004, 005          |
 | 008 | -          | leiden-aggregate      | Фаза агрегации графа алгоритма Лейдена                          | 003, 004          |
 | 009 | -          | leiden-algorithm      | Полный алгоритм Лейдена — оркестрация трёх фаз                  | 006, 007, 008     |
 | 010 | -          | cluster-metrics       | Вычисление метрик cohesion и coupling для кластеров             | —                 |
@@ -111,10 +111,10 @@ graph TD
 - [+] [006-leiden-local-move-fix](cluster/006-leiden-local-move-fix.md)
 
 ### Фича 007: leiden-refine
-- [ ] [007-leiden-refine-api](cluster/007-leiden-refine-api.md)
-- [ ] [007-leiden-refine-tests](cluster/007-leiden-refine-tests.md)
-- [ ] [007-leiden-refine-code](cluster/007-leiden-refine-code.md)
-- [ ] [007-leiden-refine-fix](cluster/007-leiden-refine-fix.md)
+- [+] [007-leiden-refine-api](cluster/007-leiden-refine-api.md)
+- [+] [007-leiden-refine-tests](cluster/007-leiden-refine-tests.md)
+- [+] [007-leiden-refine-code](cluster/007-leiden-refine-code.md)
+- [+] [007-leiden-refine-fix](cluster/007-leiden-refine-fix.md)
 
 ### Фича 008: leiden-aggregate
 - [ ] [008-leiden-aggregate-api](cluster/008-leiden-aggregate-api.md)

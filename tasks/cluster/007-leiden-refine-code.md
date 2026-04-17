@@ -1,6 +1,6 @@
 # 007-leiden-refine — Реализация
 
-## Статус: pending
+## Статус: complete
 
 ## Описание
 

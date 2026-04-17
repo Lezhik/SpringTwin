@@ -1,6 +1,6 @@
 # 007-leiden-refine — Исправление
 
-## Статус: pending
+## Статус: complete
 
 ## Описание
 
