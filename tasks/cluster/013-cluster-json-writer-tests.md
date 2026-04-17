@@ -1,6 +1,6 @@
 # 013-cluster-json-writer — Тесты
 
-## Статус: pending
+## Статус: complete
 
 ## Описание
 
