@@ -1,6 +1,6 @@
 # 015-cluster-command — Unit тесты
 
-## Статус: pending
+## Статус: complete
 
 ## Описание
 
