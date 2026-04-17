@@ -1,6 +1,6 @@
 # 009-leiden-algorithm — Тесты
 
-## Статус: pending
+## Статус: complete
 
 ## Описание
 
