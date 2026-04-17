@@ -1,6 +1,6 @@
 # 010-cluster-metrics — Исправление
 
-## Статус: pending
+## Статус: complete
 
 ## Описание
 

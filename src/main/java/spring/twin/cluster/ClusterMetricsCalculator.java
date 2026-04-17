@@ -54,7 +54,31 @@ public class ClusterMetricsCalculator {
      */
     public ClusterMetricsRecord calculate(Set<String> clusterClasses,
                                           Map<String, Map<String, Set<LinkDetails>>> dependencyGraph) {
-        return new ClusterMetricsRecord(1.0, 0.0);
+        int internalLinks = 0;
+        int externalLinks = 0;
+
+        for (String className : clusterClasses) {
+            Map<String, Set<LinkDetails>> dependencies = dependencyGraph.getOrDefault(className, Map.of());
+            for (String targetClass : dependencies.keySet()) {
+                Set<LinkDetails> linkDetails = dependencies.get(targetClass);
+                if (linkDetails != null && !linkDetails.isEmpty()) {
+                    if (clusterClasses.contains(targetClass)) {
+                        internalLinks += linkDetails.size();
+                    } else {
+                        externalLinks += linkDetails.size();
+                    }
+                }
+            }
+        }
+
+        int totalLinks = internalLinks + externalLinks;
+        if (totalLinks == 0) {
+            return new ClusterMetricsRecord(1.0, 0.0);
+        }
+
+        double cohesion = (double) internalLinks / totalLinks;
+        double coupling = (double) externalLinks / totalLinks;
+        return new ClusterMetricsRecord(cohesion, coupling);
     }
 
     /**
@@ -69,6 +93,11 @@ public class ClusterMetricsCalculator {
      */
     public Map<Integer, ClusterMetricsRecord> calculateAll(Map<Integer, Set<String>> communityMap,
                                                            Map<String, Map<String, Set<LinkDetails>>> dependencyGraph) {
-        return Map.of();
+        Map<Integer, ClusterMetricsRecord> result = new java.util.HashMap<>();
+        for (Map.Entry<Integer, Set<String>> entry : communityMap.entrySet()) {
+            ClusterMetricsRecord metrics = calculate(entry.getValue(), dependencyGraph);
+            result.put(entry.getKey(), metrics);
+        }
+        return result;
     }
 }

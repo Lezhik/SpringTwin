@@ -62,7 +62,7 @@ graph TD
 | 007 | +          | leiden-refine         | Фаза уточнения сообществ алгоритма Лейдена                      | 004, 005          |
 | 008 | +          | leiden-aggregate      | Фаза агрегации графа алгоритма Лейдена                          | 003, 004          |
 | 009 | +          | leiden-algorithm      | Полный алгоритм Лейдена — оркестрация трёх фаз                  | 006, 007, 008     |
-| 010 | -          | cluster-metrics       | Вычисление метрик cohesion и coupling для кластеров             | —                 |
+| 010 | +          | cluster-metrics       | Вычисление метрик cohesion и coupling для кластеров             | —                 |
 | 011 | -          | penalty-edges         | Обнаружение штрафных рёбер между кластерами                     | 004               |
 | 012 | -          | cluster-result        | Модели данных результата кластеризации                          | 004, 010, 011     |
 | 013 | -          | cluster-json-writer   | Запись clusters.json                                            | 012               |
@@ -129,10 +129,10 @@ graph TD
 - [+] [009-leiden-algorithm-fix](cluster/009-leiden-algorithm-fix.md)
 
 ### Фича 010: cluster-metrics
-- [ ] [010-cluster-metrics-api](cluster/010-cluster-metrics-api.md)
-- [ ] [010-cluster-metrics-tests](cluster/010-cluster-metrics-tests.md)
-- [ ] [010-cluster-metrics-code](cluster/010-cluster-metrics-code.md)
-- [ ] [010-cluster-metrics-fix](cluster/010-cluster-metrics-fix.md)
+- [+] [010-cluster-metrics-api](cluster/010-cluster-metrics-api.md)
+- [+] [010-cluster-metrics-tests](cluster/010-cluster-metrics-tests.md)
+- [+] [010-cluster-metrics-code](cluster/010-cluster-metrics-code.md)
+- [+] [010-cluster-metrics-fix](cluster/010-cluster-metrics-fix.md)
 
 ### Фича 011: penalty-edges
 - [ ] [011-penalty-edges-api](cluster/011-penalty-edges-api.md)

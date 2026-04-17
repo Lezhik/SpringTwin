@@ -1,6 +1,6 @@
 # 010-cluster-metrics — Реализация
 
-## Статус: pending
+## Статус: complete
 
 ## Описание
 
