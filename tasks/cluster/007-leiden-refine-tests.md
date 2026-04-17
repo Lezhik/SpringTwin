@@ -1,6 +1,6 @@
 # 007-leiden-refine — Тесты
 
-## Статус: pending
+## Статус: complete
 
 ## Описание
 
