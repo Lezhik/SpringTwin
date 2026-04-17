@@ -1,6 +1,6 @@
 # 008-leiden-aggregate — Реализация
 
-## Статус: pending
+## Статус: complete
 
 ## Описание
 

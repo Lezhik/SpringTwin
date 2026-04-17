@@ -60,7 +60,7 @@ graph TD
 | 005 | +          | modularity-calculator | Вычисление модулярности и прироста модулярности                 | 003, 004          |
 | 006 | +          | leiden-local-move     | Фаза локального перемещения узлов алгоритма Лейдена             | 004, 005          |
 | 007 | +          | leiden-refine         | Фаза уточнения сообществ алгоритма Лейдена                      | 004, 005          |
-| 008 | -          | leiden-aggregate      | Фаза агрегации графа алгоритма Лейдена                          | 003, 004          |
+| 008 | +          | leiden-aggregate      | Фаза агрегации графа алгоритма Лейдена                          | 003, 004          |
 | 009 | -          | leiden-algorithm      | Полный алгоритм Лейдена — оркестрация трёх фаз                  | 006, 007, 008     |
 | 010 | -          | cluster-metrics       | Вычисление метрик cohesion и coupling для кластеров             | —                 |
 | 011 | -          | penalty-edges         | Обнаружение штрафных рёбер между кластерами                     | 004               |
@@ -117,10 +117,10 @@ graph TD
 - [+] [007-leiden-refine-fix](cluster/007-leiden-refine-fix.md)
 
 ### Фича 008: leiden-aggregate
-- [ ] [008-leiden-aggregate-api](cluster/008-leiden-aggregate-api.md)
-- [ ] [008-leiden-aggregate-tests](cluster/008-leiden-aggregate-tests.md)
-- [ ] [008-leiden-aggregate-code](cluster/008-leiden-aggregate-code.md)
-- [ ] [008-leiden-aggregate-fix](cluster/008-leiden-aggregate-fix.md)
+- [+] [008-leiden-aggregate-api](cluster/008-leiden-aggregate-api.md)
+- [+] [008-leiden-aggregate-tests](cluster/008-leiden-aggregate-tests.md)
+- [+] [008-leiden-aggregate-code](cluster/008-leiden-aggregate-code.md)
+- [+] [008-leiden-aggregate-fix](cluster/008-leiden-aggregate-fix.md)
 
 ### Фича 009: leiden-algorithm
 - [ ] [009-leiden-algorithm-api](cluster/009-leiden-algorithm-api.md)

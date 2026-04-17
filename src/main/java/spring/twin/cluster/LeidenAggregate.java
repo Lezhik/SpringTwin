@@ -31,7 +31,33 @@ public class LeidenAggregate {
      * @return the aggregated graph with super-nodes
      */
     public Map<String, Map<String, Double>> aggregate(Map<String, Map<String, Double>> graph, Partition partition) {
-        throw new UnsupportedOperationException("Not implemented yet");
+        Map<String, Map<String, Double>> aggregatedGraph = new HashMap<>();
+        
+        // Initialize all communities as super-nodes (even those without outgoing edges)
+        for (Integer community : partition.communities()) {
+            String superNode = toSuperNodeName(community);
+            aggregatedGraph.put(superNode, new HashMap<>());
+        }
+        
+        for (Map.Entry<String, Map<String, Double>> nodeEntry : graph.entrySet()) {
+            String sourceNode = nodeEntry.getKey();
+            Map<String, Double> edges = nodeEntry.getValue();
+            
+            int sourceCommunity = partition.communityOf(sourceNode);
+            String sourceSuperNode = toSuperNodeName(sourceCommunity);
+            
+            for (Map.Entry<String, Double> edgeEntry : edges.entrySet()) {
+                String targetNode = edgeEntry.getKey();
+                Double weight = edgeEntry.getValue();
+                
+                int targetCommunity = partition.communityOf(targetNode);
+                String targetSuperNode = toSuperNodeName(targetCommunity);
+                
+                aggregatedGraph.get(sourceSuperNode).merge(targetSuperNode, weight, Double::sum);
+            }
+        }
+        
+        return aggregatedGraph;
     }
 
     /**
@@ -42,7 +68,7 @@ public class LeidenAggregate {
      * @return a new partition where each super-node forms its own community
      */
     public Partition createAggregatePartition(Map<String, Map<String, Double>> aggregatedGraph) {
-        throw new UnsupportedOperationException("Not implemented yet");
+        return new Partition(aggregatedGraph.keySet());
     }
 
     /**
@@ -52,6 +78,6 @@ public class LeidenAggregate {
      * @return the super-node name in format "community-{id}"
      */
     public String toSuperNodeName(int communityId) {
-        throw new UnsupportedOperationException("Not implemented yet");
+        return "community-" + communityId;
     }
 }

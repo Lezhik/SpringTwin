@@ -1,6 +1,6 @@
 # 008-leiden-aggregate — Исправление
 
-## Статус: pending
+## Статус: complete
 
 ## Описание
 
