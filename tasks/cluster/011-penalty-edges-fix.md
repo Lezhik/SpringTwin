@@ -1,6 +1,6 @@
 # 011-penalty-edges — Исправление
 
-## Статус: pending
+## Статус: complete
 
 ## Описание
 

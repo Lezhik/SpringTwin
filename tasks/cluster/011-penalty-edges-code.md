@@ -1,6 +1,6 @@
 # 011-penalty-edges — Реализация
 
-## Статус: pending
+## Статус: complete
 
 ## Описание
 

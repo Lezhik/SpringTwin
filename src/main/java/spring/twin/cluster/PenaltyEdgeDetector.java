@@ -38,6 +38,34 @@ public class PenaltyEdgeDetector {
      */
     public Map<String, Set<String>> detect(Partition partition,
                                            Map<String, Map<String, Set<LinkDetails>>> dependencyGraph) {
-        throw new UnsupportedOperationException("Not implemented yet");
+        Map<String, Set<String>> penaltyEdges = new java.util.TreeMap<>();
+
+        for (Map.Entry<String, Map<String, Set<LinkDetails>>> entry : dependencyGraph.entrySet()) {
+            String source = entry.getKey();
+            Map<String, Set<LinkDetails>> targets = entry.getValue();
+
+            // Skip source nodes not present in partition
+            if (!partition.nodes().contains(source)) {
+                continue;
+            }
+
+            int sourceCommunity = partition.communityOf(source);
+
+            for (String target : targets.keySet()) {
+                // Skip target nodes not present in partition
+                if (!partition.nodes().contains(target)) {
+                    continue;
+                }
+
+                int targetCommunity = partition.communityOf(target);
+
+                // If communities differ, this is a penalty edge
+                if (sourceCommunity != targetCommunity) {
+                    penaltyEdges.computeIfAbsent(source, k -> new java.util.HashSet<>()).add(target);
+                }
+            }
+        }
+
+        return penaltyEdges;
     }
 }
