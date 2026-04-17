@@ -1,6 +1,6 @@
 # 009-leiden-algorithm — API
 
-## Статус: pending
+## Статус: complete
 
 ## Описание
 
