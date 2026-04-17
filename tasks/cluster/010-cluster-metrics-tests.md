@@ -1,6 +1,6 @@
 # 010-cluster-metrics — Тесты
 
-## Статус: pending
+## Статус: complete
 
 ## Описание
 
