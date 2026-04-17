@@ -3,6 +3,7 @@ package spring.twin.cluster;
 import org.springframework.stereotype.Component;
 import spring.twin.scan.LinkDetails;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -60,7 +61,42 @@ public class ClusterResultBuilder {
                                Map<String, Map<String, Set<LinkDetails>>> dependencyGraph,
                                ClusterMetricsCalculator metricsCalculator,
                                PenaltyEdgeDetector penaltyDetector) {
-        // TODO: implement
-        throw new UnsupportedOperationException("Not implemented yet");
+        // 1. Extract community map from partition
+        Map<Integer, Set<String>> communityMap = partition.toCommunityMap();
+
+        // 2. Calculate metrics for each cluster
+        Map<Integer, ClusterMetricsRecord> metricsMap = metricsCalculator.calculateAll(communityMap, dependencyGraph);
+
+        // 3. Detect penalty edges
+        Map<String, Set<String>> penaltyEdges = penaltyDetector.detect(partition, dependencyGraph);
+
+        // 4. Create ClusterRecord for each community
+        List<ClusterRecord> clusters = new java.util.ArrayList<>();
+        for (Map.Entry<Integer, Set<String>> entry : communityMap.entrySet()) {
+            int communityId = entry.getKey();
+            Set<String> classSet = entry.getValue();
+
+            // Sort classes alphabetically
+            List<String> sortedClasses = new java.util.ArrayList<>(classSet);
+            java.util.Collections.sort(sortedClasses);
+
+            // Create cluster id
+            String clusterId = "cluster-" + communityId;
+
+            // Get metrics for this cluster
+            ClusterMetricsRecord metrics = metricsMap.getOrDefault(communityId, new ClusterMetricsRecord(1.0, 0.0));
+
+            clusters.add(new ClusterRecord(clusterId, sortedClasses, metrics));
+        }
+
+        // 5. Sort clusters by numeric id (extract number from "cluster-{number}")
+        clusters.sort(java.util.Comparator.comparingInt(c -> {
+            String id = c.id();
+            String numberPart = id.substring("cluster-".length());
+            return Integer.parseInt(numberPart);
+        }));
+
+        // 6. Return ClusterResult
+        return new ClusterResult(clusters, penaltyEdges);
     }
 }

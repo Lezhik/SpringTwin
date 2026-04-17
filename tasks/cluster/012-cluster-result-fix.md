@@ -1,6 +1,6 @@
 # 012-cluster-result — Исправление
 
-## Статус: pending
+## Статус: complete
 
 ## Описание
 

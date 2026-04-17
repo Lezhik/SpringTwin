@@ -64,7 +64,7 @@ graph TD
 | 009 | +          | leiden-algorithm      | Полный алгоритм Лейдена — оркестрация трёх фаз                  | 006, 007, 008     |
 | 010 | +          | cluster-metrics       | Вычисление метрик cohesion и coupling для кластеров             | —                 |
 | 011 | +          | penalty-edges         | Обнаружение штрафных рёбер между кластерами                     | 004               |
-| 012 | -          | cluster-result        | Модели данных результата кластеризации                          | 004, 010, 011     |
+| 012 | +          | cluster-result        | Модели данных результата кластеризации                          | 004, 010, 011     |
 | 013 | -          | cluster-json-writer   | Запись clusters.json                                            | 012               |
 | 014 | -          | cluster-service       | Главный сервис пайплайна cluster                                | 001–003, 009, 012, 013 |
 | 015 | -          | cluster-command       | CLI команда cluster                                             | 001, 014          |
@@ -141,10 +141,10 @@ graph TD
 - [+] [011-penalty-edges-fix](cluster/011-penalty-edges-fix.md)
 
 ### Фича 012: cluster-result
-- [ ] [012-cluster-result-api](cluster/012-cluster-result-api.md)
-- [ ] [012-cluster-result-tests](cluster/012-cluster-result-tests.md)
-- [ ] [012-cluster-result-code](cluster/012-cluster-result-code.md)
-- [ ] [012-cluster-result-fix](cluster/012-cluster-result-fix.md)
+- [+] [012-cluster-result-api](cluster/012-cluster-result-api.md)
+- [+] [012-cluster-result-tests](cluster/012-cluster-result-tests.md)
+- [+] [012-cluster-result-code](cluster/012-cluster-result-code.md)
+- [+] [012-cluster-result-fix](cluster/012-cluster-result-fix.md)
 
 ### Фича 013: cluster-json-writer
 - [ ] [013-cluster-json-writer-api](cluster/013-cluster-json-writer-api.md)

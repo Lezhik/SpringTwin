@@ -1,6 +1,6 @@
 # 012-cluster-result — Реализация
 
-## Статус: pending
+## Статус: complete
 
 ## Описание
 
