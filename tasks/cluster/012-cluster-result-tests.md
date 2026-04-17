@@ -1,6 +1,6 @@
 # 012-cluster-result — Тесты
 
-## Статус: pending
+## Статус: complete
 
 ## Описание
 
